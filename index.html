@@ -2110,29 +2110,30 @@
       progressBar.style.width = '15%';
 
       try {
-        // Attempt 1: Cloudflare Pages Functions (/api/ssq)
-        let response = null;
         let data = null;
-        try {
-          response = await fetch(`/api/ssq?pageSize=${count}&pageNo=1`);
-          if (response.ok) {
-            data = await response.json();
-          }
-        } catch (e) {
-          // Cloudflare function not running locally, try fallback
-        }
+        const targetRawUrl = `http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice?name=ssq&pageSize=${count}&pageNo=1&systemType=PC`;
+        
+        // 依次尝试不同通道: 1. Cloudflare Pages边缘代理 2. corsproxy.io 3. allorigins.win
+        const channels = [
+          { name: 'Cloudflare Pages 边缘代理', url: `/api/ssq?pageSize=${count}&pageNo=1` },
+          { name: 'CORS Proxy 专线', url: 'https://corsproxy.io/?url=' + encodeURIComponent(targetRawUrl) },
+          { name: 'AllOrigins 代理通道', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetRawUrl) + '&_t=' + Date.now() }
+        ];
 
-        // Attempt 2: Public CORS proxy fallback if needed
-        if (!data || !data.result) {
-          statusText.textContent = '尝试公共代理通道检索中...';
-          progressBar.style.width = '35%';
-          const targetUrl = encodeURIComponent(`http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice?name=ssq&pageSize=${count}&pageNo=1&systemType=PC`);
+        for (let idx = 0; idx < channels.length; idx++) {
+          const ch = channels[idx];
+          statusText.textContent = '尝试通道 ' + (idx + 1) + '/' + channels.length + ' (' + ch.name + ')...';
+          progressBar.style.width = (20 + idx * 25) + '%';
           try {
-            const proxyRes = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
-            if (proxyRes.ok) {
-              data = await proxyRes.json();
+            const res = await fetch(ch.url, { headers: { 'Accept': 'application/json' } });
+            if (res.ok) {
+              const resData = await res.json();
+              if (resData && (resData.result || Array.isArray(resData))) {
+                data = resData;
+                break;
+              }
             }
-          } catch (e) {}
+          } catch (err) {}
         }
 
         if (data && data.result && data.result.length > 0) {
@@ -2212,7 +2213,7 @@
       }
     }
 
-    // Handle Local File Import
+    // Handle Local File Import (Universal Multi-Format Parser)
     function handleFileImport(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -2220,66 +2221,197 @@
       const reader = new FileReader();
       reader.onload = function(evt) {
         try {
-          const content = evt.target.result;
-          if (file.name.endsWith('.json')) {
-            const json = JSON.parse(content);
-            const historyData = json.history || json;
-            if (Array.isArray(historyData) && historyData.length > 0) {
-              RAW_HISTORY = historyData.map(h => ({
-                i: h.issue || h.i,
-                d: h.date || h.d,
-                w: h.weekday || h.w,
-                r: (h.red || h.r).map(Number),
-                b: Number(h.blue || h.b),
-                s: Number(h.sum || h.s),
-                p: Number(h.span || h.p),
-                ac: Number(h.ac),
-                oe: h.odd_even || h.oe,
-                bs: h.big_small || h.bs
-              }));
+          const rawText = evt.target.result.trim();
+          const fileName = file.name.toLowerCase();
+          let parsedRows = [];
+
+          if (fileName.endsWith('.json')) {
+            const json = JSON.parse(rawText);
+            // 兼容多种常见 JSON 包装结构:
+            // 1. 福彩官网 API: { state: 0, result: [...] }
+            // 2. 本项目格式: { metadata: {...}, history: [...] }
+            // 3. 纯数组格式: [ {...}, {...} ]
+            // 4. 其他常见接口: { data: [...] } 或 { list: [...] }
+            let list = [];
+            if (Array.isArray(json)) {
+              list = json;
+            } else if (Array.isArray(json.result)) {
+              list = json.result;
+            } else if (Array.isArray(json.history)) {
+              list = json.history;
+            } else if (Array.isArray(json.data)) {
+              list = json.data;
+            } else if (Array.isArray(json.list)) {
+              list = json.list;
+            } else {
+              throw new Error("JSON 文件中未找到开奖记录列表 (未包含 result/history/data 数组)");
             }
-          } else if (file.name.endsWith('.csv')) {
-            const lines = content.trim().split('\n');
-            const headers = lines[0].split(',');
-            const rows = [];
-            for (let i = 1; i < lines.length; i++) {
-              const cols = lines[i].split(',').map(s => s.trim());
-              if (cols.length >= 10) {
-                const rList = [parseInt(cols[3]), parseInt(cols[4]), parseInt(cols[5]), parseInt(cols[6]), parseInt(cols[7]), parseInt(cols[8])];
-                rows.push({
-                  i: cols[0],
-                  d: cols[1],
-                  w: cols[2],
-                  r: rList,
-                  b: parseInt(cols[9]),
-                  s: parseInt(cols[10]),
-                  p: parseInt(cols[11]),
-                  ac: parseInt(cols[12]),
-                  oe: cols[13],
-                  bs: cols[14]
+
+            if (list.length === 0) {
+              throw new Error("JSON 开奖记录列表为空");
+            }
+
+            for (let idx = 0; idx < list.length; idx++) {
+              const item = list[idx];
+              // 提取期号
+              const issue = String(item.issue || item.code || item.i || item.id || item.qh || item.qihao || '').trim();
+              if (!issue) continue;
+
+              // 提取开奖日期与星期
+              let dateStr = String(item.date || item.d || item.time || item.kjsj || item.opendate || '').split(' ')[0].trim();
+              if (!dateStr || dateStr.length < 8) {
+                dateStr = '2026-01-01'; // 兜底
+              }
+              const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+              let w = item.weekday || item.w;
+              if (!w || !w.startsWith('周')) {
+                const dt = new Date(dateStr);
+                w = weekdays[dt.getDay()] || '周二';
+              }
+
+              // 提取红球 (兼容数字数组、字符串数组、逗号/空格分隔字符串、独立字段 red1~red6)
+              let redList = [];
+              const rawRed = item.red !== undefined ? item.red : (item.r !== undefined ? item.r : (item.reds || item.red_balls));
+              if (Array.isArray(rawRed)) {
+                redList = rawRed.map(x => parseInt(String(x).trim())).filter(x => !isNaN(x));
+              } else if (typeof rawRed === 'string') {
+                redList = rawRed.split(/[,，\s]+/).map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+              } else if (item.red1 || item.r1) {
+                for (let k = 1; k <= 6; k++) {
+                  const val = parseInt(item['red' + k] || item['r' + k]);
+                  if (!isNaN(val)) redList.push(val);
+                }
+              }
+              redList.sort((a, b) => a - b);
+
+              // 提取蓝球
+              let blueVal = NaN;
+              const rawBlue = item.blue !== undefined ? item.blue : (item.b !== undefined ? item.b : (item.blue_ball || item.hq));
+              if (rawBlue !== undefined) {
+                blueVal = parseInt(String(rawBlue).trim());
+              }
+
+              if (redList.length === 6 && !isNaN(blueVal) && blueVal >= 1 && blueVal <= 16) {
+                // 计算形态指标
+                const redSum = Number(item.sum || item.s) || redList.reduce((a, b) => a + b, 0);
+                const span = Number(item.span || item.p) || (Math.max(...redList) - Math.min(...redList));
+                const odd = redList.filter(x => x % 2 === 1).length;
+                const small = redList.filter(x => x <= 16).length;
+
+                let ac = Number(item.ac);
+                if (isNaN(ac)) {
+                  const diffs = new Set();
+                  for (let x = 0; x < redList.length; x++) {
+                    for (let y = x + 1; y < redList.length; y++) {
+                      diffs.add(redList[y] - redList[x]);
+                    }
+                  }
+                  ac = diffs.size - 5;
+                }
+
+                parsedRows.push({
+                  i: issue,
+                  d: dateStr,
+                  w: w,
+                  r: redList,
+                  b: blueVal,
+                  s: redSum,
+                  p: span,
+                  ac: ac,
+                  oe: `${odd}:${6 - odd}`,
+                  bs: `${6 - small}:${small}`
                 });
               }
             }
-            if (rows.length > 0) {
-              RAW_HISTORY = rows;
+          } else if (fileName.endsWith('.csv') || fileName.endsWith('.txt')) {
+            const lines = rawText.split(/[\r\n]+/).filter(l => l.trim().length > 0);
+            if (lines.length <= 1) {
+              throw new Error("CSV 文件无有效数据行");
             }
+
+            for (let i = 1; i < lines.length; i++) {
+              const cols = lines[i].split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+              if (cols.length >= 8) {
+                // 常见双色球 CSV 结构:
+                // 模式1: 期号, 开奖日期, 星期, 红1, 红2, 红3, 红4, 红5, 红6, 蓝, 和值...
+                // 模式2: 期号, 开奖日期, 红1, 红2, 红3, 红4, 红5, 红6, 蓝
+                let issue = cols[0];
+                let dateStr = cols[1];
+                let offset = cols[2].startsWith('周') ? 3 : 2;
+                let w = cols[2].startsWith('周') ? cols[2] : '周二';
+
+                let rList = [];
+                for (let k = 0; k < 6; k++) {
+                  let v = parseInt(cols[offset + k]);
+                  if (!isNaN(v)) rList.push(v);
+                }
+                let bVal = parseInt(cols[offset + 6]);
+
+                if (rList.length === 6 && !isNaN(bVal)) {
+                  rList.sort((a,b)=>a-b);
+                  const redSum = rList.reduce((a,b)=>a+b, 0);
+                  const span = Math.max(...rList) - Math.min(...rList);
+                  const odd = rList.filter(x => x % 2 === 1).length;
+                  const small = rList.filter(x => x <= 16).length;
+                  const diffs = new Set();
+                  for (let x=0; x<rList.length; x++) {
+                    for (let y=x+1; y<rList.length; y++) {
+                      diffs.add(rList[y] - rList[x]);
+                    }
+                  }
+                  parsedRows.push({
+                    i: issue,
+                    d: dateStr,
+                    w: w,
+                    r: rList,
+                    b: bVal,
+                    s: redSum,
+                    p: span,
+                    ac: diffs.size - 5,
+                    oe: `${odd}:${6-odd}`,
+                    bs: `${6-small}:${small}`
+                  });
+                }
+              }
+            }
+          } else {
+            throw new Error("不支持的文件格式，请上传 .json 或 .csv 文件");
           }
 
-          RAW_HISTORY.sort((a,b) => a.i.localeCompare(b.i));
+          if (parsedRows.length === 0) {
+            throw new Error("未能解析出符合双色球规则 (6红球+1蓝球) 的开奖记录");
+          }
+
+          // 按期号升序严格排序并更新全局数据集
+          parsedRows.sort((a, b) => a.i.localeCompare(b.i));
+          RAW_HISTORY = parsedRows;
           filteredHistory = [...RAW_HISTORY];
+
+          // 重新初始化并更新所有图表
           initDataStructures();
           populateTopMetrics();
           populateOverviewGrids();
+          populateHistoryBallFilter();
           renderOverviewCharts();
           renderRankings();
           renderOmissionMatrix();
           renderWaveformChart();
           renderHistoryTable();
 
-          alert(`成功导入 ${RAW_HISTORY.length} 期最新开奖数据！`);
+          const latestRec = RAW_HISTORY[RAW_HISTORY.length - 1];
+          alert(`✅ 成功导入 ${RAW_HISTORY.length} 期双色球开奖数据！
+最新期号：第 ${latestRec.i} 期 (${latestRec.d})
+红球：${latestRec.r.map(x=>x<10?'0'+x:x).join(' ')}  蓝球：${latestRec.b<10?'0'+latestRec.b:latestRec.b}`);
           closeSyncModal();
         } catch (err) {
-          alert('数据文件解析失败，请检查文件格式。');
+          console.error("File import error:", err);
+          alert(`❌ 数据文件解析失败：
+${err.message}
+
+支持格式：
+1. 福彩官网 API 原生导出的 JSON (包含 result 字段)
+2. 本项目导出的 JSON (包含 history 字段)
+3. 标准双色球 CSV 文件`);
         }
       };
       reader.readAsText(file);
