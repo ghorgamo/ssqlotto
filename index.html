@@ -588,9 +588,10 @@
   <header>
     <div class="header-inner">
       <div class="logo-area">
-        <h1>
-          <span>🎱 双色球最近1000期大数据可视化分析</span>
-        </h1>
+        <div style="display: flex; align-items: center; gap: 8px; margin-right: 10px;">
+          <a href="index.html" class="btn btn-primary" style="background:#da3633; border-color:#da3633; color:#fff; text-decoration:none; padding:6px 14px; font-weight:700; border-radius:20px; box-shadow:0 2px 6px rgba(218,54,51,0.4);">🎱 福彩双色球</a>
+          <a href="dlt.html" class="btn" style="color:var(--text-main); text-decoration:none; padding:6px 14px; font-weight:700; border-radius:20px; border:1px solid var(--card-border);">🏆 体彩大乐透</a>
+        </div>
         <span class="logo-badge" id="headerCountBadge">1000期全量数据</span>
       </div>
 
@@ -603,6 +604,7 @@
       </nav>
 
       <div class="header-actions">
+        <a href="dlt.html" class="btn" style="background:rgba(227,179,65,0.18); border-color:#e3b341; color:#e3b341; text-decoration:none; font-weight:700;">🏆 切换大乐透看板 &rarr;</a>
         <button class="btn btn-sync" onclick="openSyncModal()" title="手动从中国福利彩票官方同步最新开奖数据">🔄 实时更新官方数据</button>
         <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ 切换浅色</button>
         <button class="btn" onclick="exportData('json')">📥 导出JSON</button>
