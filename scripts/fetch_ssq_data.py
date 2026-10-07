@@ -18,8 +18,8 @@ import csv
 OFFICIAL_API_URL = "http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-DEFAULT_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_500.json")
-DEFAULT_CSV_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_500.csv")
+DEFAULT_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_1000.json")
+DEFAULT_CSV_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_1000.csv")
 DEFAULT_HTML_PATH = os.path.join(PROJECT_ROOT, "index.html")
 
 HEADERS = {
@@ -221,7 +221,7 @@ def update_html_with_history(history, html_path=DEFAULT_HTML_PATH):
 
 def main():
     parser = argparse.ArgumentParser(description="双色球官方真实历史数据拉取与更新工具")
-    parser.add_argument("--count", type=int, default=500, help="保留最近的期数，默认500期")
+    parser.add_argument("--count", type=int, default=1000, help="保留最近的期数，默认500期")
     parser.add_argument("--json", type=str, default=DEFAULT_JSON_PATH, help="输出JSON文件路径")
     parser.add_argument("--csv", type=str, default=DEFAULT_CSV_PATH, help="输出CSV文件路径")
     parser.add_argument("--html", type=str, default=DEFAULT_HTML_PATH, help="输出HTML文件路径")
@@ -308,6 +308,21 @@ def main():
     print(f"[+] 成功写入 CSV 数据集: {args.csv}")
     
     update_html_with_history(parsed, args.html)
+    dlt_html_path = os.path.join(PROJECT_ROOT, dlt.html)
+    if os.path.exists(dlt_html_path):
+        update_html_with_history(parsed, dlt_html_path)
+    
+    # 500期兼容备份
+    if len(parsed) >= 500:
+        backup_json = os.path.join(PROJECT_ROOT, data, ssq_history_500.json)
+        backup_csv = os.path.join(PROJECT_ROOT, data, ssq_history_500.csv)
+        sub_500 = parsed[-500:]
+        with open(backup_json, w, encoding=utf-8) as f:
+            json.dump({metadata: full_data[metadata], stats: compute_statistics(sub_500), history: sub_500}, f, ensure_ascii=False, indent=2)
+        with open(backup_csv, w, encoding=utf-8-sig, newline=) as f:
+            writer = csv.DictWriter(f, fieldnames=list(csv_rows[0].keys()))
+            writer.writeheader()
+            writer.writerows(csv_rows[-500:])
     print(f"[✔] 全量数据与看板更新完毕！最新期号: {parsed[-1]['issue']} ({parsed[-1]['date']})")
 
 if __name__ == "__main__":
