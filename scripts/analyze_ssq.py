@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-双色球开奖数据多维统计与冷热分析引擎 (analyze_ssq.py)
-输出冷/热/温号排名、遗漏值极值、形态学指标及控制台可视化图表。
+双色球多维走势与冷热统计分析引擎 (analyze_ssq.py)
+支持分析最近 1000 期 (或任意指定期数) 开奖数据，
+输出红蓝球出球次数排名、理论期望偏离度、当前遗漏期数、历史最大遗漏与冷热温分类报告。
 """
 
 import os
@@ -9,89 +10,131 @@ import sys
 import json
 import argparse
 
-DEFAULT_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "ssq_history_500.json")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+DEFAULT_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_1000.json")
+BACKUP_JSON_PATH = os.path.join(PROJECT_ROOT, "data", "ssq_history_500.json")
 
-def load_data(filepath=DEFAULT_DATA_PATH):
-    if not os.path.exists(filepath):
-        print(f"[Error] 数据文件未找到: {filepath}", file=sys.stderr)
+def load_data(filepath=None):
+    if filepath and os.path.exists(filepath):
+        target = filepath
+    elif os.path.exists(DEFAULT_JSON_PATH):
+        target = DEFAULT_JSON_PATH
+    elif os.path.exists(BACKUP_JSON_PATH):
+        target = BACKUP_JSON_PATH
+    else:
+        print(f"[Error] 未找到数据文件: {DEFAULT_JSON_PATH}", file=sys.stderr)
         sys.exit(1)
-    with open(filepath, "r", encoding="utf-8") as f:
+        
+    with open(target, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def print_header(title):
-    print("\n" + "=" * 68)
+    print("\n" + "=" * 72)
     print(f"  {title}")
-    print("=" * 68)
+    print("=" * 72)
 
-def analyze_and_print(data, top_n=10):
+def analyze(data, window_size=None):
     metadata = data.get("metadata", {})
-    stats = data.get("stats", {})
     history = data.get("history", [])
+    total_len = len(history)
     
-    print_header(f"{metadata.get('title', '双色球走势分析')} - 数据报告")
-    print(f"分析期数范围: {metadata.get('issue_range')} (共 {metadata.get('total_issues')} 期)")
-    print(f"开奖日期范围: {metadata.get('date_range')}")
-    
-    latest = history[-1]
-    print(f"\n最新开奖期号: {latest['issue']} ({latest['date']} {latest['weekday']})")
-    print(f"中奖号码: 红球 [{', '.join(latest['red'])}] + 蓝球 [{latest['blue']}]")
-    print(f"形态属性: 和值={latest['sum']} | 跨度={latest['span']} | AC值={latest['ac']} | 奇偶比={latest['odd_even']} | 大小比={latest['big_small']}")
-    
-    # 打印红球冷热出球数排名
-    print_header("🔴 红球出球数排名与冷/热/温分类 (1-33号)")
-    print(f"{'排名':<4}{'号码':<6}{'出球次数':<10}{'出现频率':<10}{'当前遗漏':<10}{'最大遗漏':<10}{'状态分类':<8}")
-    print("-" * 68)
-    
-    red_stats = stats.get("red_stats", [])
-    for row in red_stats:
-        cat_badge = row['category']
-        if row['category_code'] == 'hot':
-            cat_badge = f"🔥 {row['category']}"
-        elif row['category_code'] == 'warm':
-            cat_badge = f"🌤️ {row['category']}"
-        else:
-            cat_badge = f"❄️ {row['category']}"
-            
-        print(f"{row['rank']:<4}{row['number']:<6}{row['count']:<10}{str(row['frequency_percent'])+'%':<10}{row['current_omission']:<10}{row['max_omission']:<10}{cat_badge:<8}")
+    if window_size is None or window_size > total_len:
+        window_size = total_len
         
-    # 打印蓝球冷热出球数排名
-    print_header("🔵 蓝球出球数排名与冷/热/温分类 (1-16号)")
-    print(f"{'排名':<4}{'号码':<6}{'出球次数':<10}{'出现频率':<10}{'当前遗漏':<10}{'最大遗漏':<10}{'状态分类':<8}")
-    print("-" * 68)
+    sub_history = history[-window_size:]
+    latest = sub_history[-1]
     
-    blue_stats = stats.get("blue_stats", [])
-    for row in blue_stats:
-        cat_badge = row['category']
-        if row['category_code'] == 'hot':
-            cat_badge = f"🔥 {row['category']}"
-        elif row['category_code'] == 'warm':
-            cat_badge = f"🌤️ {row['category']}"
-        else:
-            cat_badge = f"❄️ {row['category']}"
+    print_header(f"🎱 双色球最近 {window_size} 期大数据多维统计报告")
+    print(f"数据总跨度: {sub_history[0]['issue']} ({sub_history[0]['date']}) 至 {latest['issue']} ({latest['date']})")
+    print(f"最新开奖: 第 {latest['issue']} 期 ({latest['date']} {latest['weekday']})")
+    print(f"中奖号码: 红球 [{', '.join(latest['red'])}] + 蓝球 [{latest['blue']}]")
+    print(f"形态指标: 和值={latest['sum']} | 跨度={latest['span']} | AC值={latest['ac']} | 奇偶={latest['odd_even']} | 大小={latest['big_small']}")
+    
+    # 统计出球次数与遗漏
+    red_counts = {f"{r:02d}": 0 for r in range(1, 34)}
+    blue_counts = {f"{b:02d}": 0 for b in range(1, 17)}
+    red_max_om = {f"{r:02d}": 0 for r in range(1, 34)}
+    blue_max_om = {f"{b:02d}": 0 for b in range(1, 17)}
+    
+    for rec in sub_history:
+        for r in rec["red"]:
+            red_counts[r] += 1
+        blue_counts[rec["blue"]] += 1
+        for r, om in rec.get("red_omissions", {}).items():
+            if om > red_max_om[r]: red_max_om[r] = om
+        for b, om in rec.get("blue_omissions", {}).items():
+            if om > blue_max_om[b]: blue_max_om[b] = om
             
-        print(f"{row['rank']:<4}{row['number']:<6}{row['count']:<10}{str(row['frequency_percent'])+'%':<10}{row['current_omission']:<10}{row['max_omission']:<10}{cat_badge:<8}")
-
-    # 打印极值概括
-    hottest_red = red_stats[0]
-    coldest_red = red_stats[-1]
-    max_om_red = max(red_stats, key=lambda x: x["current_omission"])
+    theory_red = round(window_size * 6 / 33, 1)
+    theory_blue = round(window_size / 16, 1)
     
-    hottest_blue = blue_stats[0]
-    coldest_blue = blue_stats[-1]
-    max_om_blue = max(blue_stats, key=lambda x: x["current_omission"])
+    # 打印红球排名
+    print_header(f"🔴 红球 1-33 出球数降序排名与冷/热/温分类 (理论期望: {theory_red}次)")
+    print(f"{'排名':<4}{'号码':<6}{'出球次数':<10}{'出球率':<10}{'理论偏差':<10}{'当前遗漏':<10}{'最大遗漏':<10}{'状态分类':<8}")
+    print("-" * 72)
     
-    print_header("📌 核心极值提炼与关注预警")
-    print(f"• 红球最热号: {hottest_red['number']} 号 (累计开出 {hottest_red['count']} 次，频率 {hottest_red['frequency_percent']}%)")
-    print(f"• 红球最冷号: {coldest_red['number']} 号 (累计开出 {coldest_red['count']} 次，频率 {coldest_red['frequency_percent']}%)")
-    print(f"• 红球当前最大遗漏: {max_om_red['number']} 号 (连续 {max_om_red['current_omission']} 期未开出，历史最大遗漏 {max_om_red['max_omission']} 期)")
-    print(f"• 蓝球最热号: {hottest_blue['number']} 号 (累计开出 {hottest_blue['count']} 次，频率 {hottest_blue['frequency_percent']}%)")
-    print(f"• 蓝球当前最大遗漏: {max_om_blue['number']} 号 (连续 {max_om_blue['current_omission']} 期未开出，历史最大遗漏 {max_om_blue['max_omission']} 期)")
-    print("=" * 68)
+    sorted_reds = sorted(red_counts.items(), key=lambda x: (-x[1], x[0]))
+    for rank, (num, cnt) in enumerate(sorted_reds, start=1):
+        cur_om = latest.get("red_omissions", {}).get(num, 0)
+        max_om = red_max_om[num]
+        freq = round(cnt / window_size * 100, 2)
+        diff = round(cnt - theory_red, 1)
+        diff_str = f"+{diff}" if diff > 0 else str(diff)
+        
+        if rank <= 10:
+            badge = "🔥 热号"
+        elif rank <= 23:
+            badge = "🌤️ 温号"
+        else:
+            badge = "❄️ 冷号"
+            
+        print(f"{rank:<4}{num:<6}{cnt:<10}{str(freq)+'%':<10}{diff_str:<10}{cur_om:<10}{max_om:<10}{badge:<8}")
+        
+    # 打印蓝球排名
+    print_header(f"🔵 蓝球 1-16 出球数降序排名与冷/热/温分类 (理论期望: {theory_blue}次)")
+    print(f"{'排名':<4}{'号码':<6}{'出球次数':<10}{'出球率':<10}{'理论偏差':<10}{'当前遗漏':<10}{'最大遗漏':<10}{'状态分类':<8}")
+    print("-" * 72)
+    
+    sorted_blues = sorted(blue_counts.items(), key=lambda x: (-x[1], x[0]))
+    for rank, (num, cnt) in enumerate(sorted_blues, start=1):
+        cur_om = latest.get("blue_omissions", {}).get(num, 0)
+        max_om = blue_max_om[num]
+        freq = round(cnt / window_size * 100, 2)
+        diff = round(cnt - theory_blue, 1)
+        diff_str = f"+{diff}" if diff > 0 else str(diff)
+        
+        if rank <= 5:
+            badge = "🔥 热号"
+        elif rank <= 11:
+            badge = "🌤️ 温号"
+        else:
+            badge = "❄️ 冷号"
+            
+        print(f"{rank:<4}{num:<6}{cnt:<10}{str(freq)+'%':<10}{diff_str:<10}{cur_om:<10}{max_om:<10}{badge:<8}")
+        
+    # 极值提炼
+    top_r = sorted_reds[0]
+    bot_r = sorted_reds[-1]
+    max_om_r = max(latest.get("red_omissions", {}).items(), key=lambda x: x[1])
+    
+    top_b = sorted_blues[0]
+    bot_b = sorted_blues[-1]
+    max_om_b = max(latest.get("blue_omissions", {}).items(), key=lambda x: x[1])
+    
+    print_header("📌 核心极值提炼与预警")
+    print(f"• 红球出球榜首: {top_r[0]} 号 (累计出球 {top_r[1]} 次，超出理论 {round(top_r[1]-theory_red, 1)} 次)")
+    print(f"• 红球出球垫底: {bot_r[0]} 号 (累计出球 {bot_r[1]} 次，低于理论 {round(theory_red-bot_r[1], 1)} 次)")
+    print(f"• 红球当前最大遗漏: {max_om_r[0]} 号 (已连续 {max_om_r[1]} 期未开出)")
+    print(f"• 蓝球出球榜首: {top_b[0]} 号 (累计出球 {top_b[1]} 次，超出理论 {round(top_b[1]-theory_blue, 1)} 次)")
+    print(f"• 蓝球当前最大遗漏: {max_om_b[0]} 号 (已连续 {max_om_b[1]} 期未开出)")
+    print("=" * 72)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="双色球多维走势与冷热统计分析工具")
-    parser.add_argument("--data", type=str, default=DEFAULT_DATA_PATH, help="JSON数据文件路径")
+    parser.add_argument("--data", type=str, default=None, help="数据文件路径")
+    parser.add_argument("--count", type=int, default=1000, help="分析期数，默认1000期")
     args = parser.parse_args()
     
     dataset = load_data(args.data)
-    analyze_and_print(dataset)
+    analyze(dataset, args.count)
