@@ -1,0 +1,39 @@
+name: Auto Update Lottery Data
+
+on:
+  schedule:
+    # 双色球每周二、四、日晚上 21:15 开奖，此处设置 UTC 14:30 (北京时间 22:30) 定时抓取更新
+    - cron: '30 14 * * 0,2,4'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Fetch and Analyze Latest Data
+        run: |
+          python scripts/fetch_ssq_data.py --count 500
+          python scripts/analyze_ssq.py
+          python artifacts/file_generation/ttl=63d/intermediate/build_webapp.py || python scripts/generate_dataset.py
+
+      - name: Commit and Push Updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/ index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update: sync latest SSQ draw data and recalculate omissions" && git push)

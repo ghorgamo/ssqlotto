@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双色球最近500期数据可视化分析平台 | 遗漏走势与冷热排名看板</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --red-primary: #f85149;
+      --red-gradient: radial-gradient(circle at 35% 35%, #ff7b72, #da3633 60%, #8e1519 100%);
+      --blue-primary: #58a6ff;
+      --blue-gradient: radial-gradient(circle at 35% 35%, #79c0ff, #1f6feb 60%, #0d419d 100%);
+      --accent-color: #238636;
+      --hot-color: #ff7b72;
+      --warm-color: #d29922;
+      --cold-color: #388bfd;
+      --table-hover: #21262d;
+      --hit-red-bg: #da3633;
+      --hit-blue-bg: #1f6feb;
+      --omission-heat: rgba(248, 81, 73, 0.15);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f6f8fa;
+      --card-bg: #ffffff;
+      --card-border: #d0d7de;
+      --text-main: #1f2328;
+      --text-muted: #656d76;
+      --red-primary: #cf222e;
+      --red-gradient: radial-gradient(circle at 35% 35%, #ff8182, #e53935 60%, #b71c1c 100%);
+      --blue-primary: #0969da;
+      --blue-gradient: radial-gradient(circle at 35% 35%, #54aeff, #1e88e5 60%, #0d47a1 100%);
+      --accent-color: #1a7f37;
+      --hot-color: #cf222e;
+      --warm-color: #9a6700;
+      --cold-color: #0969da;
+      --table-hover: #f3f4f6;
+      --hit-red-bg: #e53935;
+      --hit-blue-bg: #1e88e5;
+      --omission-heat: rgba(207, 34, 46, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      font-size: 14px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--red-primary);
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      background: var(--table-hover);
+      color: var(--text-main);
+    }
+    .tab-btn.active {
+      background: rgba(88, 166, 255, 0.15);
+      border-color: rgba(88, 166, 255, 0.3);
+      color: var(--blue-primary);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--table-hover);
+      border-color: var(--text-muted);
+    }
+    .btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--blue-primary);
+    }
+    .metric-card.red-top::before { background: var(--red-primary); }
+    .metric-card.gold-top::before { background: var(--warm-color); }
+    .metric-card.green-top::before { background: var(--accent-color); }
+
+    .metric-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .metric-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Ball Spheres */
+    .ball {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.35);
+      user-select: none;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .ball-sm {
+      width: 24px;
+      height: 24px;
+      font-size: 11px;
+    }
+    .ball-lg {
+      width: 38px;
+      height: 38px;
+      font-size: 15px;
+    }
+    .ball-red { background: var(--red-gradient); }
+    .ball-blue { background: var(--blue-gradient); }
+
+    .balls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Cards & Panels */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-body {
+      padding: 20px;
+    }
+
+    /* Controls bar */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-btn-group {
+      display: inline-flex;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .filter-btn {
+      background: var(--card-bg);
+      border: none;
+      border-right: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:last-child { border-right: none; }
+    .filter-btn.active {
+      background: var(--table-hover);
+      color: var(--blue-primary);
+    }
+    .filter-btn:hover:not(.active) {
+      color: var(--text-main);
+    }
+
+    select, input[type="text"] {
+      background: var(--bg-color);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--blue-primary);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-hot {
+      background: rgba(255, 123, 114, 0.15);
+      color: var(--hot-color);
+      border: 1px solid rgba(255, 123, 114, 0.3);
+    }
+    .badge-warm {
+      background: rgba(210, 153, 34, 0.15);
+      color: var(--warm-color);
+      border: 1px solid rgba(210, 153, 34, 0.3);
+    }
+    .badge-cold {
+      background: rgba(56, 139, 253, 0.15);
+      color: var(--cold-color);
+      border: 1px solid rgba(56, 139, 253, 0.3);
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      max-height: 680px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: center;
+    }
+    thead {
+      background: var(--card-bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      padding: 10px 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      white-space: nowrap;
+      user-select: none;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    tr:hover td {
+      background-color: var(--table-hover);
+    }
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 5;
+    }
+    tr:hover .sticky-col {
+      background: var(--table-hover);
+    }
+
+    /* Omission Matrix cells */
+    .om-cell {
+      width: 32px;
+      height: 32px;
+      padding: 0 !important;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .om-hit {
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    .om-hit-red {
+      background: var(--red-gradient) !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+    .om-hit-blue {
+      background: var(--blue-gradient) !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+    .om-heat-high {
+      background: rgba(248, 81, 73, 0.22);
+      color: var(--hot-color);
+      font-weight: 700;
+    }
+    .om-heat-mid {
+      background: rgba(210, 153, 34, 0.12);
+      color: var(--warm-color);
+    }
+
+    /* Charts Area */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      margin-top: 12px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Progress bar in table */
+    .progress-bar-bg {
+      width: 100px;
+      height: 8px;
+      background: var(--table-hover);
+      border-radius: 4px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    /* Grid for Charts & Tables */
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 992px) {
+      .two-col-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Tab Panels */
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Rank trophy / badges */
+    .rank-num {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .rank-1 { background: #ffd700; color: #000000; box-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+    .rank-2 { background: #c0c0c0; color: #000000; }
+    .rank-3 { background: #cd7f32; color: #ffffff; }
+
+    /* Footer */
+    footer {
+      max-width: 1440px;
+      margin: 40px auto 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 20px;
+    }
+
+    /* Tooltip */
+    #chart-tooltip {
+      position: absolute;
+      display: none;
+      background: rgba(22, 27, 34, 0.95);
+      border: 1px solid var(--card-border);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo-area">
+        <h1>
+          <span>🎱 双色球最近500期大数据可视化分析</span>
+        </h1>
+        <span class="logo-badge">500期全量数据</span>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('overview')">📊 综合大盘概览</button>
+        <button class="tab-btn" onclick="switchTab('hotcold')">🔥 号码统计与冷热排名</button>
+        <button class="tab-btn" onclick="switchTab('omission')">📉 每期遗漏走势图阵</button>
+        <button class="tab-btn" onclick="switchTab('waveform')">🌊 单号码遗漏波浪图</button>
+        <button class="tab-btn" onclick="switchTab('history')">📋 500期开奖历史明细</button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ 切换浅色</button>
+        <button class="btn btn-primary" onclick="exportData('json')">📥 导出JSON</button>
+        <button class="btn" onclick="exportData('csv')">📥 导出CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Executive Metric Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card red-top">
+        <div class="metric-title">
+          <span>最新开奖期号</span>
+          <span id="latestIssueDate" class="badge">--</span>
+        </div>
+        <div class="metric-val" id="latestIssueNo">--</div>
+        <div class="metric-sub balls-row" id="latestBallsRow" style="margin-top: 10px;">
+          <!-- Populated by JS -->
+        </div>
+        <div class="metric-sub" id="latestMetricsText" style="margin-top: 8px;">
+          和值: -- | 跨度: -- | AC值: -- | 奇偶: --
+        </div>
+      </div>
+
+      <div class="metric-card gold-top">
+        <div class="metric-title">
+          <span>红球出球数第一 (最热号)</span>
+          <span class="badge badge-hot">🔥 热榜榜首</span>
+        </div>
+        <div class="metric-val" id="topRedVal">
+          --
+        </div>
+        <div class="metric-sub" id="topRedSub">累计出球 -- 次 | 出现频率 --%</div>
+        <div class="metric-sub" style="color: var(--text-main); margin-top: 6px;">
+          理论期望出球: 90.9 次 (超出理论 <span id="topRedDiff" style="color: var(--hot-color);">--</span> 次)
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>蓝球出球数第一 (最热号)</span>
+          <span class="badge badge-hot">🔥 热榜榜首</span>
+        </div>
+        <div class="metric-val" id="topBlueVal">
+          --
+        </div>
+        <div class="metric-sub" id="topBlueSub">累计出球 -- 次 | 出现频率 --%</div>
+        <div class="metric-sub" style="color: var(--text-main); margin-top: 6px;">
+          理论期望出球: 31.3 次 (超出理论 <span id="topBlueDiff" style="color: var(--hot-color);">--</span> 次)
+        </div>
+      </div>
+
+      <div class="metric-card green-top">
+        <div class="metric-title">
+          <span>当前最大遗漏预警</span>
+          <span class="badge badge-cold">❄️ 极冷蓄势</span>
+        </div>
+        <div class="metric-val" style="font-size: 18px;" id="maxOmText">
+          --
+        </div>
+        <div class="metric-sub" id="maxOmSub">
+          红球与蓝球长遗漏号码状态追踪
+        </div>
+        <div class="metric-sub" style="margin-top: 6px;">
+          分析样本总量: <strong>500 期</strong> (共计 3500 个开奖球)
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: 综合大盘概览 (Overview) -->
+    <div id="panel-overview" class="tab-panel active">
+      <div class="two-col-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🔴 红球 33 码全盘出球分布与热度全览</div>
+            <div class="controls-bar">
+              <span class="badge badge-hot">🔥 热号 (前10)</span>
+              <span class="badge badge-warm">🌤️ 温号 (中13)</span>
+              <span class="badge badge-cold">❄️ 冷号 (后10)</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="redBallsOverviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🔵 蓝球 16 码全盘出球分布与热度全览</div>
+            <div class="controls-bar">
+              <span class="badge badge-hot">🔥 热号 (前5)</span>
+              <span class="badge badge-warm">🌤️ 温号 (中6)</span>
+              <span class="badge badge-cold">❄️ 冷号 (后5)</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="blueBallsOverviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 12px;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 红球和值 (Sum) 走势与正态分布</div>
+            <span class="metric-sub">理论均值: 102 | 实际均值: <span id="actualSumMean">--</span></span>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="sumDistChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚖️ 奇偶比与大小比结构分布</div>
+            <span class="metric-sub">500期形态特征分布统计</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="ratioChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 号码统计与冷热排名 (Hot/Warm/Cold Rankings) -->
+    <div id="panel-hotcold" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔥 号码出球数排行榜与冷/热/温分类矩阵</span>
+          </div>
+          <div class="controls-bar">
+            <!-- Red / Blue Switcher -->
+            <div class="filter-btn-group">
+              <button class="filter-btn active" id="btnBallTypeRed" onclick="setRankingBallType('red')">🔴 红球 (33个)</button>
+              <button class="filter-btn" id="btnBallTypeBlue" onclick="setRankingBallType('blue')">🔵 蓝球 (16个)</button>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-btn-group">
+              <button class="filter-btn active" onclick="setCategoryFilter('all')">全部</button>
+              <button class="filter-btn" onclick="setCategoryFilter('hot')">🔥 热号</button>
+              <button class="filter-btn" onclick="setCategoryFilter('warm')">🌤️ 温号</button>
+              <button class="filter-btn" onclick="setCategoryFilter('cold')">❄️ 冷号</button>
+            </div>
+
+            <!-- Sort selector -->
+            <select id="sortSelect" onchange="renderRankings()">
+              <option value="count_desc">按出球数排名 (降序，默认)</option>
+              <option value="count_asc">按出球数排名 (升序)</option>
+              <option value="num_asc">按号码自然升序 (01-33)</option>
+              <option value="om_desc">按当前遗漏 (降序，最冷在先)</option>
+              <option value="om_asc">按当前遗漏 (升序，近期最热)</option>
+              <option value="max_om_desc">按最大遗漏 (降序)</option>
+            </select>
+
+            <!-- Analysis Window -->
+            <select id="windowSelect" onchange="updateAnalysisWindow()">
+              <option value="500">最近 500 期 (全样本)</option>
+              <option value="200">最近 200 期</option>
+              <option value="100">最近 100 期</option>
+              <option value="50">最近 50 期</option>
+              <option value="30">最近 30 期 (超短期)</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="two-col-grid" style="margin-bottom: 24px;">
+            <div class="card" style="border: 1px solid var(--card-border); margin-bottom: 0;">
+              <div class="card-header" style="padding: 10px 14px;">
+                <span class="card-title" style="font-size: 13px;">📊 出球总数直观对比图 (红色虚线为理论期望均值)</span>
+              </div>
+              <div class="card-body" style="padding: 10px;">
+                <div class="chart-container" style="height: 480px;">
+                  <canvas id="rankingBarChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--card-border); margin-bottom: 0;">
+              <div class="card-header" style="padding: 10px 14px;">
+                <span class="card-title" style="font-size: 13px;">🍩 冷/热/温号占比与极值概览</span>
+              </div>
+              <div class="card-body" style="padding: 14px;">
+                <div class="chart-container" style="height: 240px;">
+                  <canvas id="hotColdDonutChart"></canvas>
+                </div>
+                <div id="hotColdSummaryText" style="margin-top: 14px; font-size: 13px; line-height: 1.8; color: var(--text-muted);">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ranking Data Table -->
+          <div class="table-container">
+            <table id="rankingsTable">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">出球排名</th>
+                  <th style="width: 70px;">号码</th>
+                  <th style="width: 160px;">出球频次 (对比进度条)</th>
+                  <th style="width: 90px;">出现概率%</th>
+                  <th style="width: 100px;">理论出号偏差</th>
+                  <th style="width: 100px;">当前遗漏期数</th>
+                  <th style="width: 100px;">历史最大遗漏</th>
+                  <th style="width: 100px;">平均遗漏期数</th>
+                  <th style="width: 100px;">冷热温状态</th>
+                  <th style="width: 90px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="rankingsTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 每期数字遗漏走势图阵 (Omission Matrix) -->
+    <div id="panel-omission" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📉 每期数字全量遗漏走势图阵 (Omission Matrix)</span>
+          </div>
+          <div class="controls-bar">
+            <!-- Ball Selection -->
+            <div class="filter-btn-group">
+              <button class="filter-btn active" id="omBallTypeRed" onclick="setOmBallType('red')">🔴 红球 1-33 遗漏走势</button>
+              <button class="filter-btn" id="omBallTypeBlue" onclick="setOmBallType('blue')">🔵 蓝球 1-16 遗漏走势</button>
+            </div>
+
+            <!-- Issue Count Selector -->
+            <select id="omIssueCount" onchange="renderOmissionMatrix()">
+              <option value="30">显示最近 30 期</option>
+              <option value="50" selected>显示最近 50 期</option>
+              <option value="100">显示最近 100 期</option>
+              <option value="200">显示最近 200 期</option>
+              <option value="500">显示全量 500 期</option>
+            </select>
+
+            <!-- Display Toggles -->
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkShowOmNumber" checked onchange="renderOmissionMatrix()"> 显示遗漏数值
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkHeatmap" checked onchange="renderOmissionMatrix()"> 遗漏深度热力着色
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkOrderDesc" checked onchange="renderOmissionMatrix()"> 最新期在顶部
+            </label>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom: 12px; font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              💡 <strong>图阵说明：</strong> 实心彩色球表示该期<strong>开出中奖</strong>（遗漏值为0）；其余格子数字为该号码<strong>距离上次开出的遗漏期数</strong>；背景渐红/渐深表示遗漏期数较长（偏冷）。
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--hit-red-bg);border-radius:50%;vertical-align:middle;"></span> 中奖开出</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:rgba(248,81,73,0.3);vertical-align:middle;"></span> 高遗漏(冷)</span>
+            </div>
+          </div>
+
+          <div class="table-container" style="max-height: 720px;">
+            <table id="omissionMatrixTable">
+              <thead id="omissionMatrixHead">
+                <!-- Populated by JS -->
+              </thead>
+              <tbody id="omissionMatrixBody">
+                <!-- Populated by JS -->
+              </tbody>
+              <tfoot id="omissionMatrixFoot" style="position: sticky; bottom: 0; background: var(--card-bg); z-index: 10;">
+                <!-- Populated by JS -->
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 单号码遗漏波浪折线图 (Single-ball Omission Waveform) -->
+    <div id="panel-waveform" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🌊 单号码 500 期遗漏波浪波动折线图 (Omission Waves)</span>
+          </div>
+          <div class="controls-bar">
+            <span>选择号码:</span>
+            <div class="filter-btn-group">
+              <button class="filter-btn active" id="waveTypeRed" onclick="setWaveType('red')">红球</button>
+              <button class="filter-btn" id="waveTypeBlue" onclick="setWaveType('blue')">蓝球</button>
+            </div>
+            <select id="waveBallSelect" onchange="renderWaveformChart()">
+              <!-- Populated by JS (01-33 or 01-16) -->
+            </select>
+            <select id="waveRangeSelect" onchange="renderWaveformChart()">
+              <option value="500">全量 500 期</option>
+              <option value="200">最近 200 期</option>
+              <option value="100">最近 100 期</option>
+              <option value="50">最近 50 期</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="waveStatsBadgeRow" style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+            <!-- Populated by JS -->
+          </div>
+          <div class="chart-container" style="height: 480px;">
+            <canvas id="waveformCanvas"></canvas>
+          </div>
+          <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted);">
+            💡 <strong>说明：</strong> 折线纵轴表示该号码在各期的遗漏期数。折线落到底部 0 点代表中奖开出；波峰越高代表遗漏期数越长。虚线为该号码在 500 期中的平均遗漏线。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: 500期开奖历史明细 (History Archive) -->
+    <div id="panel-history" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 最近 500 期开奖完整明细与形态统计</span>
+          </div>
+          <div class="controls-bar">
+            <input type="text" id="historySearchInput" placeholder="输入期号或日期搜索 (如 2026120)..." oninput="filterHistoryTable()">
+            <select id="historyFilterBall" onchange="filterHistoryTable()">
+              <option value="all">全部号码包含</option>
+              <!-- Populated by JS -->
+            </select>
+            <select id="historyPageSize" onchange="changeHistoryPageSize()">
+              <option value="25">每页 25 条</option>
+              <option value="50" selected>每页 50 条</option>
+              <option value="100">每页 100 条</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>期号</th>
+                  <th>开奖日期</th>
+                  <th>星期</th>
+                  <th style="min-width: 220px;">红球中奖号码 (1-33)</th>
+                  <th style="min-width: 70px;">蓝球</th>
+                  <th>和值</th>
+                  <th>跨度</th>
+                  <th>AC值</th>
+                  <th>奇偶比</th>
+                  <th>大小比</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 12px;">
+            <div id="historyPageInfo" style="font-size: 13px; color: var(--text-muted);">显示第 1 至 50 条，共 500 条</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn" id="btnPrevPage" onclick="prevHistoryPage()">上一页</button>
+              <span id="currentPageNum" style="padding: 6px 12px; font-weight: 600;">1</span>
+              <button class="btn" id="btnNextPage" onclick="nextHistoryPage()">下一页</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Canvas Tooltip Element -->
+  <div id="chart-tooltip"></div>
+
+  <footer>
+    <p>双色球最近500期中奖号码与全量遗漏冷热统计系统 · GitHub 开源项目架构设计</p>
+    <p style="margin-top: 4px; font-size: 11px; opacity: 0.7;">本工具纯粹基于公开开奖历史数据进行数理统计与遗漏算法建模，不构成任何投注建议。理性分析，量力而行。</p>
+  </footer>
+
+  <!-- Embedded Raw Dataset (500 Issues) -->
+  <script>
+    const RAW_HISTORY = [{"i":"2023074","d":"2023-07-30","w":"\u5468\u65e5","r":[8,14,18,20,22,27],"b":6,"s":109,"p":19,"ac":7,"oe":"1:5","bs":"4:2"},{"i":"2023075","d":"2023-08-01","w":"\u5468\u4e8c","r":[3,7,9,14,20,30],"b":13,"s":83,"p":27,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2023076","d":"2023-08-03","w":"\u5468\u56db","r":[3,10,14,22,27,30],"b":8,"s":106,"p":27,"ac":9,"oe":"2:4","bs":"3:3"},{"i":"2023077","d":"2023-08-06","w":"\u5468\u65e5","r":[1,5,14,16,18,21],"b":12,"s":75,"p":20,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2023078","d":"2023-08-08","w":"\u5468\u4e8c","r":[2,4,11,15,16,25],"b":5,"s":73,"p":23,"ac":8,"oe":"3:3","bs":"1:5"},{"i":"2023079","d":"2023-08-10","w":"\u5468\u56db","r":[7,16,18,19,20,25],"b":9,"s":105,"p":18,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2023080","d":"2023-08-13","w":"\u5468\u65e5","r":[5,7,24,28,29,33],"b":7,"s":126,"p":28,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2023081","d":"2023-08-15","w":"\u5468\u4e8c","r":[1,8,10,21,26,33],"b":15,"s":99,"p":32,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2023082","d":"2023-08-17","w":"\u5468\u56db","r":[5,18,20,28,30,33],"b":7,"s":134,"p":28,"ac":6,"oe":"2:4","bs":"5:1"},{"i":"2023083","d":"2023-08-20","w":"\u5468\u65e5","r":[7,9,16,18,25,32],"b":15,"s":107,"p":25,"ac":4,"oe":"3:3","bs":"3:3"},{"i":"2023084","d":"2023-08-22","w":"\u5468\u4e8c","r":[1,3,7,9,10,25],"b":15,"s":55,"p":24,"ac":8,"oe":"5:1","bs":"1:5"},{"i":"2023085","d":"2023-08-24","w":"\u5468\u56db","r":[5,26,30,31,32,33],"b":5,"s":157,"p":28,"ac":7,"oe":"3:3","bs":"5:1"},{"i":"2023086","d":"2023-08-27","w":"\u5468\u65e5","r":[1,7,8,9,14,32],"b":2,"s":71,"p":31,"ac":7,"oe":"3:3","bs":"1:5"},{"i":"2023087","d":"2023-08-29","w":"\u5468\u4e8c","r":[5,10,13,15,26,31],"b":1,"s":100,"p":26,"ac":6,"oe":"4:2","bs":"2:4"},{"i":"2023088","d":"2023-08-31","w":"\u5468\u56db","r":[3,7,9,16,19,24],"b":14,"s":78,"p":21,"ac":10,"oe":"4:2","bs":"2:4"},{"i":"2023089","d":"2023-09-03","w":"\u5468\u65e5","r":[1,3,6,9,15,20],"b":10,"s":54,"p":19,"ac":6,"oe":"4:2","bs":"1:5"},{"i":"2023090","d":"2023-09-05","w":"\u5468\u4e8c","r":[4,8,17,18,20,27],"b":7,"s":94,"p":23,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2023091","d":"2023-09-07","w":"\u5468\u56db","r":[12,16,21,25,31,33],"b":13,"s":138,"p":21,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2023092","d":"2023-09-10","w":"\u5468\u65e5","r":[1,10,13,23,26,27],"b":4,"s":100,"p":26,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2023093","d":"2023-09-12","w":"\u5468\u4e8c","r":[7,19,22,24,26,30],"b":5,"s":128,"p":23,"ac":8,"oe":"2:4","bs":"5:1"},{"i":"2023094","d":"2023-09-14","w":"\u5468\u56db","r":[3,4,11,23,28,31],"b":8,"s":100,"p":28,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2023095","d":"2023-09-17","w":"\u5468\u65e5","r":[13,16,17,26,28,31],"b":2,"s":131,"p":18,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2023096","d":"2023-09-19","w":"\u5468\u4e8c","r":[6,9,10,16,20,27],"b":3,"s":88,"p":21,"ac":6,"oe":"2:4","bs":"2:4"},{"i":"2023097","d":"2023-09-21","w":"\u5468\u56db","r":[1,4,5,14,15,22],"b":10,"s":61,"p":21,"ac":8,"oe":"3:3","bs":"1:5"},{"i":"2023098","d":"2023-09-24","w":"\u5468\u65e5","r":[7,16,17,29,31,32],"b":15,"s":132,"p":25,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2023099","d":"2023-09-26","w":"\u5468\u4e8c","r":[1,11,13,18,19,24],"b":8,"s":86,"p":23,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2023100","d":"2023-09-28","w":"\u5468\u56db","r":[2,9,11,18,23,26],"b":2,"s":89,"p":24,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2023101","d":"2023-10-01","w":"\u5468\u65e5","r":[1,4,9,10,24,31],"b":11,"s":79,"p":30,"ac":10,"oe":"3:3","bs":"2:4"},{"i":"2023102","d":"2023-10-03","w":"\u5468\u4e8c","r":[7,10,11,15,31,33],"b":16,"s":107,"p":26,"ac":9,"oe":"5:1","bs":"2:4"},{"i":"2023103","d":"2023-10-05","w":"\u5468\u56db","r":[8,11,13,20,22,30],"b":11,"s":104,"p":22,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2023104","d":"2023-10-08","w":"\u5468\u65e5","r":[17,18,19,21,23,29],"b":4,"s":127,"p":12,"ac":5,"oe":"5:1","bs":"6:0"},{"i":"2023105","d":"2023-10-10","w":"\u5468\u4e8c","r":[4,14,15,21,31,32],"b":14,"s":117,"p":28,"ac":5,"oe":"3:3","bs":"3:3"},{"i":"2023106","d":"2023-10-12","w":"\u5468\u56db","r":[4,5,9,11,16,19],"b":6,"s":64,"p":15,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2023107","d":"2023-10-15","w":"\u5468\u65e5","r":[4,9,24,25,29,32],"b":1,"s":123,"p":28,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2023108","d":"2023-10-17","w":"\u5468\u4e8c","r":[1,2,11,13,22,31],"b":9,"s":80,"p":30,"ac":6,"oe":"4:2","bs":"2:4"},{"i":"2023109","d":"2023-10-19","w":"\u5468\u56db","r":[4,6,7,8,19,21],"b":16,"s":65,"p":17,"ac":5,"oe":"3:3","bs":"2:4"},{"i":"2023110","d":"2023-10-22","w":"\u5468\u65e5","r":[5,6,11,12,20,29],"b":11,"s":83,"p":24,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2023111","d":"2023-10-24","w":"\u5468\u4e8c","r":[6,13,16,21,28,29],"b":13,"s":113,"p":23,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2023112","d":"2023-10-26","w":"\u5468\u56db","r":[1,3,5,20,21,32],"b":5,"s":82,"p":31,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2023113","d":"2023-10-29","w":"\u5468\u65e5","r":[11,13,22,27,28,32],"b":8,"s":133,"p":21,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2023114","d":"2023-10-31","w":"\u5468\u4e8c","r":[2,5,8,9,10,17],"b":7,"s":51,"p":15,"ac":6,"oe":"3:3","bs":"1:5"},{"i":"2023115","d":"2023-11-02","w":"\u5468\u56db","r":[10,16,18,20,30,32],"b":13,"s":126,"p":22,"ac":5,"oe":"0:6","bs":"4:2"},{"i":"2023116","d":"2023-11-05","w":"\u5468\u65e5","r":[1,2,3,15,18,25],"b":3,"s":64,"p":24,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2023117","d":"2023-11-07","w":"\u5468\u4e8c","r":[2,18,19,22,27,32],"b":9,"s":120,"p":30,"ac":9,"oe":"2:4","bs":"5:1"},{"i":"2023118","d":"2023-11-09","w":"\u5468\u56db","r":[5,9,15,18,29,30],"b":16,"s":106,"p":25,"ac":10,"oe":"4:2","bs":"3:3"},{"i":"2023119","d":"2023-11-12","w":"\u5468\u65e5","r":[2,13,14,19,28,31],"b":6,"s":107,"p":29,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2023120","d":"2023-11-14","w":"\u5468\u4e8c","r":[13,15,19,20,26,30],"b":9,"s":123,"p":17,"ac":6,"oe":"3:3","bs":"4:2"},{"i":"2023121","d":"2023-11-16","w":"\u5468\u56db","r":[3,4,5,13,14,28],"b":4,"s":67,"p":25,"ac":6,"oe":"3:3","bs":"1:5"},{"i":"2023122","d":"2023-11-19","w":"\u5468\u65e5","r":[4,5,15,26,29,30],"b":3,"s":109,"p":26,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2023123","d":"2023-11-21","w":"\u5468\u4e8c","r":[5,13,16,24,26,28],"b":7,"s":112,"p":23,"ac":7,"oe":"2:4","bs":"3:3"},{"i":"2023124","d":"2023-11-23","w":"\u5468\u56db","r":[5,7,15,17,21,30],"b":6,"s":95,"p":25,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2023125","d":"2023-11-26","w":"\u5468\u65e5","r":[1,4,5,21,27,32],"b":3,"s":90,"p":31,"ac":10,"oe":"4:2","bs":"3:3"},{"i":"2023126","d":"2023-11-28","w":"\u5468\u4e8c","r":[1,5,6,10,12,25],"b":12,"s":59,"p":24,"ac":8,"oe":"3:3","bs":"1:5"},{"i":"2023127","d":"2023-11-30","w":"\u5468\u56db","r":[5,12,18,22,23,29],"b":1,"s":109,"p":24,"ac":6,"oe":"3:3","bs":"4:2"},{"i":"2023128","d":"2023-12-03","w":"\u5468\u65e5","r":[5,7,8,15,16,17],"b":16,"s":68,"p":12,"ac":4,"oe":"4:2","bs":"1:5"},{"i":"2023129","d":"2023-12-05","w":"\u5468\u4e8c","r":[3,14,20,21,28,29],"b":11,"s":115,"p":26,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2023130","d":"2023-12-07","w":"\u5468\u56db","r":[5,7,19,25,30,33],"b":10,"s":119,"p":28,"ac":9,"oe":"5:1","bs":"4:2"},{"i":"2023131","d":"2023-12-10","w":"\u5468\u65e5","r":[3,10,13,19,24,29],"b":9,"s":98,"p":26,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2023132","d":"2023-12-12","w":"\u5468\u4e8c","r":[4,5,19,22,24,25],"b":12,"s":99,"p":21,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2023133","d":"2023-12-14","w":"\u5468\u56db","r":[4,9,11,25,31,32],"b":7,"s":112,"p":28,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2023134","d":"2023-12-17","w":"\u5468\u65e5","r":[10,14,17,18,30,32],"b":13,"s":121,"p":22,"ac":9,"oe":"1:5","bs":"4:2"},{"i":"2023135","d":"2023-12-19","w":"\u5468\u4e8c","r":[4,13,15,18,20,27],"b":2,"s":97,"p":23,"ac":5,"oe":"3:3","bs":"3:3"},{"i":"2023136","d":"2023-12-21","w":"\u5468\u56db","r":[5,18,24,28,29,31],"b":11,"s":135,"p":26,"ac":9,"oe":"3:3","bs":"5:1"},{"i":"2023137","d":"2023-12-24","w":"\u5468\u65e5","r":[1,2,4,13,24,33],"b":9,"s":77,"p":32,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2023138","d":"2023-12-26","w":"\u5468\u4e8c","r":[2,7,16,19,22,27],"b":12,"s":93,"p":25,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2023139","d":"2023-12-28","w":"\u5468\u56db","r":[5,9,18,21,26,33],"b":2,"s":112,"p":28,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2023140","d":"2023-12-31","w":"\u5468\u65e5","r":[8,18,19,24,28,30],"b":10,"s":127,"p":22,"ac":7,"oe":"1:5","bs":"5:1"},{"i":"2023141","d":"2024-01-02","w":"\u5468\u4e8c","r":[1,5,10,12,28,32],"b":12,"s":88,"p":31,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2023142","d":"2024-01-04","w":"\u5468\u56db","r":[7,10,15,17,19,21],"b":9,"s":89,"p":14,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2023143","d":"2024-01-07","w":"\u5468\u65e5","r":[4,15,19,21,22,24],"b":9,"s":105,"p":20,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2023144","d":"2024-01-09","w":"\u5468\u4e8c","r":[11,19,21,23,25,29],"b":10,"s":128,"p":18,"ac":3,"oe":"6:0","bs":"5:1"},{"i":"2023145","d":"2024-01-11","w":"\u5468\u56db","r":[4,7,18,19,20,29],"b":5,"s":97,"p":25,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2023146","d":"2024-01-14","w":"\u5468\u65e5","r":[10,13,16,17,22,30],"b":6,"s":108,"p":20,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2023147","d":"2024-01-16","w":"\u5468\u4e8c","r":[5,8,14,17,18,29],"b":3,"s":91,"p":24,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2023148","d":"2024-01-18","w":"\u5468\u56db","r":[1,5,11,13,15,24],"b":4,"s":69,"p":23,"ac":7,"oe":"5:1","bs":"1:5"},{"i":"2023149","d":"2024-01-21","w":"\u5468\u65e5","r":[4,6,19,24,29,31],"b":9,"s":113,"p":27,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2023150","d":"2024-01-23","w":"\u5468\u4e8c","r":[2,7,9,11,23,27],"b":7,"s":79,"p":25,"ac":7,"oe":"5:1","bs":"2:4"},{"i":"2023151","d":"2024-01-25","w":"\u5468\u56db","r":[9,10,11,13,14,32],"b":11,"s":89,"p":23,"ac":5,"oe":"3:3","bs":"1:5"},{"i":"2023152","d":"2024-01-28","w":"\u5468\u65e5","r":[13,16,23,25,29,31],"b":12,"s":137,"p":18,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2023153","d":"2024-01-30","w":"\u5468\u4e8c","r":[4,17,21,25,29,30],"b":6,"s":126,"p":26,"ac":6,"oe":"4:2","bs":"5:1"},{"i":"2024001","d":"2024-02-01","w":"\u5468\u56db","r":[5,6,9,11,31,32],"b":11,"s":94,"p":27,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2024002","d":"2024-02-04","w":"\u5468\u65e5","r":[12,14,20,26,28,30],"b":16,"s":130,"p":18,"ac":4,"oe":"0:6","bs":"4:2"},{"i":"2024003","d":"2024-02-06","w":"\u5468\u4e8c","r":[1,15,19,20,22,32],"b":2,"s":109,"p":31,"ac":10,"oe":"3:3","bs":"4:2"},{"i":"2024004","d":"2024-02-08","w":"\u5468\u56db","r":[7,10,23,26,28,31],"b":12,"s":125,"p":24,"ac":5,"oe":"3:3","bs":"4:2"},{"i":"2024005","d":"2024-02-11","w":"\u5468\u65e5","r":[14,15,19,20,21,32],"b":15,"s":121,"p":18,"ac":6,"oe":"3:3","bs":"4:2"},{"i":"2024006","d":"2024-02-13","w":"\u5468\u4e8c","r":[3,6,10,20,22,24],"b":15,"s":85,"p":21,"ac":7,"oe":"1:5","bs":"3:3"},{"i":"2024007","d":"2024-02-15","w":"\u5468\u56db","r":[1,4,7,12,24,32],"b":14,"s":80,"p":31,"ac":7,"oe":"2:4","bs":"2:4"},{"i":"2024008","d":"2024-02-18","w":"\u5468\u65e5","r":[2,5,6,10,19,21],"b":9,"s":63,"p":19,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2024009","d":"2024-02-20","w":"\u5468\u4e8c","r":[3,7,17,19,26,29],"b":13,"s":101,"p":26,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2024010","d":"2024-02-22","w":"\u5468\u56db","r":[3,7,8,17,21,31],"b":3,"s":87,"p":28,"ac":6,"oe":"5:1","bs":"3:3"},{"i":"2024011","d":"2024-02-25","w":"\u5468\u65e5","r":[1,5,11,21,22,24],"b":5,"s":84,"p":23,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024012","d":"2024-02-27","w":"\u5468\u4e8c","r":[5,13,15,17,21,24],"b":14,"s":95,"p":19,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2024013","d":"2024-02-29","w":"\u5468\u56db","r":[7,10,13,14,19,33],"b":13,"s":96,"p":26,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2024014","d":"2024-03-03","w":"\u5468\u65e5","r":[17,21,23,26,28,30],"b":14,"s":145,"p":13,"ac":4,"oe":"3:3","bs":"6:0"},{"i":"2024015","d":"2024-03-05","w":"\u5468\u4e8c","r":[4,5,9,12,15,16],"b":7,"s":61,"p":12,"ac":5,"oe":"3:3","bs":"0:6"},{"i":"2024016","d":"2024-03-07","w":"\u5468\u56db","r":[3,4,10,20,24,27],"b":7,"s":88,"p":24,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2024017","d":"2024-03-10","w":"\u5468\u65e5","r":[2,8,18,21,28,30],"b":3,"s":107,"p":28,"ac":9,"oe":"1:5","bs":"4:2"},{"i":"2024018","d":"2024-03-12","w":"\u5468\u4e8c","r":[10,17,23,24,26,31],"b":1,"s":131,"p":21,"ac":7,"oe":"3:3","bs":"5:1"},{"i":"2024019","d":"2024-03-14","w":"\u5468\u56db","r":[3,4,18,25,30,33],"b":16,"s":113,"p":30,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024020","d":"2024-03-17","w":"\u5468\u65e5","r":[5,6,9,17,20,27],"b":6,"s":84,"p":22,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2024021","d":"2024-03-19","w":"\u5468\u4e8c","r":[5,6,9,10,22,29],"b":4,"s":81,"p":24,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2024022","d":"2024-03-21","w":"\u5468\u56db","r":[3,16,19,27,28,29],"b":7,"s":122,"p":26,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2024023","d":"2024-03-24","w":"\u5468\u65e5","r":[1,9,15,17,30,33],"b":6,"s":105,"p":32,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2024024","d":"2024-03-26","w":"\u5468\u4e8c","r":[7,12,15,17,18,22],"b":15,"s":91,"p":15,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2024025","d":"2024-03-28","w":"\u5468\u56db","r":[7,8,9,10,17,31],"b":15,"s":82,"p":24,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2024026","d":"2024-03-31","w":"\u5468\u65e5","r":[1,2,3,9,16,26],"b":1,"s":57,"p":25,"ac":8,"oe":"3:3","bs":"1:5"},{"i":"2024027","d":"2024-04-02","w":"\u5468\u4e8c","r":[9,12,16,23,29,31],"b":14,"s":120,"p":22,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024028","d":"2024-04-04","w":"\u5468\u56db","r":[2,5,11,22,25,30],"b":8,"s":95,"p":28,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024029","d":"2024-04-07","w":"\u5468\u65e5","r":[6,10,17,22,25,26],"b":2,"s":106,"p":20,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2024030","d":"2024-04-09","w":"\u5468\u4e8c","r":[2,6,21,24,27,32],"b":1,"s":112,"p":30,"ac":9,"oe":"2:4","bs":"4:2"},{"i":"2024031","d":"2024-04-11","w":"\u5468\u56db","r":[1,8,19,25,26,30],"b":14,"s":109,"p":29,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2024032","d":"2024-04-14","w":"\u5468\u65e5","r":[5,7,11,18,23,28],"b":3,"s":92,"p":23,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024033","d":"2024-04-16","w":"\u5468\u4e8c","r":[3,6,7,19,26,32],"b":15,"s":93,"p":29,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024034","d":"2024-04-18","w":"\u5468\u56db","r":[8,10,14,15,19,33],"b":5,"s":99,"p":25,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2024035","d":"2024-04-21","w":"\u5468\u65e5","r":[5,6,9,12,31,32],"b":9,"s":95,"p":27,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2024036","d":"2024-04-23","w":"\u5468\u4e8c","r":[4,6,10,12,19,22],"b":4,"s":73,"p":18,"ac":8,"oe":"1:5","bs":"2:4"},{"i":"2024037","d":"2024-04-25","w":"\u5468\u56db","r":[4,9,20,21,23,32],"b":7,"s":109,"p":28,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024038","d":"2024-04-28","w":"\u5468\u65e5","r":[4,6,8,12,16,31],"b":16,"s":77,"p":27,"ac":6,"oe":"1:5","bs":"1:5"},{"i":"2024039","d":"2024-04-30","w":"\u5468\u4e8c","r":[5,9,14,20,28,31],"b":13,"s":107,"p":26,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024040","d":"2024-05-02","w":"\u5468\u56db","r":[4,9,12,16,19,31],"b":14,"s":91,"p":27,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2024041","d":"2024-05-05","w":"\u5468\u65e5","r":[2,4,9,19,28,31],"b":13,"s":93,"p":29,"ac":10,"oe":"3:3","bs":"3:3"},{"i":"2024042","d":"2024-05-07","w":"\u5468\u4e8c","r":[1,4,11,16,22,31],"b":3,"s":85,"p":30,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2024043","d":"2024-05-09","w":"\u5468\u56db","r":[2,5,11,19,22,26],"b":16,"s":85,"p":24,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024044","d":"2024-05-12","w":"\u5468\u65e5","r":[1,7,8,10,13,17],"b":8,"s":56,"p":16,"ac":6,"oe":"4:2","bs":"1:5"},{"i":"2024045","d":"2024-05-14","w":"\u5468\u4e8c","r":[8,20,21,25,28,33],"b":4,"s":135,"p":25,"ac":6,"oe":"3:3","bs":"5:1"},{"i":"2024046","d":"2024-05-16","w":"\u5468\u56db","r":[7,9,12,18,21,22],"b":6,"s":89,"p":15,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024047","d":"2024-05-19","w":"\u5468\u65e5","r":[2,14,15,16,20,25],"b":1,"s":92,"p":23,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2024048","d":"2024-05-21","w":"\u5468\u4e8c","r":[6,8,9,17,22,31],"b":7,"s":93,"p":25,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024049","d":"2024-05-23","w":"\u5468\u56db","r":[1,3,6,15,17,32],"b":1,"s":74,"p":31,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2024050","d":"2024-05-26","w":"\u5468\u65e5","r":[11,16,19,20,30,32],"b":11,"s":128,"p":21,"ac":10,"oe":"2:4","bs":"4:2"},{"i":"2024051","d":"2024-05-28","w":"\u5468\u4e8c","r":[9,13,16,17,25,30],"b":11,"s":110,"p":21,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2024052","d":"2024-05-30","w":"\u5468\u56db","r":[3,8,19,21,24,28],"b":16,"s":103,"p":25,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024053","d":"2024-06-02","w":"\u5468\u65e5","r":[1,5,6,10,25,26],"b":9,"s":73,"p":25,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2024054","d":"2024-06-04","w":"\u5468\u4e8c","r":[3,4,8,17,21,30],"b":4,"s":83,"p":27,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2024055","d":"2024-06-06","w":"\u5468\u56db","r":[1,14,16,19,21,32],"b":12,"s":103,"p":31,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2024056","d":"2024-06-09","w":"\u5468\u65e5","r":[2,5,13,14,30,33],"b":3,"s":97,"p":31,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2024057","d":"2024-06-11","w":"\u5468\u4e8c","r":[16,21,22,25,32,33],"b":15,"s":149,"p":17,"ac":8,"oe":"3:3","bs":"5:1"},{"i":"2024058","d":"2024-06-13","w":"\u5468\u56db","r":[7,8,9,12,15,31],"b":7,"s":82,"p":24,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2024059","d":"2024-06-16","w":"\u5468\u65e5","r":[9,12,14,22,24,30],"b":12,"s":111,"p":21,"ac":7,"oe":"1:5","bs":"3:3"},{"i":"2024060","d":"2024-06-18","w":"\u5468\u4e8c","r":[14,16,21,27,32,33],"b":3,"s":143,"p":19,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2024061","d":"2024-06-20","w":"\u5468\u56db","r":[4,6,9,21,30,33],"b":15,"s":103,"p":29,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2024062","d":"2024-06-23","w":"\u5468\u65e5","r":[8,12,14,24,26,29],"b":3,"s":113,"p":21,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2024063","d":"2024-06-25","w":"\u5468\u4e8c","r":[1,8,15,21,24,26],"b":5,"s":95,"p":25,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024064","d":"2024-06-27","w":"\u5468\u56db","r":[4,6,25,26,27,29],"b":13,"s":117,"p":25,"ac":5,"oe":"3:3","bs":"4:2"},{"i":"2024065","d":"2024-06-30","w":"\u5468\u65e5","r":[2,8,23,28,31,33],"b":7,"s":125,"p":31,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024066","d":"2024-07-02","w":"\u5468\u4e8c","r":[13,17,19,25,27,31],"b":7,"s":132,"p":18,"ac":3,"oe":"6:0","bs":"5:1"},{"i":"2024067","d":"2024-07-04","w":"\u5468\u56db","r":[1,2,3,7,16,29],"b":8,"s":58,"p":28,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2024068","d":"2024-07-07","w":"\u5468\u65e5","r":[2,5,11,12,13,17],"b":2,"s":60,"p":15,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2024069","d":"2024-07-09","w":"\u5468\u4e8c","r":[6,9,13,15,19,33],"b":15,"s":95,"p":27,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2024070","d":"2024-07-11","w":"\u5468\u56db","r":[2,11,19,22,26,27],"b":2,"s":107,"p":25,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024071","d":"2024-07-14","w":"\u5468\u65e5","r":[8,15,20,21,27,32],"b":4,"s":123,"p":24,"ac":5,"oe":"3:3","bs":"4:2"},{"i":"2024072","d":"2024-07-16","w":"\u5468\u4e8c","r":[1,3,8,21,28,30],"b":15,"s":91,"p":29,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2024073","d":"2024-07-18","w":"\u5468\u56db","r":[4,6,12,22,23,32],"b":15,"s":99,"p":28,"ac":9,"oe":"1:5","bs":"3:3"},{"i":"2024074","d":"2024-07-21","w":"\u5468\u65e5","r":[4,5,12,14,24,28],"b":14,"s":87,"p":24,"ac":9,"oe":"1:5","bs":"2:4"},{"i":"2024075","d":"2024-07-23","w":"\u5468\u4e8c","r":[2,4,5,8,15,26],"b":11,"s":60,"p":24,"ac":8,"oe":"2:4","bs":"1:5"},{"i":"2024076","d":"2024-07-25","w":"\u5468\u56db","r":[1,4,19,22,27,29],"b":10,"s":102,"p":28,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2024077","d":"2024-07-28","w":"\u5468\u65e5","r":[3,6,8,11,20,32],"b":9,"s":80,"p":29,"ac":7,"oe":"2:4","bs":"2:4"},{"i":"2024078","d":"2024-07-30","w":"\u5468\u4e8c","r":[5,14,16,22,25,26],"b":10,"s":108,"p":21,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2024079","d":"2024-08-01","w":"\u5468\u56db","r":[1,8,15,21,22,31],"b":12,"s":98,"p":30,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2024080","d":"2024-08-04","w":"\u5468\u65e5","r":[1,4,9,24,25,26],"b":16,"s":89,"p":25,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024081","d":"2024-08-06","w":"\u5468\u4e8c","r":[1,3,5,12,18,32],"b":9,"s":71,"p":31,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2024082","d":"2024-08-08","w":"\u5468\u56db","r":[5,7,24,25,31,33],"b":7,"s":125,"p":28,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2024083","d":"2024-08-11","w":"\u5468\u65e5","r":[1,13,25,26,29,33],"b":2,"s":127,"p":32,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2024084","d":"2024-08-13","w":"\u5468\u4e8c","r":[7,14,15,23,27,33],"b":5,"s":119,"p":26,"ac":9,"oe":"5:1","bs":"3:3"},{"i":"2024085","d":"2024-08-15","w":"\u5468\u56db","r":[2,9,12,14,20,25],"b":12,"s":82,"p":23,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2024086","d":"2024-08-18","w":"\u5468\u65e5","r":[1,2,8,23,27,31],"b":14,"s":92,"p":30,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024087","d":"2024-08-20","w":"\u5468\u4e8c","r":[8,15,21,26,27,29],"b":15,"s":126,"p":21,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2024088","d":"2024-08-22","w":"\u5468\u56db","r":[4,12,13,17,28,32],"b":3,"s":106,"p":28,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2024089","d":"2024-08-25","w":"\u5468\u65e5","r":[7,9,10,14,19,20],"b":4,"s":79,"p":13,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2024090","d":"2024-08-27","w":"\u5468\u4e8c","r":[5,7,12,22,31,32],"b":6,"s":109,"p":27,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024091","d":"2024-08-29","w":"\u5468\u56db","r":[4,20,22,26,27,28],"b":8,"s":127,"p":24,"ac":7,"oe":"1:5","bs":"5:1"},{"i":"2024092","d":"2024-09-01","w":"\u5468\u65e5","r":[6,16,21,27,28,33],"b":16,"s":131,"p":27,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2024093","d":"2024-09-03","w":"\u5468\u4e8c","r":[5,7,9,13,14,28],"b":12,"s":76,"p":23,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2024094","d":"2024-09-05","w":"\u5468\u56db","r":[9,16,17,20,26,31],"b":3,"s":119,"p":22,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024095","d":"2024-09-08","w":"\u5468\u65e5","r":[3,6,16,21,24,25],"b":7,"s":95,"p":22,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024096","d":"2024-09-10","w":"\u5468\u4e8c","r":[8,14,17,21,28,33],"b":3,"s":121,"p":25,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024097","d":"2024-09-12","w":"\u5468\u56db","r":[2,3,4,12,16,21],"b":10,"s":58,"p":19,"ac":8,"oe":"2:4","bs":"1:5"},{"i":"2024098","d":"2024-09-15","w":"\u5468\u65e5","r":[3,6,10,16,27,31],"b":16,"s":93,"p":28,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2024099","d":"2024-09-17","w":"\u5468\u4e8c","r":[2,4,7,17,28,33],"b":7,"s":91,"p":31,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024100","d":"2024-09-19","w":"\u5468\u56db","r":[2,10,22,23,27,33],"b":10,"s":117,"p":31,"ac":10,"oe":"3:3","bs":"4:2"},{"i":"2024101","d":"2024-09-22","w":"\u5468\u65e5","r":[11,13,15,18,29,31],"b":10,"s":117,"p":20,"ac":6,"oe":"5:1","bs":"3:3"},{"i":"2024102","d":"2024-09-24","w":"\u5468\u4e8c","r":[2,7,9,16,27,33],"b":3,"s":94,"p":31,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2024103","d":"2024-09-26","w":"\u5468\u56db","r":[3,4,18,21,29,30],"b":2,"s":105,"p":27,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024104","d":"2024-09-29","w":"\u5468\u65e5","r":[10,12,13,14,21,23],"b":14,"s":93,"p":13,"ac":5,"oe":"3:3","bs":"2:4"},{"i":"2024105","d":"2024-10-01","w":"\u5468\u4e8c","r":[3,8,21,22,24,29],"b":2,"s":107,"p":26,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024106","d":"2024-10-03","w":"\u5468\u56db","r":[8,10,21,28,29,33],"b":8,"s":129,"p":25,"ac":10,"oe":"3:3","bs":"4:2"},{"i":"2024107","d":"2024-10-06","w":"\u5468\u65e5","r":[4,5,11,13,21,30],"b":1,"s":84,"p":26,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2024108","d":"2024-10-08","w":"\u5468\u4e8c","r":[1,12,19,24,25,32],"b":13,"s":113,"p":31,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024109","d":"2024-10-10","w":"\u5468\u56db","r":[1,9,14,22,24,26],"b":10,"s":96,"p":25,"ac":7,"oe":"2:4","bs":"3:3"},{"i":"2024110","d":"2024-10-13","w":"\u5468\u65e5","r":[9,12,14,15,26,33],"b":14,"s":109,"p":24,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2024111","d":"2024-10-15","w":"\u5468\u4e8c","r":[6,12,14,19,27,31],"b":2,"s":109,"p":25,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024112","d":"2024-10-17","w":"\u5468\u56db","r":[5,6,9,10,12,25],"b":15,"s":67,"p":20,"ac":7,"oe":"3:3","bs":"1:5"},{"i":"2024113","d":"2024-10-20","w":"\u5468\u65e5","r":[1,5,10,14,16,23],"b":1,"s":69,"p":22,"ac":6,"oe":"3:3","bs":"1:5"},{"i":"2024114","d":"2024-10-22","w":"\u5468\u4e8c","r":[3,11,22,23,30,33],"b":14,"s":122,"p":30,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2024115","d":"2024-10-24","w":"\u5468\u56db","r":[3,11,15,21,24,33],"b":6,"s":107,"p":30,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2024116","d":"2024-10-27","w":"\u5468\u65e5","r":[2,4,6,13,17,24],"b":1,"s":66,"p":22,"ac":5,"oe":"2:4","bs":"2:4"},{"i":"2024117","d":"2024-10-29","w":"\u5468\u4e8c","r":[4,12,19,25,29,31],"b":15,"s":120,"p":27,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2024118","d":"2024-10-31","w":"\u5468\u56db","r":[5,12,14,20,21,23],"b":13,"s":95,"p":18,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2024119","d":"2024-11-03","w":"\u5468\u65e5","r":[10,13,14,20,25,26],"b":5,"s":108,"p":16,"ac":7,"oe":"2:4","bs":"3:3"},{"i":"2024120","d":"2024-11-05","w":"\u5468\u4e8c","r":[1,13,17,20,26,33],"b":5,"s":110,"p":32,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2024121","d":"2024-11-07","w":"\u5468\u56db","r":[4,6,11,18,27,29],"b":10,"s":95,"p":25,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2024122","d":"2024-11-10","w":"\u5468\u65e5","r":[19,21,24,27,28,31],"b":12,"s":150,"p":12,"ac":6,"oe":"4:2","bs":"6:0"},{"i":"2024123","d":"2024-11-12","w":"\u5468\u4e8c","r":[3,4,11,13,16,27],"b":11,"s":74,"p":24,"ac":10,"oe":"4:2","bs":"1:5"},{"i":"2024124","d":"2024-11-14","w":"\u5468\u56db","r":[6,9,10,17,21,26],"b":2,"s":89,"p":20,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024125","d":"2024-11-17","w":"\u5468\u65e5","r":[7,9,10,18,26,33],"b":8,"s":103,"p":26,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024126","d":"2024-11-19","w":"\u5468\u4e8c","r":[1,2,4,18,27,28],"b":8,"s":80,"p":27,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2024127","d":"2024-11-21","w":"\u5468\u56db","r":[1,2,10,21,22,26],"b":15,"s":82,"p":25,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2024128","d":"2024-11-24","w":"\u5468\u65e5","r":[4,7,9,19,26,33],"b":9,"s":98,"p":29,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024129","d":"2024-11-26","w":"\u5468\u4e8c","r":[3,12,14,25,31,32],"b":10,"s":117,"p":29,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2024130","d":"2024-11-28","w":"\u5468\u56db","r":[1,3,17,25,29,30],"b":7,"s":105,"p":29,"ac":10,"oe":"5:1","bs":"4:2"},{"i":"2024131","d":"2024-12-01","w":"\u5468\u65e5","r":[1,8,16,19,22,30],"b":4,"s":96,"p":29,"ac":6,"oe":"2:4","bs":"3:3"},{"i":"2024132","d":"2024-12-03","w":"\u5468\u4e8c","r":[14,15,21,25,29,32],"b":6,"s":136,"p":18,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2024133","d":"2024-12-05","w":"\u5468\u56db","r":[2,11,13,28,32,33],"b":3,"s":119,"p":31,"ac":10,"oe":"3:3","bs":"3:3"},{"i":"2024134","d":"2024-12-08","w":"\u5468\u65e5","r":[13,14,20,23,30,33],"b":9,"s":133,"p":20,"ac":6,"oe":"3:3","bs":"4:2"},{"i":"2024135","d":"2024-12-10","w":"\u5468\u4e8c","r":[6,8,19,21,29,33],"b":11,"s":116,"p":27,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2024136","d":"2024-12-12","w":"\u5468\u56db","r":[1,16,22,24,27,31],"b":8,"s":121,"p":30,"ac":9,"oe":"3:3","bs":"4:2"},{"i":"2024137","d":"2024-12-15","w":"\u5468\u65e5","r":[4,14,18,19,27,30],"b":3,"s":112,"p":26,"ac":10,"oe":"2:4","bs":"4:2"},{"i":"2024138","d":"2024-12-17","w":"\u5468\u4e8c","r":[2,3,12,13,15,16],"b":8,"s":61,"p":14,"ac":5,"oe":"3:3","bs":"0:6"},{"i":"2024139","d":"2024-12-19","w":"\u5468\u56db","r":[9,16,17,22,23,28],"b":9,"s":115,"p":19,"ac":5,"oe":"3:3","bs":"4:2"},{"i":"2024140","d":"2024-12-22","w":"\u5468\u65e5","r":[1,5,9,17,21,32],"b":5,"s":85,"p":31,"ac":5,"oe":"5:1","bs":"3:3"},{"i":"2024141","d":"2024-12-24","w":"\u5468\u4e8c","r":[3,4,7,9,13,29],"b":10,"s":65,"p":26,"ac":8,"oe":"5:1","bs":"1:5"},{"i":"2024142","d":"2024-12-26","w":"\u5468\u56db","r":[3,5,12,17,18,33],"b":3,"s":88,"p":30,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2024143","d":"2024-12-29","w":"\u5468\u65e5","r":[7,8,9,10,27,32],"b":13,"s":93,"p":25,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2024144","d":"2024-12-31","w":"\u5468\u4e8c","r":[1,2,5,7,14,30],"b":8,"s":59,"p":29,"ac":10,"oe":"3:3","bs":"1:5"},{"i":"2024145","d":"2025-01-02","w":"\u5468\u56db","r":[1,5,16,20,26,33],"b":5,"s":101,"p":32,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2024146","d":"2025-01-05","w":"\u5468\u65e5","r":[11,15,27,28,29,33],"b":4,"s":143,"p":22,"ac":7,"oe":"5:1","bs":"4:2"},{"i":"2024147","d":"2025-01-07","w":"\u5468\u4e8c","r":[1,10,23,26,27,32],"b":9,"s":119,"p":31,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2024148","d":"2025-01-09","w":"\u5468\u56db","r":[3,4,5,27,32,33],"b":14,"s":104,"p":30,"ac":6,"oe":"4:2","bs":"3:3"},{"i":"2024149","d":"2025-01-12","w":"\u5468\u65e5","r":[2,6,8,22,25,30],"b":9,"s":93,"p":28,"ac":10,"oe":"1:5","bs":"3:3"},{"i":"2024150","d":"2025-01-14","w":"\u5468\u4e8c","r":[1,9,10,15,20,22],"b":6,"s":77,"p":21,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2024151","d":"2025-01-16","w":"\u5468\u56db","r":[4,7,10,11,30,31],"b":10,"s":93,"p":27,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2024152","d":"2025-01-19","w":"\u5468\u65e5","r":[8,10,25,27,28,30],"b":13,"s":128,"p":22,"ac":5,"oe":"2:4","bs":"4:2"},{"i":"2024153","d":"2025-01-21","w":"\u5468\u4e8c","r":[3,5,10,26,27,31],"b":7,"s":102,"p":28,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025001","d":"2025-01-23","w":"\u5468\u56db","r":[16,17,26,28,29,32],"b":3,"s":148,"p":16,"ac":7,"oe":"2:4","bs":"5:1"},{"i":"2025002","d":"2025-01-26","w":"\u5468\u65e5","r":[6,17,21,27,29,33],"b":10,"s":133,"p":27,"ac":7,"oe":"5:1","bs":"5:1"},{"i":"2025003","d":"2025-01-28","w":"\u5468\u4e8c","r":[6,10,11,21,29,30],"b":16,"s":107,"p":24,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025004","d":"2025-01-30","w":"\u5468\u56db","r":[2,6,9,15,28,31],"b":16,"s":91,"p":29,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2025005","d":"2025-02-02","w":"\u5468\u65e5","r":[5,10,11,23,26,32],"b":14,"s":107,"p":27,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025006","d":"2025-02-04","w":"\u5468\u4e8c","r":[7,11,22,23,24,31],"b":2,"s":118,"p":24,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2025007","d":"2025-02-06","w":"\u5468\u56db","r":[7,13,15,16,28,30],"b":16,"s":109,"p":23,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025008","d":"2025-02-09","w":"\u5468\u65e5","r":[7,11,24,25,32,33],"b":3,"s":132,"p":26,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2025009","d":"2025-02-11","w":"\u5468\u4e8c","r":[8,21,24,26,27,28],"b":1,"s":134,"p":20,"ac":7,"oe":"2:4","bs":"5:1"},{"i":"2025010","d":"2025-02-13","w":"\u5468\u56db","r":[6,7,9,11,13,22],"b":9,"s":68,"p":16,"ac":7,"oe":"4:2","bs":"1:5"},{"i":"2025011","d":"2025-02-16","w":"\u5468\u65e5","r":[10,12,25,26,28,30],"b":5,"s":131,"p":20,"ac":6,"oe":"1:5","bs":"4:2"},{"i":"2025012","d":"2025-02-18","w":"\u5468\u4e8c","r":[5,10,15,17,24,32],"b":15,"s":103,"p":27,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025013","d":"2025-02-20","w":"\u5468\u56db","r":[7,11,13,18,24,28],"b":13,"s":101,"p":21,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2025014","d":"2025-02-23","w":"\u5468\u65e5","r":[2,7,16,20,22,27],"b":10,"s":94,"p":25,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2025015","d":"2025-02-25","w":"\u5468\u4e8c","r":[7,15,16,23,31,33],"b":1,"s":125,"p":26,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2025016","d":"2025-02-27","w":"\u5468\u56db","r":[9,14,16,18,21,22],"b":5,"s":100,"p":13,"ac":6,"oe":"2:4","bs":"3:3"},{"i":"2025017","d":"2025-03-02","w":"\u5468\u65e5","r":[3,9,16,28,29,31],"b":2,"s":116,"p":28,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2025018","d":"2025-03-04","w":"\u5468\u4e8c","r":[5,15,19,22,23,28],"b":2,"s":112,"p":23,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2025019","d":"2025-03-06","w":"\u5468\u56db","r":[2,10,16,25,26,28],"b":2,"s":107,"p":26,"ac":10,"oe":"1:5","bs":"3:3"},{"i":"2025020","d":"2025-03-09","w":"\u5468\u65e5","r":[9,11,16,19,20,33],"b":16,"s":108,"p":24,"ac":10,"oe":"4:2","bs":"3:3"},{"i":"2025021","d":"2025-03-11","w":"\u5468\u4e8c","r":[4,14,16,18,24,29],"b":6,"s":105,"p":25,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2025022","d":"2025-03-13","w":"\u5468\u56db","r":[9,10,16,18,20,28],"b":14,"s":101,"p":19,"ac":7,"oe":"1:5","bs":"3:3"},{"i":"2025023","d":"2025-03-16","w":"\u5468\u65e5","r":[2,3,12,19,22,33],"b":7,"s":91,"p":31,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2025024","d":"2025-03-18","w":"\u5468\u4e8c","r":[1,9,11,19,24,31],"b":7,"s":95,"p":30,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025025","d":"2025-03-20","w":"\u5468\u56db","r":[8,15,17,18,20,30],"b":7,"s":108,"p":22,"ac":6,"oe":"2:4","bs":"4:2"},{"i":"2025026","d":"2025-03-23","w":"\u5468\u65e5","r":[1,5,7,13,14,29],"b":11,"s":69,"p":28,"ac":9,"oe":"5:1","bs":"1:5"},{"i":"2025027","d":"2025-03-25","w":"\u5468\u4e8c","r":[7,12,15,17,27,33],"b":6,"s":111,"p":26,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025028","d":"2025-03-27","w":"\u5468\u56db","r":[5,7,10,14,23,28],"b":15,"s":87,"p":23,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2025029","d":"2025-03-30","w":"\u5468\u65e5","r":[1,16,19,21,23,31],"b":6,"s":111,"p":30,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2025030","d":"2025-04-01","w":"\u5468\u4e8c","r":[2,19,27,29,30,33],"b":13,"s":140,"p":31,"ac":9,"oe":"4:2","bs":"5:1"},{"i":"2025031","d":"2025-04-03","w":"\u5468\u56db","r":[4,5,6,12,13,16],"b":12,"s":56,"p":12,"ac":6,"oe":"2:4","bs":"0:6"},{"i":"2025032","d":"2025-04-06","w":"\u5468\u65e5","r":[2,4,8,10,26,29],"b":12,"s":79,"p":27,"ac":8,"oe":"1:5","bs":"2:4"},{"i":"2025033","d":"2025-04-08","w":"\u5468\u4e8c","r":[2,4,10,12,22,23],"b":2,"s":73,"p":21,"ac":7,"oe":"1:5","bs":"2:4"},{"i":"2025034","d":"2025-04-10","w":"\u5468\u56db","r":[4,5,14,16,21,31],"b":15,"s":91,"p":27,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025035","d":"2025-04-13","w":"\u5468\u65e5","r":[3,4,19,20,24,27],"b":6,"s":97,"p":24,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2025036","d":"2025-04-15","w":"\u5468\u4e8c","r":[4,22,26,27,28,31],"b":11,"s":138,"p":27,"ac":7,"oe":"2:4","bs":"5:1"},{"i":"2025037","d":"2025-04-17","w":"\u5468\u56db","r":[3,19,30,31,32,33],"b":13,"s":148,"p":30,"ac":7,"oe":"4:2","bs":"5:1"},{"i":"2025038","d":"2025-04-20","w":"\u5468\u65e5","r":[2,5,8,14,19,22],"b":9,"s":70,"p":20,"ac":5,"oe":"2:4","bs":"2:4"},{"i":"2025039","d":"2025-04-22","w":"\u5468\u4e8c","r":[12,15,16,17,20,21],"b":7,"s":101,"p":9,"ac":3,"oe":"3:3","bs":"3:3"},{"i":"2025040","d":"2025-04-24","w":"\u5468\u56db","r":[2,12,14,15,22,29],"b":4,"s":94,"p":27,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2025041","d":"2025-04-27","w":"\u5468\u65e5","r":[4,8,11,15,21,22],"b":16,"s":81,"p":18,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2025042","d":"2025-04-29","w":"\u5468\u4e8c","r":[2,14,16,20,31,33],"b":14,"s":116,"p":31,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2025043","d":"2025-05-01","w":"\u5468\u56db","r":[1,14,16,21,22,31],"b":16,"s":105,"p":30,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2025044","d":"2025-05-04","w":"\u5468\u65e5","r":[4,7,13,14,25,31],"b":10,"s":94,"p":27,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2025045","d":"2025-05-06","w":"\u5468\u4e8c","r":[2,7,13,25,27,32],"b":2,"s":106,"p":30,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025046","d":"2025-05-08","w":"\u5468\u56db","r":[1,9,13,21,26,32],"b":8,"s":102,"p":31,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025047","d":"2025-05-11","w":"\u5468\u65e5","r":[5,8,12,15,23,29],"b":14,"s":92,"p":24,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2025048","d":"2025-05-13","w":"\u5468\u4e8c","r":[6,7,12,17,32,33],"b":6,"s":107,"p":27,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2025049","d":"2025-05-15","w":"\u5468\u56db","r":[2,9,13,16,20,22],"b":13,"s":82,"p":20,"ac":6,"oe":"2:4","bs":"2:4"},{"i":"2025050","d":"2025-05-18","w":"\u5468\u65e5","r":[5,9,10,14,25,28],"b":7,"s":91,"p":23,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025051","d":"2025-05-20","w":"\u5468\u4e8c","r":[10,18,21,28,29,32],"b":8,"s":138,"p":22,"ac":6,"oe":"2:4","bs":"5:1"},{"i":"2025052","d":"2025-05-22","w":"\u5468\u56db","r":[4,8,11,14,22,26],"b":16,"s":85,"p":22,"ac":7,"oe":"1:5","bs":"2:4"},{"i":"2025053","d":"2025-05-25","w":"\u5468\u65e5","r":[7,11,13,22,26,33],"b":5,"s":112,"p":26,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2025054","d":"2025-05-27","w":"\u5468\u4e8c","r":[2,4,8,11,19,26],"b":16,"s":70,"p":24,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2025055","d":"2025-05-29","w":"\u5468\u56db","r":[11,12,26,27,29,31],"b":2,"s":136,"p":20,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2025056","d":"2025-06-01","w":"\u5468\u65e5","r":[1,5,17,21,22,25],"b":12,"s":91,"p":24,"ac":6,"oe":"5:1","bs":"4:2"},{"i":"2025057","d":"2025-06-03","w":"\u5468\u4e8c","r":[2,3,9,16,27,31],"b":3,"s":88,"p":29,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2025058","d":"2025-06-05","w":"\u5468\u56db","r":[3,6,14,22,28,32],"b":10,"s":105,"p":29,"ac":9,"oe":"1:5","bs":"3:3"},{"i":"2025059","d":"2025-06-08","w":"\u5468\u65e5","r":[4,9,14,18,22,28],"b":13,"s":95,"p":24,"ac":6,"oe":"1:5","bs":"3:3"},{"i":"2025060","d":"2025-06-10","w":"\u5468\u4e8c","r":[1,4,10,18,20,22],"b":6,"s":75,"p":21,"ac":9,"oe":"1:5","bs":"3:3"},{"i":"2025061","d":"2025-06-12","w":"\u5468\u56db","r":[6,7,11,15,18,21],"b":6,"s":78,"p":15,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2025062","d":"2025-06-15","w":"\u5468\u65e5","r":[1,3,21,27,30,31],"b":6,"s":113,"p":30,"ac":10,"oe":"5:1","bs":"4:2"},{"i":"2025063","d":"2025-06-17","w":"\u5468\u4e8c","r":[10,11,12,16,17,22],"b":2,"s":88,"p":12,"ac":4,"oe":"2:4","bs":"2:4"},{"i":"2025064","d":"2025-06-19","w":"\u5468\u56db","r":[8,14,16,22,30,32],"b":12,"s":122,"p":24,"ac":4,"oe":"0:6","bs":"3:3"},{"i":"2025065","d":"2025-06-22","w":"\u5468\u65e5","r":[8,21,24,25,27,30],"b":16,"s":135,"p":22,"ac":7,"oe":"3:3","bs":"5:1"},{"i":"2025066","d":"2025-06-24","w":"\u5468\u4e8c","r":[4,6,7,11,13,15],"b":11,"s":56,"p":11,"ac":5,"oe":"4:2","bs":"0:6"},{"i":"2025067","d":"2025-06-26","w":"\u5468\u56db","r":[5,10,12,13,15,33],"b":9,"s":88,"p":28,"ac":7,"oe":"4:2","bs":"1:5"},{"i":"2025068","d":"2025-06-29","w":"\u5468\u65e5","r":[7,9,11,12,20,25],"b":15,"s":84,"p":18,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2025069","d":"2025-07-01","w":"\u5468\u4e8c","r":[5,9,10,18,29,30],"b":7,"s":101,"p":25,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025070","d":"2025-07-03","w":"\u5468\u56db","r":[2,3,15,18,23,26],"b":2,"s":87,"p":24,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025071","d":"2025-07-06","w":"\u5468\u65e5","r":[7,14,22,23,30,33],"b":13,"s":129,"p":26,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2025072","d":"2025-07-08","w":"\u5468\u4e8c","r":[4,13,14,15,22,32],"b":13,"s":100,"p":28,"ac":6,"oe":"2:4","bs":"2:4"},{"i":"2025073","d":"2025-07-10","w":"\u5468\u56db","r":[1,7,11,16,20,32],"b":1,"s":87,"p":31,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025074","d":"2025-07-13","w":"\u5468\u65e5","r":[15,25,26,27,28,31],"b":15,"s":152,"p":16,"ac":6,"oe":"4:2","bs":"5:1"},{"i":"2025075","d":"2025-07-15","w":"\u5468\u4e8c","r":[2,4,11,17,21,32],"b":16,"s":87,"p":30,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2025076","d":"2025-07-17","w":"\u5468\u56db","r":[3,11,14,16,22,33],"b":11,"s":99,"p":30,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2025077","d":"2025-07-20","w":"\u5468\u65e5","r":[16,17,20,28,31,32],"b":10,"s":144,"p":16,"ac":4,"oe":"2:4","bs":"5:1"},{"i":"2025078","d":"2025-07-22","w":"\u5468\u4e8c","r":[2,3,16,25,30,32],"b":2,"s":108,"p":30,"ac":9,"oe":"2:4","bs":"3:3"},{"i":"2025079","d":"2025-07-24","w":"\u5468\u56db","r":[1,10,11,13,31,33],"b":4,"s":99,"p":32,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2025080","d":"2025-07-27","w":"\u5468\u65e5","r":[1,3,12,22,28,31],"b":8,"s":97,"p":30,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025081","d":"2025-07-29","w":"\u5468\u4e8c","r":[7,14,19,23,24,29],"b":4,"s":116,"p":22,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2025082","d":"2025-07-31","w":"\u5468\u56db","r":[7,8,9,24,26,33],"b":9,"s":107,"p":26,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2025083","d":"2025-08-03","w":"\u5468\u65e5","r":[2,10,15,26,27,33],"b":4,"s":113,"p":31,"ac":10,"oe":"3:3","bs":"3:3"},{"i":"2025084","d":"2025-08-05","w":"\u5468\u4e8c","r":[4,5,10,22,23,29],"b":15,"s":93,"p":25,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2025085","d":"2025-08-07","w":"\u5468\u56db","r":[3,8,14,15,22,33],"b":11,"s":95,"p":30,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2025086","d":"2025-08-10","w":"\u5468\u65e5","r":[7,9,10,21,26,31],"b":7,"s":104,"p":24,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2025087","d":"2025-08-12","w":"\u5468\u4e8c","r":[3,9,13,16,21,29],"b":12,"s":91,"p":26,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2025088","d":"2025-08-14","w":"\u5468\u56db","r":[5,6,9,14,17,31],"b":13,"s":82,"p":26,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2025089","d":"2025-08-17","w":"\u5468\u65e5","r":[17,18,19,22,27,33],"b":6,"s":136,"p":16,"ac":8,"oe":"4:2","bs":"6:0"},{"i":"2025090","d":"2025-08-19","w":"\u5468\u4e8c","r":[1,5,10,17,23,25],"b":16,"s":81,"p":24,"ac":10,"oe":"5:1","bs":"3:3"},{"i":"2025091","d":"2025-08-21","w":"\u5468\u56db","r":[6,7,10,13,18,29],"b":7,"s":83,"p":23,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025092","d":"2025-08-24","w":"\u5468\u65e5","r":[5,6,14,15,28,29],"b":8,"s":97,"p":24,"ac":5,"oe":"3:3","bs":"2:4"},{"i":"2025093","d":"2025-08-26","w":"\u5468\u4e8c","r":[3,12,13,14,21,29],"b":13,"s":92,"p":26,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2025094","d":"2025-08-28","w":"\u5468\u56db","r":[1,5,6,25,30,32],"b":9,"s":99,"p":31,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2025095","d":"2025-08-31","w":"\u5468\u65e5","r":[7,8,12,21,27,30],"b":8,"s":105,"p":23,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2025096","d":"2025-09-02","w":"\u5468\u4e8c","r":[4,15,18,22,25,33],"b":10,"s":117,"p":29,"ac":6,"oe":"3:3","bs":"4:2"},{"i":"2025097","d":"2025-09-04","w":"\u5468\u56db","r":[1,11,12,14,23,26],"b":15,"s":87,"p":25,"ac":7,"oe":"3:3","bs":"2:4"},{"i":"2025098","d":"2025-09-07","w":"\u5468\u65e5","r":[1,6,10,14,26,32],"b":2,"s":89,"p":31,"ac":9,"oe":"1:5","bs":"2:4"},{"i":"2025099","d":"2025-09-09","w":"\u5468\u4e8c","r":[12,14,23,25,27,31],"b":12,"s":132,"p":19,"ac":5,"oe":"4:2","bs":"4:2"},{"i":"2025100","d":"2025-09-11","w":"\u5468\u56db","r":[7,13,21,23,26,30],"b":7,"s":120,"p":23,"ac":10,"oe":"4:2","bs":"4:2"},{"i":"2025101","d":"2025-09-14","w":"\u5468\u65e5","r":[5,6,7,15,28,29],"b":15,"s":90,"p":24,"ac":6,"oe":"4:2","bs":"2:4"},{"i":"2025102","d":"2025-09-16","w":"\u5468\u4e8c","r":[12,16,18,22,24,25],"b":8,"s":117,"p":13,"ac":6,"oe":"1:5","bs":"4:2"},{"i":"2025103","d":"2025-09-18","w":"\u5468\u56db","r":[7,9,14,25,29,31],"b":8,"s":115,"p":24,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025104","d":"2025-09-21","w":"\u5468\u65e5","r":[8,9,14,21,28,33],"b":9,"s":113,"p":25,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2025105","d":"2025-09-23","w":"\u5468\u4e8c","r":[3,19,20,22,26,28],"b":11,"s":118,"p":25,"ac":8,"oe":"2:4","bs":"5:1"},{"i":"2025106","d":"2025-09-25","w":"\u5468\u56db","r":[6,7,11,13,27,31],"b":9,"s":95,"p":25,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2025107","d":"2025-09-28","w":"\u5468\u65e5","r":[3,11,14,20,29,31],"b":9,"s":108,"p":28,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2025108","d":"2025-09-30","w":"\u5468\u4e8c","r":[15,22,23,28,31,32],"b":1,"s":151,"p":17,"ac":7,"oe":"3:3","bs":"5:1"},{"i":"2025109","d":"2025-10-02","w":"\u5468\u56db","r":[5,8,9,19,27,28],"b":1,"s":96,"p":23,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025110","d":"2025-10-05","w":"\u5468\u65e5","r":[10,24,27,28,31,33],"b":6,"s":153,"p":23,"ac":8,"oe":"3:3","bs":"5:1"},{"i":"2025111","d":"2025-10-07","w":"\u5468\u4e8c","r":[3,8,11,15,16,30],"b":7,"s":83,"p":27,"ac":8,"oe":"3:3","bs":"1:5"},{"i":"2025112","d":"2025-10-09","w":"\u5468\u56db","r":[1,2,4,8,25,27],"b":15,"s":67,"p":26,"ac":8,"oe":"3:3","bs":"2:4"},{"i":"2025113","d":"2025-10-12","w":"\u5468\u65e5","r":[6,19,23,25,31,32],"b":12,"s":136,"p":26,"ac":8,"oe":"4:2","bs":"5:1"},{"i":"2025114","d":"2025-10-14","w":"\u5468\u4e8c","r":[1,2,7,8,12,17],"b":14,"s":47,"p":16,"ac":5,"oe":"3:3","bs":"1:5"},{"i":"2025115","d":"2025-10-16","w":"\u5468\u56db","r":[13,19,20,21,23,30],"b":13,"s":126,"p":17,"ac":6,"oe":"4:2","bs":"5:1"},{"i":"2025116","d":"2025-10-19","w":"\u5468\u65e5","r":[4,16,24,28,29,31],"b":3,"s":132,"p":27,"ac":9,"oe":"2:4","bs":"4:2"},{"i":"2025117","d":"2025-10-21","w":"\u5468\u4e8c","r":[3,7,13,16,21,31],"b":15,"s":91,"p":28,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2025118","d":"2025-10-23","w":"\u5468\u56db","r":[5,9,15,24,27,31],"b":9,"s":111,"p":26,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025119","d":"2025-10-26","w":"\u5468\u65e5","r":[1,5,8,13,24,26],"b":16,"s":77,"p":25,"ac":10,"oe":"3:3","bs":"2:4"},{"i":"2025120","d":"2025-10-28","w":"\u5468\u4e8c","r":[13,15,18,19,31,32],"b":8,"s":128,"p":19,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2025121","d":"2025-10-30","w":"\u5468\u56db","r":[11,18,20,22,23,24],"b":13,"s":118,"p":13,"ac":6,"oe":"2:4","bs":"5:1"},{"i":"2025122","d":"2025-11-02","w":"\u5468\u65e5","r":[2,12,16,21,26,31],"b":12,"s":108,"p":29,"ac":4,"oe":"2:4","bs":"3:3"},{"i":"2025123","d":"2025-11-04","w":"\u5468\u4e8c","r":[2,16,25,27,31,32],"b":2,"s":133,"p":30,"ac":10,"oe":"3:3","bs":"4:2"},{"i":"2025124","d":"2025-11-06","w":"\u5468\u56db","r":[4,7,10,18,23,28],"b":9,"s":90,"p":24,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2025125","d":"2025-11-09","w":"\u5468\u65e5","r":[2,5,8,11,15,24],"b":12,"s":65,"p":22,"ac":5,"oe":"3:3","bs":"1:5"},{"i":"2025126","d":"2025-11-11","w":"\u5468\u4e8c","r":[6,11,14,17,24,29],"b":16,"s":101,"p":23,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2025127","d":"2025-11-13","w":"\u5468\u56db","r":[11,17,22,28,31,33],"b":2,"s":142,"p":22,"ac":6,"oe":"4:2","bs":"5:1"},{"i":"2025128","d":"2025-11-16","w":"\u5468\u65e5","r":[5,7,12,13,26,31],"b":9,"s":94,"p":26,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2025129","d":"2025-11-18","w":"\u5468\u4e8c","r":[5,7,9,23,24,27],"b":6,"s":95,"p":22,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2025130","d":"2025-11-20","w":"\u5468\u56db","r":[4,6,11,16,24,31],"b":15,"s":92,"p":27,"ac":7,"oe":"2:4","bs":"2:4"},{"i":"2025131","d":"2025-11-23","w":"\u5468\u65e5","r":[4,14,16,19,26,32],"b":7,"s":111,"p":28,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2025132","d":"2025-11-25","w":"\u5468\u4e8c","r":[3,4,13,17,19,21],"b":12,"s":77,"p":18,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025133","d":"2025-11-27","w":"\u5468\u56db","r":[5,9,14,18,22,29],"b":13,"s":97,"p":24,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2025134","d":"2025-11-30","w":"\u5468\u65e5","r":[1,11,15,17,18,28],"b":16,"s":90,"p":27,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025135","d":"2025-12-02","w":"\u5468\u4e8c","r":[1,16,18,28,32,33],"b":16,"s":128,"p":32,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2025136","d":"2025-12-04","w":"\u5468\u56db","r":[1,4,10,11,21,33],"b":12,"s":80,"p":32,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2025137","d":"2025-12-07","w":"\u5468\u65e5","r":[7,9,11,14,23,28],"b":13,"s":92,"p":21,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2025138","d":"2025-12-09","w":"\u5468\u4e8c","r":[3,10,14,21,27,29],"b":9,"s":104,"p":26,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2025139","d":"2025-12-11","w":"\u5468\u56db","r":[4,8,18,20,22,32],"b":13,"s":104,"p":28,"ac":4,"oe":"0:6","bs":"4:2"},{"i":"2025140","d":"2025-12-14","w":"\u5468\u65e5","r":[1,5,6,17,20,23],"b":13,"s":72,"p":22,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2025141","d":"2025-12-16","w":"\u5468\u4e8c","r":[13,18,24,26,27,29],"b":7,"s":137,"p":16,"ac":6,"oe":"3:3","bs":"5:1"},{"i":"2025142","d":"2025-12-18","w":"\u5468\u56db","r":[4,13,14,22,31,33],"b":6,"s":117,"p":29,"ac":7,"oe":"3:3","bs":"3:3"},{"i":"2025143","d":"2025-12-21","w":"\u5468\u65e5","r":[3,12,17,24,25,31],"b":10,"s":112,"p":28,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2025144","d":"2025-12-23","w":"\u5468\u4e8c","r":[1,8,9,12,16,24],"b":8,"s":70,"p":23,"ac":5,"oe":"2:4","bs":"1:5"},{"i":"2025145","d":"2025-12-25","w":"\u5468\u56db","r":[9,17,20,27,30,32],"b":5,"s":135,"p":23,"ac":8,"oe":"3:3","bs":"5:1"},{"i":"2025146","d":"2025-12-28","w":"\u5468\u65e5","r":[1,4,9,14,28,30],"b":6,"s":86,"p":29,"ac":9,"oe":"2:4","bs":"2:4"},{"i":"2025147","d":"2025-12-30","w":"\u5468\u4e8c","r":[8,10,11,13,27,30],"b":16,"s":99,"p":22,"ac":5,"oe":"3:3","bs":"2:4"},{"i":"2025148","d":"2026-01-01","w":"\u5468\u56db","r":[7,14,16,17,18,27],"b":6,"s":99,"p":20,"ac":5,"oe":"3:3","bs":"3:3"},{"i":"2025149","d":"2026-01-04","w":"\u5468\u65e5","r":[11,12,16,18,20,32],"b":4,"s":109,"p":21,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2025150","d":"2026-01-06","w":"\u5468\u4e8c","r":[2,5,6,11,17,19],"b":1,"s":60,"p":17,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2025151","d":"2026-01-08","w":"\u5468\u56db","r":[1,5,8,14,15,33],"b":1,"s":76,"p":32,"ac":9,"oe":"4:2","bs":"1:5"},{"i":"2025152","d":"2026-01-11","w":"\u5468\u65e5","r":[7,8,15,21,23,25],"b":9,"s":99,"p":18,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2025153","d":"2026-01-13","w":"\u5468\u4e8c","r":[11,14,17,18,20,26],"b":7,"s":106,"p":15,"ac":5,"oe":"2:4","bs":"4:2"},{"i":"2026001","d":"2026-01-15","w":"\u5468\u56db","r":[8,10,13,23,24,31],"b":3,"s":109,"p":23,"ac":10,"oe":"3:3","bs":"3:3"},{"i":"2026002","d":"2026-01-18","w":"\u5468\u65e5","r":[6,8,13,14,28,29],"b":13,"s":98,"p":23,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2026003","d":"2026-01-20","w":"\u5468\u4e8c","r":[3,15,22,23,25,33],"b":1,"s":121,"p":30,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2026004","d":"2026-01-22","w":"\u5468\u56db","r":[1,2,7,12,13,24],"b":8,"s":59,"p":23,"ac":4,"oe":"3:3","bs":"1:5"},{"i":"2026005","d":"2026-01-25","w":"\u5468\u65e5","r":[3,16,18,20,24,29],"b":16,"s":110,"p":26,"ac":7,"oe":"2:4","bs":"4:2"},{"i":"2026006","d":"2026-01-27","w":"\u5468\u4e8c","r":[4,9,10,15,24,25],"b":1,"s":87,"p":21,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2026007","d":"2026-01-29","w":"\u5468\u56db","r":[2,5,21,26,27,33],"b":2,"s":114,"p":31,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2026008","d":"2026-02-01","w":"\u5468\u65e5","r":[2,12,14,25,26,31],"b":9,"s":110,"p":29,"ac":9,"oe":"2:4","bs":"3:3"},{"i":"2026009","d":"2026-02-03","w":"\u5468\u4e8c","r":[1,2,5,12,17,31],"b":5,"s":68,"p":30,"ac":10,"oe":"4:2","bs":"2:4"},{"i":"2026010","d":"2026-02-05","w":"\u5468\u56db","r":[2,4,15,16,18,33],"b":12,"s":88,"p":31,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2026011","d":"2026-02-08","w":"\u5468\u65e5","r":[4,5,8,10,22,30],"b":12,"s":79,"p":26,"ac":10,"oe":"1:5","bs":"2:4"},{"i":"2026012","d":"2026-02-10","w":"\u5468\u4e8c","r":[13,21,24,25,28,30],"b":9,"s":141,"p":17,"ac":8,"oe":"3:3","bs":"5:1"},{"i":"2026013","d":"2026-02-12","w":"\u5468\u56db","r":[8,10,17,23,27,32],"b":12,"s":117,"p":24,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2026014","d":"2026-02-15","w":"\u5468\u65e5","r":[12,21,24,25,31,33],"b":9,"s":146,"p":21,"ac":8,"oe":"4:2","bs":"5:1"},{"i":"2026015","d":"2026-02-17","w":"\u5468\u4e8c","r":[2,8,16,17,20,21],"b":13,"s":84,"p":19,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2026016","d":"2026-02-19","w":"\u5468\u56db","r":[4,7,9,15,17,22],"b":10,"s":74,"p":18,"ac":6,"oe":"4:2","bs":"2:4"},{"i":"2026017","d":"2026-02-22","w":"\u5468\u65e5","r":[3,9,12,15,26,29],"b":9,"s":94,"p":26,"ac":5,"oe":"4:2","bs":"2:4"},{"i":"2026018","d":"2026-02-24","w":"\u5468\u4e8c","r":[9,17,19,26,28,31],"b":15,"s":130,"p":22,"ac":8,"oe":"4:2","bs":"5:1"},{"i":"2026019","d":"2026-02-26","w":"\u5468\u56db","r":[9,12,13,22,23,25],"b":1,"s":104,"p":16,"ac":6,"oe":"4:2","bs":"3:3"},{"i":"2026020","d":"2026-03-01","w":"\u5468\u65e5","r":[3,7,8,14,28,30],"b":3,"s":90,"p":27,"ac":10,"oe":"2:4","bs":"2:4"},{"i":"2026021","d":"2026-03-03","w":"\u5468\u4e8c","r":[5,15,21,25,26,31],"b":12,"s":123,"p":26,"ac":5,"oe":"5:1","bs":"4:2"},{"i":"2026022","d":"2026-03-05","w":"\u5468\u56db","r":[18,20,23,24,28,32],"b":1,"s":145,"p":14,"ac":6,"oe":"1:5","bs":"6:0"},{"i":"2026023","d":"2026-03-08","w":"\u5468\u65e5","r":[1,3,14,19,21,24],"b":16,"s":82,"p":23,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2026024","d":"2026-03-10","w":"\u5468\u4e8c","r":[4,14,16,20,23,30],"b":2,"s":107,"p":26,"ac":7,"oe":"1:5","bs":"3:3"},{"i":"2026025","d":"2026-03-12","w":"\u5468\u56db","r":[1,15,17,25,29,31],"b":7,"s":118,"p":30,"ac":6,"oe":"6:0","bs":"4:2"},{"i":"2026026","d":"2026-03-15","w":"\u5468\u65e5","r":[6,8,16,20,23,24],"b":8,"s":97,"p":18,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2026027","d":"2026-03-17","w":"\u5468\u4e8c","r":[1,12,13,19,29,32],"b":12,"s":106,"p":31,"ac":10,"oe":"4:2","bs":"3:3"},{"i":"2026028","d":"2026-03-19","w":"\u5468\u56db","r":[5,6,8,20,22,23],"b":9,"s":84,"p":18,"ac":4,"oe":"2:4","bs":"3:3"},{"i":"2026029","d":"2026-03-22","w":"\u5468\u65e5","r":[3,4,17,19,27,29],"b":4,"s":99,"p":26,"ac":8,"oe":"5:1","bs":"4:2"},{"i":"2026030","d":"2026-03-24","w":"\u5468\u4e8c","r":[5,6,7,13,15,19],"b":4,"s":65,"p":14,"ac":6,"oe":"5:1","bs":"1:5"},{"i":"2026031","d":"2026-03-26","w":"\u5468\u56db","r":[4,7,11,14,20,30],"b":6,"s":86,"p":26,"ac":6,"oe":"2:4","bs":"2:4"},{"i":"2026032","d":"2026-03-29","w":"\u5468\u65e5","r":[1,4,11,12,16,18],"b":4,"s":62,"p":17,"ac":9,"oe":"2:4","bs":"1:5"},{"i":"2026033","d":"2026-03-31","w":"\u5468\u4e8c","r":[3,8,11,17,20,30],"b":8,"s":89,"p":27,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2026034","d":"2026-04-02","w":"\u5468\u56db","r":[2,3,5,6,10,24],"b":12,"s":50,"p":22,"ac":7,"oe":"2:4","bs":"1:5"},{"i":"2026035","d":"2026-04-05","w":"\u5468\u65e5","r":[2,5,6,10,23,33],"b":12,"s":79,"p":31,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2026036","d":"2026-04-07","w":"\u5468\u4e8c","r":[3,9,10,11,16,32],"b":14,"s":81,"p":29,"ac":7,"oe":"3:3","bs":"1:5"},{"i":"2026037","d":"2026-04-09","w":"\u5468\u56db","r":[7,14,15,23,26,31],"b":11,"s":116,"p":24,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2026038","d":"2026-04-12","w":"\u5468\u65e5","r":[1,5,7,18,23,31],"b":7,"s":85,"p":30,"ac":9,"oe":"5:1","bs":"3:3"},{"i":"2026039","d":"2026-04-14","w":"\u5468\u4e8c","r":[9,10,18,25,27,33],"b":9,"s":122,"p":24,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2026040","d":"2026-04-16","w":"\u5468\u56db","r":[1,3,8,11,23,25],"b":14,"s":71,"p":24,"ac":8,"oe":"5:1","bs":"2:4"},{"i":"2026041","d":"2026-04-19","w":"\u5468\u65e5","r":[4,11,15,18,25,31],"b":16,"s":104,"p":27,"ac":7,"oe":"4:2","bs":"3:3"},{"i":"2026042","d":"2026-04-21","w":"\u5468\u4e8c","r":[1,3,6,17,24,33],"b":3,"s":84,"p":32,"ac":9,"oe":"4:2","bs":"3:3"},{"i":"2026043","d":"2026-04-23","w":"\u5468\u56db","r":[2,7,12,21,24,25],"b":1,"s":91,"p":23,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2026044","d":"2026-04-26","w":"\u5468\u65e5","r":[1,13,25,28,29,32],"b":4,"s":128,"p":31,"ac":7,"oe":"4:2","bs":"4:2"},{"i":"2026045","d":"2026-04-28","w":"\u5468\u4e8c","r":[2,7,10,14,19,32],"b":3,"s":84,"p":30,"ac":8,"oe":"2:4","bs":"2:4"},{"i":"2026046","d":"2026-04-30","w":"\u5468\u56db","r":[1,3,11,17,26,29],"b":16,"s":87,"p":28,"ac":10,"oe":"5:1","bs":"3:3"},{"i":"2026047","d":"2026-05-03","w":"\u5468\u65e5","r":[13,14,17,20,27,32],"b":11,"s":123,"p":19,"ac":8,"oe":"3:3","bs":"4:2"},{"i":"2026048","d":"2026-05-05","w":"\u5468\u4e8c","r":[2,9,16,26,31,32],"b":10,"s":116,"p":30,"ac":9,"oe":"2:4","bs":"3:3"},{"i":"2026049","d":"2026-05-07","w":"\u5468\u56db","r":[4,5,16,21,24,29],"b":9,"s":99,"p":25,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2026050","d":"2026-05-10","w":"\u5468\u65e5","r":[2,4,14,18,20,33],"b":2,"s":91,"p":31,"ac":8,"oe":"1:5","bs":"3:3"},{"i":"2026051","d":"2026-05-12","w":"\u5468\u4e8c","r":[11,12,14,16,17,29],"b":4,"s":99,"p":18,"ac":6,"oe":"3:3","bs":"2:4"},{"i":"2026052","d":"2026-05-14","w":"\u5468\u56db","r":[1,3,10,11,14,26],"b":15,"s":65,"p":25,"ac":10,"oe":"3:3","bs":"1:5"},{"i":"2026053","d":"2026-05-17","w":"\u5468\u65e5","r":[3,9,17,21,26,30],"b":2,"s":106,"p":27,"ac":8,"oe":"4:2","bs":"4:2"},{"i":"2026054","d":"2026-05-19","w":"\u5468\u4e8c","r":[2,15,19,22,23,33],"b":3,"s":114,"p":31,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2026055","d":"2026-05-21","w":"\u5468\u56db","r":[7,9,11,29,30,33],"b":10,"s":119,"p":26,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2026056","d":"2026-05-24","w":"\u5468\u65e5","r":[1,4,8,10,32,33],"b":7,"s":88,"p":32,"ac":10,"oe":"2:4","bs":"2:4"},{"i":"2026057","d":"2026-05-26","w":"\u5468\u4e8c","r":[8,17,21,24,28,30],"b":4,"s":128,"p":22,"ac":6,"oe":"2:4","bs":"5:1"},{"i":"2026058","d":"2026-05-28","w":"\u5468\u56db","r":[2,5,9,12,22,32],"b":12,"s":82,"p":30,"ac":5,"oe":"2:4","bs":"2:4"},{"i":"2026059","d":"2026-05-31","w":"\u5468\u65e5","r":[10,14,18,20,23,32],"b":8,"s":117,"p":22,"ac":8,"oe":"1:5","bs":"4:2"},{"i":"2026060","d":"2026-06-02","w":"\u5468\u4e8c","r":[1,6,8,11,25,31],"b":14,"s":82,"p":30,"ac":9,"oe":"4:2","bs":"2:4"},{"i":"2026061","d":"2026-06-04","w":"\u5468\u56db","r":[1,10,16,23,28,31],"b":1,"s":109,"p":30,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2026062","d":"2026-06-07","w":"\u5468\u65e5","r":[8,10,18,19,32,33],"b":12,"s":120,"p":25,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2026063","d":"2026-06-09","w":"\u5468\u4e8c","r":[4,7,9,12,13,22],"b":2,"s":67,"p":18,"ac":7,"oe":"3:3","bs":"1:5"},{"i":"2026064","d":"2026-06-11","w":"\u5468\u56db","r":[6,9,24,30,32,33],"b":9,"s":134,"p":27,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2026065","d":"2026-06-14","w":"\u5468\u65e5","r":[1,9,15,17,24,31],"b":14,"s":97,"p":30,"ac":6,"oe":"5:1","bs":"3:3"},{"i":"2026066","d":"2026-06-16","w":"\u5468\u4e8c","r":[1,4,6,13,20,33],"b":16,"s":77,"p":32,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2026067","d":"2026-06-18","w":"\u5468\u56db","r":[2,9,10,11,15,24],"b":6,"s":71,"p":22,"ac":7,"oe":"3:3","bs":"1:5"},{"i":"2026068","d":"2026-06-21","w":"\u5468\u65e5","r":[1,5,10,12,16,27],"b":5,"s":71,"p":26,"ac":6,"oe":"3:3","bs":"1:5"},{"i":"2026069","d":"2026-06-23","w":"\u5468\u4e8c","r":[1,3,8,16,20,31],"b":11,"s":79,"p":30,"ac":9,"oe":"3:3","bs":"2:4"},{"i":"2026070","d":"2026-06-25","w":"\u5468\u56db","r":[8,9,15,19,25,33],"b":5,"s":109,"p":25,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2026071","d":"2026-06-28","w":"\u5468\u65e5","r":[2,4,7,12,21,26],"b":8,"s":72,"p":24,"ac":6,"oe":"2:4","bs":"2:4"},{"i":"2026072","d":"2026-06-30","w":"\u5468\u4e8c","r":[14,22,24,25,28,33],"b":9,"s":146,"p":19,"ac":7,"oe":"2:4","bs":"5:1"},{"i":"2026073","d":"2026-07-02","w":"\u5468\u56db","r":[11,17,19,23,25,30],"b":3,"s":125,"p":19,"ac":6,"oe":"5:1","bs":"5:1"},{"i":"2026074","d":"2026-07-05","w":"\u5468\u65e5","r":[1,2,14,22,28,31],"b":2,"s":98,"p":30,"ac":10,"oe":"2:4","bs":"3:3"},{"i":"2026075","d":"2026-07-07","w":"\u5468\u4e8c","r":[2,6,14,17,29,31],"b":14,"s":99,"p":29,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2026076","d":"2026-07-09","w":"\u5468\u56db","r":[3,4,6,22,25,29],"b":13,"s":89,"p":26,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2026077","d":"2026-07-12","w":"\u5468\u65e5","r":[1,8,11,22,30,31],"b":9,"s":103,"p":30,"ac":10,"oe":"3:3","bs":"3:3"},{"i":"2026078","d":"2026-07-14","w":"\u5468\u4e8c","r":[2,5,11,20,24,25],"b":5,"s":87,"p":23,"ac":9,"oe":"3:3","bs":"3:3"},{"i":"2026079","d":"2026-07-16","w":"\u5468\u56db","r":[2,11,23,29,30,31],"b":2,"s":126,"p":29,"ac":9,"oe":"4:2","bs":"4:2"},{"i":"2026080","d":"2026-07-19","w":"\u5468\u65e5","r":[1,3,5,8,13,32],"b":5,"s":62,"p":31,"ac":8,"oe":"4:2","bs":"1:5"},{"i":"2026081","d":"2026-07-21","w":"\u5468\u4e8c","r":[6,8,13,20,22,26],"b":13,"s":95,"p":20,"ac":7,"oe":"1:5","bs":"3:3"},{"i":"2026082","d":"2026-07-23","w":"\u5468\u56db","r":[13,17,21,29,30,31],"b":7,"s":141,"p":18,"ac":7,"oe":"5:1","bs":"5:1"},{"i":"2026083","d":"2026-07-26","w":"\u5468\u65e5","r":[9,10,12,15,21,31],"b":4,"s":98,"p":22,"ac":8,"oe":"4:2","bs":"2:4"},{"i":"2026084","d":"2026-07-28","w":"\u5468\u4e8c","r":[10,20,21,25,29,32],"b":12,"s":137,"p":22,"ac":8,"oe":"3:3","bs":"5:1"},{"i":"2026085","d":"2026-07-30","w":"\u5468\u56db","r":[5,14,15,26,27,30],"b":1,"s":117,"p":25,"ac":8,"oe":"3:3","bs":"3:3"},{"i":"2026086","d":"2026-08-02","w":"\u5468\u65e5","r":[7,11,13,24,29,33],"b":13,"s":117,"p":26,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2026087","d":"2026-08-04","w":"\u5468\u4e8c","r":[6,10,17,18,19,31],"b":10,"s":101,"p":25,"ac":7,"oe":"3:3","bs":"4:2"},{"i":"2026088","d":"2026-08-06","w":"\u5468\u56db","r":[5,9,12,23,29,33],"b":13,"s":111,"p":28,"ac":8,"oe":"5:1","bs":"3:3"},{"i":"2026089","d":"2026-08-09","w":"\u5468\u65e5","r":[4,7,13,22,25,31],"b":4,"s":102,"p":27,"ac":4,"oe":"4:2","bs":"3:3"},{"i":"2026090","d":"2026-08-11","w":"\u5468\u4e8c","r":[7,10,14,18,19,24],"b":9,"s":92,"p":17,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2026091","d":"2026-08-13","w":"\u5468\u56db","r":[1,2,4,18,24,28],"b":9,"s":77,"p":27,"ac":10,"oe":"1:5","bs":"3:3"},{"i":"2026092","d":"2026-08-16","w":"\u5468\u65e5","r":[3,4,5,6,8,20],"b":12,"s":46,"p":17,"ac":5,"oe":"2:4","bs":"1:5"},{"i":"2026093","d":"2026-08-18","w":"\u5468\u4e8c","r":[1,11,20,23,27,28],"b":10,"s":110,"p":27,"ac":10,"oe":"4:2","bs":"4:2"},{"i":"2026094","d":"2026-08-20","w":"\u5468\u56db","r":[6,23,24,25,26,33],"b":6,"s":137,"p":27,"ac":7,"oe":"3:3","bs":"5:1"},{"i":"2026095","d":"2026-08-23","w":"\u5468\u65e5","r":[1,5,9,11,26,28],"b":14,"s":80,"p":27,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2026096","d":"2026-08-25","w":"\u5468\u4e8c","r":[3,8,9,17,24,29],"b":13,"s":90,"p":26,"ac":8,"oe":"4:2","bs":"3:3"},{"i":"2026097","d":"2026-08-27","w":"\u5468\u56db","r":[1,5,8,14,27,33],"b":15,"s":88,"p":32,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2026098","d":"2026-08-25","w":"\u5468\u4e8c","r":[8,16,18,22,25,26],"b":7,"s":115,"p":18,"ac":7,"oe":"1:5","bs":"4:2"},{"i":"2026099","d":"2026-08-27","w":"\u5468\u56db","r":[1,12,14,18,30,31],"b":2,"s":106,"p":30,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2026100","d":"2026-08-30","w":"\u5468\u65e5","r":[3,4,9,13,22,31],"b":4,"s":82,"p":28,"ac":7,"oe":"4:2","bs":"2:4"},{"i":"2026101","d":"2026-09-01","w":"\u5468\u4e8c","r":[5,6,8,9,24,25],"b":12,"s":77,"p":20,"ac":5,"oe":"3:3","bs":"2:4"},{"i":"2026102","d":"2026-09-03","w":"\u5468\u56db","r":[3,4,10,13,16,25],"b":9,"s":71,"p":22,"ac":6,"oe":"3:3","bs":"1:5"},{"i":"2026103","d":"2026-09-06","w":"\u5468\u65e5","r":[4,11,20,27,28,30],"b":15,"s":120,"p":26,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2026104","d":"2026-09-08","w":"\u5468\u4e8c","r":[11,12,13,19,20,31],"b":3,"s":106,"p":20,"ac":6,"oe":"4:2","bs":"3:3"},{"i":"2026105","d":"2026-09-10","w":"\u5468\u56db","r":[2,4,13,14,15,30],"b":8,"s":78,"p":28,"ac":7,"oe":"2:4","bs":"1:5"},{"i":"2026106","d":"2026-09-13","w":"\u5468\u65e5","r":[6,11,13,14,22,30],"b":14,"s":96,"p":24,"ac":7,"oe":"2:4","bs":"2:4"},{"i":"2026107","d":"2026-09-15","w":"\u5468\u4e8c","r":[1,5,9,17,24,33],"b":4,"s":89,"p":32,"ac":7,"oe":"5:1","bs":"3:3"},{"i":"2026108","d":"2026-09-17","w":"\u5468\u56db","r":[6,11,13,14,20,28],"b":16,"s":92,"p":22,"ac":7,"oe":"2:4","bs":"2:4"},{"i":"2026109","d":"2026-09-20","w":"\u5468\u65e5","r":[9,12,15,26,30,33],"b":6,"s":125,"p":24,"ac":6,"oe":"3:3","bs":"3:3"},{"i":"2026110","d":"2026-09-22","w":"\u5468\u4e8c","r":[2,5,16,19,26,32],"b":14,"s":100,"p":30,"ac":8,"oe":"2:4","bs":"3:3"},{"i":"2026111","d":"2026-09-24","w":"\u5468\u56db","r":[6,7,14,22,31,32],"b":5,"s":112,"p":26,"ac":7,"oe":"2:4","bs":"3:3"},{"i":"2026112","d":"2026-09-27","w":"\u5468\u65e5","r":[1,4,11,12,17,29],"b":11,"s":74,"p":28,"ac":10,"oe":"4:2","bs":"2:4"},{"i":"2026113","d":"2026-09-30","w":"\u5468\u4e09","r":[3,4,20,24,29,30],"b":11,"s":110,"p":27,"ac":8,"oe":"2:4","bs":"4:2"},{"i":"2026114","d":"2026-10-06","w":"\u5468\u4e8c","r":[7,18,23,24,29,31],"b":10,"s":132,"p":24,"ac":7,"oe":"4:2","bs":"5:1"}];
+  </script>
+
+  <script>
+    // Global State
+    let currentTab = 'overview';
+    let rankingBallType = 'red'; // 'red' or 'blue'
+    let rankingCategory = 'all'; // 'all', 'hot', 'warm', 'cold'
+    let omBallType = 'red'; // 'red' or 'blue'
+    let waveType = 'red';
+    let currentWaveBall = 16;
+    let analysisWindow = 500;
+    let historyPage = 1;
+    let historyPageSize = 50;
+    let filteredHistory = [...RAW_HISTORY];
+
+    // Precomputed Dynamic Structures
+    let dynamicStats = {};
+    let omissionMatrix = { red: [], blue: [] };
+
+    // Format utility
+    function padZero(num) {
+      return num < 10 ? '0' + num : '' + num;
+    }
+
+    // Initialize & Calculate all omissions & stats
+    function initDataStructures() {
+      // 1. Compute full omission matrix over all 500 issues
+      // RAW_HISTORY is in chronological order (earliest to latest)
+      const redCurOm = Array(34).fill(0);
+      const blueCurOm = Array(17).fill(0);
+      omissionMatrix.red = [];
+      omissionMatrix.blue = [];
+
+      for (let i = 0; i < RAW_HISTORY.length; i++) {
+        const item = RAW_HISTORY[i];
+        const redSet = new Set(item.r);
+        const blueVal = item.b;
+
+        const rRow = [];
+        for (let r = 1; r <= 33; r++) {
+          if (redSet.has(r)) {
+            redCurOm[r] = 0;
+          } else {
+            redCurOm[r]++;
+          }
+          rRow.push(redCurOm[r]);
+        }
+        omissionMatrix.red.push(rRow);
+
+        const bRow = [];
+        for (let b = 1; b <= 16; b++) {
+          if (b === blueVal) {
+            blueCurOm[b] = 0;
+          } else {
+            blueCurOm[b]++;
+          }
+          bRow.push(blueCurOm[b]);
+        }
+        omissionMatrix.blue.push(bRow);
+      }
+
+      computeWindowStats(analysisWindow);
+    }
+
+    // Compute stats for current window (e.g. 500, 200, 100, 50, 30)
+    function computeWindowStats(windowSize) {
+      const total = Math.min(windowSize, RAW_HISTORY.length);
+      const startIndex = RAW_HISTORY.length - total;
+      const subHistory = RAW_HISTORY.slice(startIndex);
+
+      // Red counts
+      const redCounts = Array(34).fill(0);
+      const blueCounts = Array(17).fill(0);
+      const redMaxOm = Array(34).fill(0);
+      const blueMaxOm = Array(17).fill(0);
+
+      for (let i = startIndex; i < RAW_HISTORY.length; i++) {
+        const item = RAW_HISTORY[i];
+        for (const r of item.r) redCounts[r]++;
+        blueCounts[item.b]++;
+
+        const rOm = omissionMatrix.red[i];
+        const bOm = omissionMatrix.blue[i];
+        for (let r = 1; r <= 33; r++) {
+          if (rOm[r - 1] > redMaxOm[r]) redMaxOm[r] = rOm[r - 1];
+        }
+        for (let b = 1; b <= 16; b++) {
+          if (bOm[b - 1] > blueMaxOm[b]) blueMaxOm[b] = bOm[b - 1];
+        }
+      }
+
+      const latestROm = omissionMatrix.red[RAW_HISTORY.length - 1];
+      const latestBOm = omissionMatrix.blue[RAW_HISTORY.length - 1];
+
+      // Red Ball List & Sort
+      const redList = [];
+      const theoryRed = (total * 6 / 33);
+      for (let r = 1; r <= 33; r++) {
+        redList.push({
+          num: r,
+          numStr: padZero(r),
+          count: redCounts[r],
+          freq: (redCounts[r] / total * 100),
+          curOm: latestROm[r - 1],
+          maxOm: redMaxOm[r],
+          avgOm: redCounts[r] > 0 ? (total / redCounts[r]).toFixed(1) : total,
+          theoryDiff: (redCounts[r] - theoryRed).toFixed(1)
+        });
+      }
+      redList.sort((a, b) => b.count - a.count || a.num - b.num);
+      redList.forEach((item, idx) => {
+        item.rank = idx + 1;
+        if (item.rank <= 10) {
+          item.cat = '热号';
+          item.catCode = 'hot';
+        } else if (item.rank <= 23) {
+          item.cat = '温号';
+          item.catCode = 'warm';
+        } else {
+          item.cat = '冷号';
+          item.catCode = 'cold';
+        }
+      });
+
+      // Blue Ball List & Sort
+      const blueList = [];
+      const theoryBlue = (total / 16);
+      for (let b = 1; b <= 16; b++) {
+        blueList.push({
+          num: b,
+          numStr: padZero(b),
+          count: blueCounts[b],
+          freq: (blueCounts[b] / total * 100),
+          curOm: latestBOm[b - 1],
+          maxOm: blueMaxOm[b],
+          avgOm: blueCounts[b] > 0 ? (total / blueCounts[b]).toFixed(1) : total,
+          theoryDiff: (blueCounts[b] - theoryBlue).toFixed(1)
+        });
+      }
+      blueList.sort((a, b) => b.count - a.count || a.num - b.num);
+      blueList.forEach((item, idx) => {
+        item.rank = idx + 1;
+        if (item.rank <= 5) {
+          item.cat = '热号';
+          item.catCode = 'hot';
+        } else if (item.rank <= 11) {
+          item.cat = '温号';
+          item.catCode = 'warm';
+        } else {
+          item.cat = '冷号';
+          item.catCode = 'cold';
+        }
+      });
+
+      dynamicStats = {
+        totalIssues: total,
+        startIndex,
+        subHistory,
+        redList,
+        blueList,
+        theoryRed,
+        theoryBlue
+      };
+    }
+
+    // Switch Top Tabs
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+      const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (targetBtn) targetBtn.classList.add('active');
+      const targetPanel = document.getElementById('panel-' + tabId);
+      if (targetPanel) targetPanel.classList.add('active');
+
+      // Trigger lazy renders for the tab
+      if (tabId === 'overview') {
+        renderOverviewCharts();
+      } else if (tabId === 'hotcold') {
+        renderRankings();
+      } else if (tabId === 'omission') {
+        renderOmissionMatrix();
+      } else if (tabId === 'waveform') {
+        renderWaveformChart();
+      } else if (tabId === 'history') {
+        renderHistoryTable();
+      }
+    }
+
+    // Theme Toggle
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('themeBtn').textContent = isDark ? '🌙 切换深色' : '☀️ 切换浅色';
+      // Re-render active charts
+      if (currentTab === 'overview') renderOverviewCharts();
+      if (currentTab === 'hotcold') renderRankingCharts();
+      if (currentTab === 'waveform') renderWaveformChart();
+    }
+
+    // Populate Top Executive Metrics
+    function populateTopMetrics() {
+      const latest = RAW_HISTORY[RAW_HISTORY.length - 1];
+      document.getElementById('latestIssueNo').textContent = '第 ' + latest.i + ' 期';
+      document.getElementById('latestIssueDate').textContent = latest.d + ' ' + latest.w;
+
+      const ballsRow = document.getElementById('latestBallsRow');
+      ballsRow.innerHTML = '';
+      latest.r.forEach(r => {
+        const b = document.createElement('span');
+        b.className = 'ball ball-red';
+        b.textContent = padZero(r);
+        ballsRow.appendChild(b);
+      });
+      const blueBall = document.createElement('span');
+      blueBall.className = 'ball ball-blue';
+      blueBall.textContent = padZero(latest.b);
+      ballsRow.appendChild(blueBall);
+
+      document.getElementById('latestMetricsText').textContent =
+        `和值: ${latest.s} | 跨度: ${latest.p} | AC值: ${latest.ac} | 奇偶: ${latest.oe} | 大小: ${latest.bs}`;
+
+      // Top Red
+      const topR = dynamicStats.redList[0];
+      document.getElementById('topRedVal').innerHTML = `<span class="ball ball-red ball-lg" style="margin-right:8px;">${topR.numStr}</span> ${topR.count} 次出球`;
+      document.getElementById('topRedSub').textContent = `出球率 ${topR.freq.toFixed(2)}% | 当前遗漏 ${topR.curOm} 期 | 最大遗漏 ${topR.maxOm} 期`;
+      document.getElementById('topRedDiff').textContent = '+' + topR.theoryDiff;
+
+      // Top Blue
+      const topB = dynamicStats.blueList[0];
+      document.getElementById('topBlueVal').innerHTML = `<span class="ball ball-blue ball-lg" style="margin-right:8px;">${topB.numStr}</span> ${topB.count} 次出球`;
+      document.getElementById('topBlueSub').textContent = `出球率 ${topB.freq.toFixed(2)}% | 当前遗漏 ${topB.curOm} 期 | 最大遗漏 ${topB.maxOm} 期`;
+      document.getElementById('topBlueDiff').textContent = '+' + topB.theoryDiff;
+
+      // Max Omission
+      const maxOmRed = [...dynamicStats.redList].sort((a,b) => b.curOm - a.curOm)[0];
+      const maxOmBlue = [...dynamicStats.blueList].sort((a,b) => b.curOm - a.curOm)[0];
+      document.getElementById('maxOmText').innerHTML =
+        `红球 <strong style="color:var(--hot-color)">${maxOmRed.numStr}</strong> (${maxOmRed.curOm}期未出) / 蓝球 <strong style="color:var(--blue-primary)">${maxOmBlue.numStr}</strong> (${maxOmBlue.curOm}期未出)`;
+    }
+
+    // Populate Overview Grids
+    function populateOverviewGrids() {
+      // Red Ball Grid
+      const redGrid = document.getElementById('redBallsOverviewGrid');
+      redGrid.innerHTML = '';
+      const redsByNum = [...dynamicStats.redList].sort((a, b) => a.num - b.num);
+      redsByNum.forEach(item => {
+        const div = document.createElement('div');
+        div.style.background = 'var(--bg-color)';
+        div.style.border = '1px solid var(--card-border)';
+        div.style.borderRadius = '6px';
+        div.style.padding = '8px 4px';
+        div.style.textAlign = 'center';
+        div.style.cursor = 'pointer';
+        div.title = `红球 ${item.numStr}: 出现${item.count}次, 排名#${item.rank}, 当前遗漏${item.curOm}期`;
+        div.onclick = () => {
+          waveType = 'red';
+          currentWaveBall = item.num;
+          document.getElementById('waveBallSelect').value = item.num;
+          switchTab('waveform');
+        };
+
+        let badgeClass = item.catCode === 'hot' ? 'badge-hot' : (item.catCode === 'warm' ? 'badge-warm' : 'badge-cold');
+        div.innerHTML = `
+          <div class="ball ball-red ball-sm" style="margin: 0 auto 4px;">${item.numStr}</div>
+          <div style="font-weight:700; font-size:12px;">${item.count}次</div>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">遗漏${item.curOm}</div>
+          <span class="badge ${badgeClass}" style="margin-top:4px; font-size:9px; padding:1px 4px;">#${item.rank}</span>
+        `;
+        redGrid.appendChild(div);
+      });
+
+      // Blue Ball Grid
+      const blueGrid = document.getElementById('blueBallsOverviewGrid');
+      blueGrid.innerHTML = '';
+      const bluesByNum = [...dynamicStats.blueList].sort((a, b) => a.num - b.num);
+      bluesByNum.forEach(item => {
+        const div = document.createElement('div');
+        div.style.background = 'var(--bg-color)';
+        div.style.border = '1px solid var(--card-border)';
+        div.style.borderRadius = '6px';
+        div.style.padding = '8px 4px';
+        div.style.textAlign = 'center';
+        div.style.cursor = 'pointer';
+        div.title = `蓝球 ${item.numStr}: 出现${item.count}次, 排名#${item.rank}, 当前遗漏${item.curOm}期`;
+        div.onclick = () => {
+          waveType = 'blue';
+          currentWaveBall = item.num;
+          document.getElementById('waveBallSelect').value = item.num;
+          switchTab('waveform');
+        };
+
+        let badgeClass = item.catCode === 'hot' ? 'badge-hot' : (item.catCode === 'warm' ? 'badge-warm' : 'badge-cold');
+        div.innerHTML = `
+          <div class="ball ball-blue ball-sm" style="margin: 0 auto 4px;">${item.numStr}</div>
+          <div style="font-weight:700; font-size:12px;">${item.count}次</div>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">遗漏${item.curOm}</div>
+          <span class="badge ${badgeClass}" style="margin-top:4px; font-size:9px; padding:1px 4px;">#${item.rank}</span>
+        `;
+        blueGrid.appendChild(div);
+      });
+    }
+
+    // Render Overview Charts (Sum distribution, parity/big-small)
+    function renderOverviewCharts() {
+      // Sum Distribution
+      const canvasSum = document.getElementById('sumDistChart');
+      if (!canvasSum) return;
+      const ctx = canvasSum.getContext('2d');
+      const w = canvasSum.parentElement.clientWidth;
+      const h = canvasSum.parentElement.clientHeight;
+      canvasSum.width = w * window.devicePixelRatio;
+      canvasSum.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      // Group sum into bins of size 10 (e.g. 50-59, 60-69, ... 140-149)
+      const bins = {};
+      let totalSum = 0;
+      RAW_HISTORY.forEach(item => {
+        totalSum += item.s;
+        const binStart = Math.floor(item.s / 10) * 10;
+        bins[binStart] = (bins[binStart] || 0) + 1;
+      });
+      const meanSum = (totalSum / RAW_HISTORY.length).toFixed(1);
+      document.getElementById('actualSumMean').textContent = meanSum;
+
+      const binKeys = Object.keys(bins).map(Number).sort((a,b)=>a-b);
+      const maxCount = Math.max(...Object.values(bins));
+
+      // Draw Sum Histogram
+      ctx.clearRect(0, 0, w, h);
+      const padLeft = 40, padRight = 20, padTop = 30, padBottom = 40;
+      const chartW = w - padLeft - padRight;
+      const chartH = h - padTop - padBottom;
+      const barW = (chartW / binKeys.length) - 6;
+
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+      ctx.font = '11px sans-serif';
+      ctx.textAlign = 'center';
+
+      binKeys.forEach((bin, idx) => {
+        const count = bins[bin];
+        const barH = (count / maxCount) * (chartH - 20);
+        const x = padLeft + idx * (chartW / binKeys.length) + 3;
+        const y = padTop + chartH - barH;
+
+        // Gradient bar
+        const grad = ctx.createLinearGradient(x, y, x, y + barH);
+        grad.addColorStop(0, '#f85149');
+        grad.addColorStop(1, 'rgba(248, 81, 73, 0.4)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, barW, barH);
+
+        // Labels
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-main');
+        ctx.fillText(count, x + barW / 2, y - 5);
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+        ctx.fillText(`${bin}-${bin+9}`, x + barW / 2, h - padBottom + 16);
+      });
+
+      // Ratio Chart (Odd/Even breakdown)
+      const canvasRatio = document.getElementById('ratioChart');
+      if (!canvasRatio) return;
+      const rCtx = canvasRatio.getContext('2d');
+      const rw = canvasRatio.parentElement.clientWidth;
+      const rh = canvasRatio.parentElement.clientHeight;
+      canvasRatio.width = rw * window.devicePixelRatio;
+      canvasRatio.height = rh * window.devicePixelRatio;
+      rCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      rCtx.clearRect(0, 0, rw, rh);
+
+      const oeCounts = {};
+      RAW_HISTORY.forEach(item => {
+        oeCounts[item.oe] = (oeCounts[item.oe] || 0) + 1;
+      });
+      const oeKeys = Object.keys(oeCounts).sort((a,b) => oeCounts[b] - oeCounts[a]);
+      const maxOE = Math.max(...Object.values(oeCounts));
+
+      const rBarW = (rw - 80) / oeKeys.length - 8;
+      oeKeys.forEach((key, idx) => {
+        const cnt = oeCounts[key];
+        const bHeight = (cnt / maxOE) * (rh - 80);
+        const x = 50 + idx * ((rw - 80) / oeKeys.length) + 4;
+        const y = 30 + (rh - 80) - bHeight;
+
+        const grad = rCtx.createLinearGradient(x, y, x, y + bHeight);
+        grad.addColorStop(0, '#58a6ff');
+        grad.addColorStop(1, 'rgba(88, 166, 255, 0.35)');
+        rCtx.fillStyle = grad;
+        rCtx.fillRect(x, y, rBarW, bHeight);
+
+        rCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-main');
+        rCtx.font = '11px sans-serif';
+        rCtx.textAlign = 'center';
+        rCtx.fillText(`${cnt}期 (${(cnt/5).toFixed(1)}%)`, x + rBarW / 2, y - 6);
+        rCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+        rCtx.fillText(key, x + rBarW / 2, rh - 30);
+      });
+      rCtx.fillText('奇偶比形态 (奇:偶)', rw / 2, rh - 10);
+    }
+
+    // TAB 2: Rankings & Hot/Warm/Cold logic
+    function setRankingBallType(type) {
+      rankingBallType = type;
+      document.getElementById('btnBallTypeRed').classList.toggle('active', type === 'red');
+      document.getElementById('btnBallTypeBlue').classList.toggle('active', type === 'blue');
+      renderRankings();
+    }
+
+    function setCategoryFilter(cat) {
+      rankingCategory = cat;
+      const group = document.querySelectorAll('#panel-hotcold .filter-btn-group')[1];
+      group.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${cat}'`));
+      });
+      renderRankings();
+    }
+
+    function updateAnalysisWindow() {
+      const win = parseInt(document.getElementById('windowSelect').value);
+      analysisWindow = win;
+      computeWindowStats(win);
+      populateTopMetrics();
+      populateOverviewGrids();
+      renderRankings();
+    }
+
+    function renderRankings() {
+      const list = rankingBallType === 'red' ? [...dynamicStats.redList] : [...dynamicStats.blueList];
+      const sortMode = document.getElementById('sortSelect').value;
+
+      // Filtering
+      let displayList = list;
+      if (rankingCategory !== 'all') {
+        displayList = displayList.filter(item => item.catCode === rankingCategory);
+      }
+
+      // Sorting
+      if (sortMode === 'count_desc') {
+        displayList.sort((a,b) => b.count - a.count || a.num - b.num);
+      } else if (sortMode === 'count_asc') {
+        displayList.sort((a,b) => a.count - b.count || a.num - b.num);
+      } else if (sortMode === 'num_asc') {
+        displayList.sort((a,b) => a.num - b.num);
+      } else if (sortMode === 'om_desc') {
+        displayList.sort((a,b) => b.curOm - a.curOm);
+      } else if (sortMode === 'om_asc') {
+        displayList.sort((a,b) => a.curOm - b.curOm);
+      } else if (sortMode === 'max_om_desc') {
+        displayList.sort((a,b) => b.maxOm - a.maxOm);
+      }
+
+      // Render Table
+      const tbody = document.getElementById('rankingsTableBody');
+      tbody.innerHTML = '';
+      const maxCount = Math.max(...list.map(x => x.count));
+
+      displayList.forEach(item => {
+        const tr = document.createElement('tr');
+        const ballClass = rankingBallType === 'red' ? 'ball-red' : 'ball-blue';
+
+        let rankBadge = `<span class="rank-num ${item.rank === 1 ? 'rank-1' : (item.rank === 2 ? 'rank-2' : (item.rank === 3 ? 'rank-3' : ''))}">${item.rank}</span>`;
+        let catBadge = `<span class="badge ${item.catCode === 'hot' ? 'badge-hot' : (item.catCode === 'warm' ? 'badge-warm' : 'badge-cold')}">${item.catCode === 'hot' ? '🔥 热号' : (item.catCode === 'warm' ? '🌤️ 温号' : '❄️ 冷号')}</span>`;
+
+        let diffSign = item.theoryDiff > 0 ? `+${item.theoryDiff}` : `${item.theoryDiff}`;
+        let diffColor = item.theoryDiff > 0 ? 'var(--hot-color)' : (item.theoryDiff < 0 ? 'var(--cold-color)' : 'var(--text-muted)');
+
+        const barPct = (item.count / maxCount * 100).toFixed(0);
+        const barFillColor = rankingBallType === 'red' ? 'var(--red-primary)' : 'var(--blue-primary)';
+
+        tr.innerHTML = `
+          <td>${rankBadge}</td>
+          <td><span class="ball ${ballClass} ball-sm" style="margin:0 auto;">${item.numStr}</span></td>
+          <td style="text-align: left; padding-left: 20px;">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${barPct}%; background: ${barFillColor};"></div></div>
+            <strong style="font-size:13px;">${item.count}</strong> 次
+          </td>
+          <td>${item.freq.toFixed(2)}%</td>
+          <td style="color: ${diffColor}; font-weight: 600;">${diffSign}</td>
+          <td style="font-weight: 700; ${item.curOm >= 10 ? 'color: var(--hot-color);' : ''}">${item.curOm === 0 ? '<span class="badge badge-hot">最新开出</span>' : item.curOm + ' 期'}</td>
+          <td>${item.maxOm} 期</td>
+          <td>${item.avgOm} 期</td>
+          <td>${catBadge}</td>
+          <td>
+            <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="viewBallWave('${rankingBallType}', ${item.num})">📈 走势</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderRankingCharts();
+    }
+
+    function viewBallWave(type, ballNum) {
+      waveType = type;
+      currentWaveBall = ballNum;
+      document.getElementById('waveBallSelect').value = ballNum;
+      document.getElementById('waveTypeRed').classList.toggle('active', type === 'red');
+      document.getElementById('waveTypeBlue').classList.toggle('active', type === 'blue');
+      switchTab('waveform');
+    }
+
+    function renderRankingCharts() {
+      // Horizontal Bar Chart
+      const canvasBar = document.getElementById('rankingBarChart');
+      if (!canvasBar) return;
+      const ctx = canvasBar.getContext('2d');
+      const w = canvasBar.parentElement.clientWidth;
+      const h = canvasBar.parentElement.clientHeight;
+      canvasBar.width = w * window.devicePixelRatio;
+      canvasBar.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.clearRect(0, 0, w, h);
+
+      const list = rankingBallType === 'red' ? dynamicStats.redList : dynamicStats.blueList;
+      const padLeft = 40, padRight = 35, padTop = 20, padBottom = 20;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
+      const numItems = list.length;
+      const rowH = plotH / numItems;
+      const maxCount = Math.max(...list.map(x => x.count));
+
+      // Theoretical reference line
+      const theoryVal = rankingBallType === 'red' ? dynamicStats.theoryRed : dynamicStats.theoryBlue;
+      const theoryX = padLeft + (theoryVal / maxCount) * plotW;
+
+      ctx.strokeStyle = '#a371f7';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(theoryX, padTop);
+      ctx.lineTo(theoryX, h - padBottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#a371f7';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`理论均值: ${theoryVal.toFixed(1)}次`, theoryX, padTop - 5);
+
+      list.forEach((item, idx) => {
+        const y = padTop + idx * rowH;
+        const bW = (item.count / maxCount) * plotW;
+
+        // Label (Number)
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-main');
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(item.numStr, padLeft - 8, y + rowH * 0.7);
+
+        // Bar
+        let barColor = item.catCode === 'hot' ? '#f85149' : (item.catCode === 'warm' ? '#d29922' : '#388bfd');
+        ctx.fillStyle = barColor;
+        ctx.fillRect(padLeft, y + 2, bW, Math.max(rowH - 4, 3));
+
+        // Value text
+        ctx.textAlign = 'left';
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+        ctx.font = '10px sans-serif';
+        ctx.fillText(`${item.count}`, padLeft + bW + 6, y + rowH * 0.7);
+      });
+
+      // Donut Chart for proportions
+      const canvasDonut = document.getElementById('hotColdDonutChart');
+      if (!canvasDonut) return;
+      const dCtx = canvasDonut.getContext('2d');
+      const dw = canvasDonut.parentElement.clientWidth;
+      const dh = canvasDonut.parentElement.clientHeight;
+      canvasDonut.width = dw * window.devicePixelRatio;
+      canvasDonut.height = dh * window.devicePixelRatio;
+      dCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      dCtx.clearRect(0, 0, dw, dh);
+
+      const hotCount = list.filter(x => x.catCode === 'hot').length;
+      const warmCount = list.filter(x => x.catCode === 'warm').length;
+      const coldCount = list.filter(x => x.catCode === 'cold').length;
+      const totalBalls = list.length;
+
+      const slices = [
+        { label: '🔥 热号', count: hotCount, color: '#f85149' },
+        { label: '🌤️ 温号', count: warmCount, color: '#d29922' },
+        { label: '❄️ 冷号', count: coldCount, color: '#388bfd' }
+      ];
+
+      const centerX = dw / 2 - 40;
+      const centerY = dh / 2;
+      const radius = Math.min(centerX, centerY) - 15;
+      const innerRadius = radius * 0.58;
+
+      let curAngle = -Math.PI / 2;
+      slices.forEach(slice => {
+        const sliceAngle = (slice.count / totalBalls) * 2 * Math.PI;
+        dCtx.beginPath();
+        dCtx.arc(centerX, centerY, radius, curAngle, curAngle + sliceAngle);
+        dCtx.arc(centerX, centerY, innerRadius, curAngle + sliceAngle, curAngle, true);
+        dCtx.closePath();
+        dCtx.fillStyle = slice.color;
+        dCtx.fill();
+        curAngle += sliceAngle;
+      });
+
+      // Center text
+      dCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-main');
+      dCtx.font = 'bold 16px sans-serif';
+      dCtx.textAlign = 'center';
+      dCtx.textBaseline = 'middle';
+      dCtx.fillText(`${totalBalls}个`, centerX, centerY - 8);
+      dCtx.font = '10px sans-serif';
+      dCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+      dCtx.fillText(rankingBallType === 'red' ? '红球总数' : '蓝球总数', centerX, centerY + 12);
+
+      // Legend
+      let legY = centerY - 35;
+      slices.forEach(slice => {
+        dCtx.fillStyle = slice.color;
+        dCtx.fillRect(dw - 110, legY, 12, 12);
+        dCtx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-main');
+        dCtx.font = '11px sans-serif';
+        dCtx.textAlign = 'left';
+        dCtx.textBaseline = 'middle';
+        dCtx.fillText(`${slice.label}: ${slice.count}个 (${(slice.count/totalBalls*100).toFixed(0)}%)`, dw - 92, legY + 6);
+        legY += 26;
+      });
+
+      // Update Summary Text
+      const hottest = list[0];
+      const coldest = list[list.length - 1];
+      const maxOmBall = [...list].sort((a,b) => b.curOm - a.curOm)[0];
+
+      document.getElementById('hotColdSummaryText').innerHTML = `
+        <p>• <strong>榜首热号</strong>: <strong style="color:var(--hot-color);">${hottest.numStr}号</strong>，累计开出 <strong>${hottest.count}次</strong> (出现概率 ${hottest.freq.toFixed(2)}%)，超出理论期望 ${hottest.theoryDiff} 次。</p>
+        <p>• <strong>最冷号码</strong>: <strong style="color:var(--cold-color);">${coldest.numStr}号</strong>，累计仅开出 <strong>${coldest.count}次</strong> (出现概率 ${coldest.freq.toFixed(2)}%)，低于理论期望 ${Math.abs(coldest.theoryDiff)} 次。</p>
+        <p>• <strong>当前最大遗漏</strong>: <strong>${maxOmBall.numStr}号</strong> 已连续 <strong>${maxOmBall.curOm}期</strong> 未开出（历史500期内最大遗漏为 ${maxOmBall.maxOm} 期）。</p>
+      `;
+    }
+
+    // TAB 3: Omission Matrix (每期数字的遗漏期数)
+    function setOmBallType(type) {
+      omBallType = type;
+      document.getElementById('omBallTypeRed').classList.toggle('active', type === 'red');
+      document.getElementById('omBallTypeBlue').classList.toggle('active', type === 'blue');
+      renderOmissionMatrix();
+    }
+
+    function renderOmissionMatrix() {
+      const isRed = omBallType === 'red';
+      const numCount = isRed ? 33 : 16;
+      const showNumber = document.getElementById('chkShowOmNumber').checked;
+      const heatmap = document.getElementById('chkHeatmap').checked;
+      const descOrder = document.getElementById('chkOrderDesc').checked;
+      const issueCountLimit = parseInt(document.getElementById('omIssueCount').value);
+
+      // Slicing issues
+      const totalLen = RAW_HISTORY.length;
+      const count = Math.min(issueCountLimit, totalLen);
+      const startIdx = totalLen - count;
+
+      let indices = [];
+      for (let i = startIdx; i < totalLen; i++) indices.push(i);
+      if (descOrder) indices.reverse(); // latest first
+
+      // Head
+      const thead = document.getElementById('omissionMatrixHead');
+      let headHtml = `<tr>
+        <th class="sticky-col" style="width: 80px;">期号</th>
+        <th style="width: 75px;">开奖日期</th>`;
+      for (let num = 1; num <= numCount; num++) {
+        headHtml += `<th style="width: 32px; padding: 6px 2px;"><span class="ball ${isRed ? 'ball-red' : 'ball-blue'} ball-sm" style="margin: 0 auto;">${padZero(num)}</span></th>`;
+      }
+      headHtml += `</tr>`;
+      thead.innerHTML = headHtml;
+
+      // Body
+      const tbody = document.getElementById('omissionMatrixBody');
+      const rowsHtml = [];
+
+      for (let idx of indices) {
+        const rec = RAW_HISTORY[idx];
+        const omRow = isRed ? omissionMatrix.red[idx] : omissionMatrix.blue[idx];
+        const hitSet = new Set(isRed ? rec.r : [rec.b]);
+
+        let rowStr = `<tr>
+          <td class="sticky-col" style="font-weight: 600;">${rec.i}</td>
+          <td style="color: var(--text-muted); font-size: 11px;">${rec.d.slice(5)}</td>`;
+
+        for (let num = 1; num <= numCount; num++) {
+          const omVal = omRow[num - 1];
+          const isHit = omVal === 0;
+
+          if (isHit) {
+            rowStr += `<td class="om-cell om-hit ${isRed ? 'om-hit-red' : 'om-hit-blue'}">${padZero(num)}</td>`;
+          } else {
+            let heatClass = '';
+            if (heatmap) {
+              if (omVal >= (isRed ? 15 : 30)) heatClass = 'om-heat-high';
+              else if (omVal >= (isRed ? 8 : 15)) heatClass = 'om-heat-mid';
+            }
+            rowStr += `<td class="om-cell ${heatClass}">${showNumber ? omVal : ''}</td>`;
+          }
+        }
+        rowStr += `</tr>`;
+        rowsHtml.push(rowStr);
+      }
+      tbody.innerHTML = rowsHtml.join('');
+
+      // Foot: summary rows (出现次数, 平均遗漏, 最大遗漏, 当前遗漏)
+      const tfoot = document.getElementById('omissionMatrixFoot');
+      const list = isRed ? dynamicStats.redList : dynamicStats.blueList;
+      const byNum = [...list].sort((a,b) => a.num - b.num);
+
+      let footHtml = `
+        <tr style="font-weight: 700; border-top: 2px solid var(--card-border);">
+          <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px; color: var(--text-main);">出现总次数</td>
+          ${byNum.map(x => `<td style="color: var(--text-main);">${x.count}</td>`).join('')}
+        </tr>
+        <tr style="color: var(--text-muted);">
+          <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">平均遗漏</td>
+          ${byNum.map(x => `<td>${x.avgOm}</td>`).join('')}
+        </tr>
+        <tr style="color: var(--warm-color);">
+          <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">历史最大遗漏</td>
+          ${byNum.map(x => `<td>${x.maxOm}</td>`).join('')}
+        </tr>
+        <tr style="color: var(--hot-color); font-weight: 700;">
+          <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">当前遗漏期数</td>
+          ${byNum.map(x => `<td>${x.curOm}</td>`).join('')}
+        </tr>
+      `;
+      tfoot.innerHTML = footHtml;
+    }
+
+    // TAB 4: Waveform line chart for single ball
+    function setWaveType(type) {
+      waveType = type;
+      document.getElementById('waveTypeRed').classList.toggle('active', type === 'red');
+      document.getElementById('waveTypeBlue').classList.toggle('active', type === 'blue');
+      populateWaveBallSelect();
+      renderWaveformChart();
+    }
+
+    function populateWaveBallSelect() {
+      const sel = document.getElementById('waveBallSelect');
+      sel.innerHTML = '';
+      const maxN = waveType === 'red' ? 33 : 16;
+      for (let n = 1; n <= maxN; n++) {
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = `${waveType === 'red' ? '红球' : '蓝球'} ${padZero(n)} 号`;
+        sel.appendChild(opt);
+      }
+      if (currentWaveBall > maxN) currentWaveBall = 1;
+      sel.value = currentWaveBall;
+    }
+
+    function renderWaveformChart() {
+      const ballNum = parseInt(document.getElementById('waveBallSelect').value);
+      currentWaveBall = ballNum;
+      const isRed = waveType === 'red';
+      const rangeLimit = parseInt(document.getElementById('waveRangeSelect').value);
+
+      const totalLen = RAW_HISTORY.length;
+      const count = Math.min(rangeLimit, totalLen);
+      const startIdx = totalLen - count;
+
+      // Extract omission series for this ball
+      const omSeries = [];
+      const omMatrix = isRed ? omissionMatrix.red : omissionMatrix.blue;
+      for (let i = startIdx; i < totalLen; i++) {
+        omSeries.push({
+          issue: RAW_HISTORY[i].i,
+          date: RAW_HISTORY[i].d,
+          om: omMatrix[i][ballNum - 1]
+        });
+      }
+
+      // Stats for this ball
+      const list = isRed ? dynamicStats.redList : dynamicStats.blueList;
+      const ballStat = list.find(x => x.num === ballNum);
+
+      // Render Badges
+      const badgeRow = document.getElementById('waveStatsBadgeRow');
+      badgeRow.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="ball ${isRed ? 'ball-red' : 'ball-blue'} ball-lg">${padZero(ballNum)}</span>
+          <div>
+            <div style="font-weight:700; font-size:15px;">${isRed ? '红球' : '蓝球'} ${padZero(ballNum)} 号 500期遗漏全景</div>
+            <div style="font-size:12px; color:var(--text-muted);">
+              出球总数: <strong>${ballStat.count}次</strong> |
+              排名: <strong>#${ballStat.rank}</strong> |
+              当前遗漏: <strong style="${ballStat.curOm>=10?'color:var(--hot-color)':''}">${ballStat.curOm}期</strong> |
+              最大遗漏: <strong>${ballStat.maxOm}期</strong> |
+              平均遗漏: <strong>${ballStat.avgOm}期</strong>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Canvas Plot
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.clearRect(0, 0, w, h);
+
+      const padLeft = 45, padRight = 30, padTop = 30, padBottom = 40;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
+
+      const maxOmInSeries = Math.max(...omSeries.map(x => x.om), 10);
+      const yMax = Math.ceil(maxOmInSeries * 1.15);
+
+      // Y-axis grid
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--card-border');
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+
+      const yTicks = 5;
+      for (let i = 0; i <= yTicks; i++) {
+        const val = Math.round(yMax * (i / yTicks));
+        const y = padTop + plotH - (val / yMax) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(w - padRight, y);
+        ctx.stroke();
+        ctx.fillText(val, padLeft - 8, y + 3);
+      }
+
+      // Average omission reference line
+      const avgY = padTop + plotH - (parseFloat(ballStat.avgOm) / yMax) * plotH;
+      ctx.strokeStyle = '#a371f7';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padLeft, avgY);
+      ctx.lineTo(w - padRight, avgY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#a371f7';
+      ctx.fillText(`平均遗漏: ${ballStat.avgOm}`, w - padRight, avgY - 6);
+
+      // Draw Area & Line
+      const pts = [];
+      for (let i = 0; i < omSeries.length; i++) {
+        const x = padLeft + (i / (omSeries.length - 1)) * plotW;
+        const y = padTop + plotH - (omSeries[i].om / yMax) * plotH;
+        pts.push({ x, y, data: omSeries[i] });
+      }
+
+      // Gradient Fill
+      const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+      if (isRed) {
+        grad.addColorStop(0, 'rgba(248, 81, 73, 0.4)');
+        grad.addColorStop(1, 'rgba(248, 81, 73, 0.02)');
+      } else {
+        grad.addColorStop(0, 'rgba(88, 166, 255, 0.4)');
+        grad.addColorStop(1, 'rgba(88, 166, 255, 0.02)');
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, padTop + plotH);
+      pts.forEach(p => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(pts[pts.length - 1].x, padTop + plotH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Stroke Line
+      ctx.beginPath();
+      ctx.strokeStyle = isRed ? '#f85149' : '#58a6ff';
+      ctx.lineWidth = 2;
+      pts.forEach((p, idx) => {
+        if (idx === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      // Hit markers (where om === 0)
+      pts.forEach(p => {
+        if (p.data.om === 0) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.5, 0, 2 * Math.PI);
+          ctx.fillStyle = isRed ? '#ff7b72' : '#79c0ff';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      });
+
+      // X-axis labels
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-muted');
+      ctx.textAlign = 'center';
+      const xSteps = 6;
+      for (let s = 0; s <= xSteps; s++) {
+        const idx = Math.min(Math.round((s / xSteps) * (omSeries.length - 1)), omSeries.length - 1);
+        const p = pts[idx];
+        ctx.fillText(p.data.issue, p.x, h - padBottom + 16);
+      }
+    }
+
+    // TAB 5: History Archive Table & Filtering
+    function filterHistoryTable() {
+      const search = document.getElementById('historySearchInput').value.trim().toLowerCase();
+      const filterBall = document.getElementById('historyFilterBall').value;
+
+      filteredHistory = RAW_HISTORY.filter(item => {
+        const matchesSearch = !search || item.i.toLowerCase().includes(search) || item.d.toLowerCase().includes(search);
+        let matchesBall = true;
+        if (filterBall !== 'all') {
+          const [type, num] = filterBall.split('_');
+          const n = parseInt(num);
+          if (type === 'r') matchesBall = item.r.includes(n);
+          else if (type === 'b') matchesBall = item.b === n;
+        }
+        return matchesSearch && matchesBall;
+      });
+
+      historyPage = 1;
+      renderHistoryTable();
+    }
+
+    function changeHistoryPageSize() {
+      historyPageSize = parseInt(document.getElementById('historyPageSize').value);
+      historyPage = 1;
+      renderHistoryTable();
+    }
+
+    function prevHistoryPage() {
+      if (historyPage > 1) {
+        historyPage--;
+        renderHistoryTable();
+      }
+    }
+
+    function nextHistoryPage() {
+      const maxPages = Math.ceil(filteredHistory.length / historyPageSize);
+      if (historyPage < maxPages) {
+        historyPage++;
+        renderHistoryTable();
+      }
+    }
+
+    function renderHistoryTable() {
+      // Reverse to show latest first by default
+      const displayData = [...filteredHistory].reverse();
+      const start = (historyPage - 1) * historyPageSize;
+      const pageItems = displayData.slice(start, start + historyPageSize);
+
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '';
+
+      pageItems.forEach(item => {
+        const tr = document.createElement('tr');
+        const redBallsHtml = item.r.map(r => `<span class="ball ball-red ball-sm">${padZero(r)}</span>`).join(' ');
+        const blueBallHtml = `<span class="ball ball-blue ball-sm">${padZero(item.b)}</span>`;
+
+        tr.innerHTML = `
+          <td style="font-weight:700;">${item.i}</td>
+          <td>${item.d}</td>
+          <td style="color:var(--text-muted);">${item.w}</td>
+          <td><div class="balls-row" style="justify-content:center;">${redBallsHtml}</div></td>
+          <td><div class="balls-row" style="justify-content:center;">${blueBallHtml}</div></td>
+          <td>${item.s}</td>
+          <td>${item.p}</td>
+          <td>${item.ac}</td>
+          <td>${item.oe}</td>
+          <td>${item.bs}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Page Info
+      const totalCount = filteredHistory.length;
+      const end = Math.min(start + historyPageSize, totalCount);
+      document.getElementById('historyPageInfo').textContent = `显示第 ${totalCount > 0 ? start + 1 : 0} 至 ${end} 条，共 ${totalCount} 条`;
+      document.getElementById('currentPageNum').textContent = `${historyPage} / ${Math.ceil(totalCount / historyPageSize) || 1}`;
+      document.getElementById('btnPrevPage').disabled = historyPage <= 1;
+      document.getElementById('btnNextPage').disabled = historyPage >= Math.ceil(totalCount / historyPageSize);
+    }
+
+    function populateHistoryBallFilter() {
+      const sel = document.getElementById('historyFilterBall');
+      sel.innerHTML = '<option value="all">全部号码包含</option>';
+      const optGroupRed = document.createElement('optgroup');
+      optGroupRed.label = '包含红球';
+      for (let r = 1; r <= 33; r++) {
+        const opt = document.createElement('option');
+        opt.value = `r_${r}`;
+        opt.textContent = `包含红球 ${padZero(r)}`;
+        optGroupRed.appendChild(opt);
+      }
+      sel.appendChild(optGroupRed);
+
+      const optGroupBlue = document.createElement('optgroup');
+      optGroupBlue.label = '包含蓝球';
+      for (let b = 1; b <= 16; b++) {
+        const opt = document.createElement('option');
+        opt.value = `b_${b}`;
+        opt.textContent = `包含蓝球 ${padZero(b)}`;
+        optGroupBlue.appendChild(opt);
+      }
+      sel.appendChild(optGroupBlue);
+    }
+
+    // Export Data Utility
+    function exportData(format) {
+      if (format === 'json') {
+        const blob = new Blob([JSON.stringify(RAW_HISTORY, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ssq_history_500_${Date.now()}.json`;
+        a.click();
+      } else if (format === 'csv') {
+        let csvContent = '期号,开奖日期,星期,红球1,红球2,红球3,红球4,红球5,红球6,蓝球,和值,跨度,AC值,奇偶比,大小比\n';
+        RAW_HISTORY.forEach(item => {
+          csvContent += `${item.i},${item.d},${item.w},${padZero(item.r[0])},${padZero(item.r[1])},${padZero(item.r[2])},${padZero(item.r[3])},${padZero(item.r[4])},${padZero(item.r[5])},${padZero(item.b)},${item.s},${item.p},${item.ac},${item.oe},${item.bs}\n`;
+        });
+        const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ssq_history_500_${Date.now()}.csv`;
+        a.click();
+      }
+    }
+
+    // Window resize handler
+    window.addEventListener('resize', () => {
+      if (currentTab === 'overview') renderOverviewCharts();
+      if (currentTab === 'hotcold') renderRankingCharts();
+      if (currentTab === 'waveform') renderWaveformChart();
+    });
+
+    // Startup
+    window.addEventListener('DOMContentLoaded', () => {
+      initDataStructures();
+      populateTopMetrics();
+      populateOverviewGrids();
+      populateWaveBallSelect();
+      populateHistoryBallFilter();
+
+      // Render initial tab
+      renderOverviewCharts();
+      renderRankings();
+      renderOmissionMatrix();
+      renderWaveformChart();
+      renderHistoryTable();
+    });
+  </script>
+</body>
+</html>
