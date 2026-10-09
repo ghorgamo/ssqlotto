@@ -18,12 +18,12 @@
       --gold-primary: #ffd60a;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffd60a 50%, #f5a300 84%, #cc7d00 100%);
       --accent-color: #2997ff;
-      --hot-color: #ff453a;
-      --warm-color: #ff9f0a;
-      --cold-color: #0a84ff;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffc46b, #ff6a3d 55%, #e0281a 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #ffd97a, #ff9f0a 55%, #cc6f00 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #a8e6ff, #3395ff 55%, #0060d6 100%);
+      --hot-color: #f273b5;
+      --warm-color: #b889ea;
+      --cold-color: #45dad1;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ffc2dd, #f273b5 55%, #c41d7f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #dcc2ff, #b889ea 55%, #8049c6 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #b5f5ec, #45dad1 55%, #06868a 100%);
       --table-hover: rgba(255, 255, 255, 0.045);
       --hit-red-bg: #ff3b30;
       --hit-blue-bg: #0a84ff;
@@ -49,12 +49,12 @@
       --gold-primary: #b8860b;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffc402 50%, #dd9200 84%, #b06f00 100%);
       --accent-color: #0071e3;
-      --hot-color: #d70015;
-      --warm-color: #a85b00;
-      --cold-color: #0066cc;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffb25e, #f9561d 55%, #d70015 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #ffcf5c, #e8890c 55%, #a85b00 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #8fd3ff, #0071e3 55%, #004e9e 100%);
+      --hot-color: #c41d7f;
+      --warm-color: #8049c6;
+      --cold-color: #06868a;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ffadd2, #ec58a9 55%, #c41d7f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #d3adf7, #9f69e2 55%, #531dab 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #87e8de, #0fb4b4 55%, #06868a 100%);
       --table-hover: rgba(0, 0, 0, 0.03);
       --hit-red-bg: #e03127;
       --hit-blue-bg: #0071e3;
@@ -305,6 +305,7 @@
       font-weight: 700;
       font-size: 14px;
       font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
       box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 4px 10px rgba(0, 0, 0, 0.28);
       user-select: none;
       flex-shrink: 0;
@@ -332,17 +333,17 @@
     .ball-hot {
       background: var(--hot-gradient);
       color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(255, 69, 58, 0.35), 0 4px 16px rgba(255, 59, 48, 0.5);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(236, 88, 169, 0.35), 0 4px 16px rgba(236, 88, 169, 0.45);
     }
     .ball-warm {
       background: var(--warm-gradient);
-      color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(255, 159, 10, 0.35);
+      color: #2b1c00;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(159, 105, 226, 0.35);
     }
     .ball-cold {
       background: var(--cold-gradient);
       color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(10, 132, 255, 0.35);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(38, 201, 195, 0.4);
     }
 
     .balls-row {
@@ -367,16 +368,16 @@
       box-shadow: var(--shadow-card);
     }
     .ov-cell.cell-hot {
-      border-color: rgba(255, 69, 58, 0.55);
-      background: linear-gradient(180deg, rgba(255, 69, 58, 0.12), rgba(255, 69, 58, 0.02));
+      border-color: rgba(236, 88, 169, 0.55);
+      background: linear-gradient(180deg, rgba(236, 88, 169, 0.12), rgba(236, 88, 169, 0.02));
     }
     .ov-cell.cell-warm {
-      border-color: rgba(255, 159, 10, 0.55);
-      background: linear-gradient(180deg, rgba(255, 159, 10, 0.12), rgba(255, 159, 10, 0.02));
+      border-color: rgba(159, 105, 226, 0.55);
+      background: linear-gradient(180deg, rgba(159, 105, 226, 0.12), rgba(159, 105, 226, 0.02));
     }
     .ov-cell.cell-cold {
-      border-color: rgba(10, 132, 255, 0.55);
-      background: linear-gradient(180deg, rgba(10, 132, 255, 0.12), rgba(10, 132, 255, 0.02));
+      border-color: rgba(38, 201, 195, 0.55);
+      background: linear-gradient(180deg, rgba(38, 201, 195, 0.12), rgba(38, 201, 195, 0.02));
     }
 
     /* 冷热图例（球样 + 文字） */
@@ -462,17 +463,17 @@
     }
     /* 冷热类别筛选：激活态按类别着色 */
     .filter-btn.fc-hot.active {
-      background: rgba(255, 69, 58, 0.16);
+      background: rgba(236, 88, 169, 0.16);
       color: var(--hot-color);
       box-shadow: none;
     }
     .filter-btn.fc-warm.active {
-      background: rgba(255, 159, 10, 0.18);
+      background: rgba(159, 105, 226, 0.16);
       color: var(--warm-color);
       box-shadow: none;
     }
     .filter-btn.fc-cold.active {
-      background: rgba(10, 132, 255, 0.16);
+      background: rgba(38, 201, 195, 0.16);
       color: var(--cold-color);
       box-shadow: none;
     }
@@ -506,18 +507,27 @@
     }
     .badge-hot {
       background: var(--hot-color);
-      color: #ffffff;
+      color: #1d1d1f;
     }
     .badge-warm {
       background: var(--warm-color);
-      color: #2b1c00;
+      color: #1d1d1f;
     }
     .badge-cold {
       background: var(--cold-color);
+      color: #1d1d1f;
+    }
+    [data-theme="light"] .badge-hot,
+    [data-theme="light"] .badge-warm,
+    [data-theme="light"] .badge-cold {
       color: #ffffff;
     }
-    [data-theme="light"] .badge-warm {
-      color: #ffffff;
+    /* 深色主题徽标加深底色：白字对比度 hot 3.41→4.68、cold 3.65→5.76（WCAG AA 小字需 ≥4.5） */
+    [data-theme="dark"] .badge-hot {
+      background: #e0281a;
+    }
+    [data-theme="dark"] .badge-cold {
+      background: #0060d6;
     }
 
     /* Tables */
@@ -594,12 +604,12 @@
       box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
     }
     .om-heat-high {
-      background: rgba(255, 69, 58, 0.2);
+      background: rgba(236, 88, 169, 0.2);
       color: var(--hot-color);
       font-weight: 700;
     }
     .om-heat-mid {
-      background: rgba(255, 159, 10, 0.14);
+      background: rgba(159, 105, 226, 0.14);
       color: var(--warm-color);
     }
 
