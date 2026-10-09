@@ -588,8 +588,22 @@
       position: relative;
     }
     .om-hit {
-      color: #ffffff !important;
       font-weight: 700;
+    }
+    .om-hit-cat-hot {
+      background: var(--hot-gradient) !important;
+      color: #ffffff !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
+    }
+    .om-hit-cat-warm {
+      background: var(--warm-gradient) !important;
+      color: #07332f !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+    }
+    .om-hit-cat-cold {
+      background: var(--cold-gradient) !important;
+      color: #3a2c12 !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
     }
     .om-hit-red {
       background: var(--red-gradient) !important;
@@ -1014,8 +1028,10 @@
               💡 <strong>图阵说明：</strong> 实心彩色球表示该期<strong>开出中奖</strong>（遗漏值为0）；其余格子数字为该号码<strong>距离上次开出的遗漏期数</strong>；背景渐深表示遗漏期数较长（偏冷）。
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-              <span><span style="display:inline-block;width:12px;height:12px;background:#e53935;border-radius:50%;vertical-align:middle;"></span> 中奖开出</span>
-              <span><span style="display:inline-block;width:12px;height:12px;background:rgba(248,81,73,0.3);vertical-align:middle;"></span> 高遗漏(冷)</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--hot-color);border-radius:50%;vertical-align:middle;"></span> 热号</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--warm-color);border-radius:50%;vertical-align:middle;"></span> 温号</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--cold-color);border-radius:50%;vertical-align:middle;"></span> 冷号</span>
+              <span style="color:var(--text-muted);">实心格 = 该期开出，底色越深遗漏越久</span>
             </div>
           </div>
 
@@ -1910,6 +1926,9 @@
       const rowsHtml = [];
 
       const omMatrixData = isPri ? omissionMatrix.primary : omissionMatrix.secondary;
+      const catByNum = {};
+      for (let n = 1; n <= numCount; n++) catByNum[n] = catOf(isPri ? 'primary' : 'secondary', n);
+      const CAT_RGB = { hot: '245, 117, 130', warm: '69, 218, 209', cold: '200, 167, 134' };
       for (let idx of indices) {
         const rec = activeHistory[idx];
         const omRow = omMatrixData[idx];
@@ -1918,20 +1937,19 @@
           <td class="sticky-col" style="font-weight: 600;">${rec.i}</td>
           <td style="color: var(--text-muted); font-size: 11px;">${rec.d.slice(5)}</td>`;
 
-        const hitClass = isPri ? (isSSQ ? 'om-hit-red' : 'om-hit-gold') : 'om-hit-blue';
         for (let num = 1; num <= numCount; num++) {
           const omVal = omRow[num - 1];
           const isHit = omVal === 0;
 
           if (isHit) {
-            rowStr += `<td class="om-cell om-hit ${hitClass}">${padZero(num)}</td>`;
+            rowStr += `<td class="om-cell om-hit om-hit-cat-${catByNum[num]}">${padZero(num)}</td>`;
           } else {
-            let heatClass = '';
+            let heatBg = '';
             if (heatmap) {
-              if (omVal >= (isPri ? 15 : 20)) heatClass = 'om-heat-high';
-              else if (omVal >= (isPri ? 8 : 10)) heatClass = 'om-heat-mid';
+              if (omVal >= (isPri ? 15 : 20)) heatBg = `background: rgba(${CAT_RGB[catByNum[num]]}, 0.22); font-weight: 700;`;
+              else if (omVal >= (isPri ? 8 : 10)) heatBg = `background: rgba(${CAT_RGB[catByNum[num]]}, 0.12);`;
             }
-            rowStr += `<td class="om-cell ${heatClass}">${showNumber ? omVal : ''}</td>`;
+            rowStr += `<td class="om-cell" style="color: var(--${catByNum[num]}-color); ${heatBg}">${showNumber ? omVal : ''}</td>`;
           }
         }
         rowStr += `</tr>`;
@@ -1946,19 +1964,19 @@
       let footHtml = `
         <tr style="font-weight: 700; border-top: 2px solid var(--card-border);">
           <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px; color: var(--text-main);">出现总次数</td>
-          ${byNum.map(x => `<td style="color: var(--text-main);">${x.count}</td>`).join('')}
+          ${byNum.map(x => `<td style="color: var(--${x.catCode}-color);">${x.count}</td>`).join('')}
         </tr>
         <tr style="color: var(--text-muted);">
           <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">平均遗漏</td>
-          ${byNum.map(x => `<td>${x.avgOm}</td>`).join('')}
+          ${byNum.map(x => `<td style="color: var(--${x.catCode}-color);">${x.avgOm}</td>`).join('')}
         </tr>
         <tr style="color: var(--warm-color);">
           <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">历史最大遗漏</td>
-          ${byNum.map(x => `<td>${x.maxOm}</td>`).join('')}
+          ${byNum.map(x => `<td style="color: var(--${x.catCode}-color);">${x.maxOm}</td>`).join('')}
         </tr>
         <tr style="color: var(--hot-color); font-weight: 700;">
           <td class="sticky-col" colspan="2" style="text-align: right; padding-right: 12px;">当前遗漏期数</td>
-          ${byNum.map(x => `<td>${x.curOm}</td>`).join('')}
+          ${byNum.map(x => `<td style="color: var(--${x.catCode}-color);">${x.curOm}</td>`).join('')}
         </tr>
       `;
       tfoot.innerHTML = footHtml;
