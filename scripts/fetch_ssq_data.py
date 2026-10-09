@@ -308,18 +308,18 @@ def main():
     print(f"[+] 成功写入 CSV 数据集: {args.csv}")
     
     update_html_with_history(parsed, args.html)
-    dlt_html_path = os.path.join(PROJECT_ROOT, "dlt.html")
+    dlt_html_path = os.path.join(PROJECT_ROOT, dlt.html)
     if os.path.exists(dlt_html_path):
         update_html_with_history(parsed, dlt_html_path)
     
     # 500期兼容备份
     if len(parsed) >= 500:
-        backup_json = os.path.join(PROJECT_ROOT, "data", "ssq_history_500.json")
-        backup_csv = os.path.join(PROJECT_ROOT, "data", "ssq_history_500.csv")
+        backup_json = os.path.join(PROJECT_ROOT, data, ssq_history_500.json)
+        backup_csv = os.path.join(PROJECT_ROOT, data, ssq_history_500.csv)
         sub_500 = parsed[-500:]
-        with open(backup_json, "w", encoding="utf-8") as f:
-            json.dump({"metadata": full_data["metadata"], "stats": compute_statistics(sub_500), "history": sub_500}, f, ensure_ascii=False, indent=2)
-        with open(backup_csv, "w", encoding="utf-8-sig", newline="") as f:
+        with open(backup_json, w, encoding=utf-8) as f:
+            json.dump({metadata: full_data[metadata], stats: compute_statistics(sub_500), history: sub_500}, f, ensure_ascii=False, indent=2)
+        with open(backup_csv, w, encoding=utf-8-sig, newline=) as f:
             writer = csv.DictWriter(f, fieldnames=list(csv_rows[0].keys()))
             writer.writeheader()
             writer.writerows(csv_rows[-500:])
