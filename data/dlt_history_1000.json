@@ -5,9 +5,9 @@
     "date_range": "2020-05-20 至 2026-10-07",
     "issue_range": "2020015 至 2026114",
     "latest_issue": "2026114",
-    "latest_draw": "前区: 05 12 18 23 31 后区: 05 11",
-    "source": "中国体育彩票官方数据中心",
-    "updated_at": "2026-10-07T07:21:18.694444"
+    "latest_draw": "前区: 08 12 15 29 30 后区: 09 12",
+    "source": "多源交叉核对（网易彩票 + 新浪彩票，2026-10-09 核对修正第2026114期）",
+    "updated_at": "2026-10-09T12:51:51.321467"
   },
   "stats": {
     "total_issues": 1000,
@@ -109,6 +109,19 @@
       },
       {
         "rank": 8,
+        "number": "08",
+        "category": "热号",
+        "category_code": "hot",
+        "frequency": 150,
+        "frequency_pct": 15.0,
+        "current_omission": 0,
+        "max_omission": 38,
+        "expected": 142.9,
+        "bias": 7.1,
+        "bias_pct": 5.0
+      },
+      {
+        "rank": 9,
         "number": "35",
         "category": "热号",
         "category_code": "hot",
@@ -119,19 +132,6 @@
         "expected": 142.9,
         "bias": 7.1,
         "bias_pct": 5.0
-      },
-      {
-        "rank": 9,
-        "number": "08",
-        "category": "热号",
-        "category_code": "hot",
-        "frequency": 149,
-        "frequency_pct": 14.9,
-        "current_omission": 14,
-        "max_omission": 38,
-        "expected": 142.9,
-        "bias": 6.1,
-        "bias_pct": 4.3
       },
       {
         "rank": 10,
@@ -148,9 +148,22 @@
       },
       {
         "rank": 11,
-        "number": "22",
+        "number": "15",
         "category": "热号",
         "category_code": "hot",
+        "frequency": 146,
+        "frequency_pct": 14.6,
+        "current_omission": 0,
+        "max_omission": 41,
+        "expected": 142.9,
+        "bias": 3.1,
+        "bias_pct": 2.2
+      },
+      {
+        "rank": 12,
+        "number": "22",
+        "category": "温号",
+        "category_code": "warm",
         "frequency": 146,
         "frequency_pct": 14.6,
         "current_omission": 2,
@@ -160,33 +173,7 @@
         "bias_pct": 2.2
       },
       {
-        "rank": 12,
-        "number": "31",
-        "category": "温号",
-        "category_code": "warm",
-        "frequency": 146,
-        "frequency_pct": 14.6,
-        "current_omission": 0,
-        "max_omission": 26,
-        "expected": 142.9,
-        "bias": 3.1,
-        "bias_pct": 2.2
-      },
-      {
         "rank": 13,
-        "number": "15",
-        "category": "温号",
-        "category_code": "warm",
-        "frequency": 145,
-        "frequency_pct": 14.5,
-        "current_omission": 10,
-        "max_omission": 41,
-        "expected": 142.9,
-        "bias": 2.1,
-        "bias_pct": 1.5
-      },
-      {
-        "rank": 14,
         "number": "16",
         "category": "温号",
         "category_code": "warm",
@@ -199,7 +186,7 @@
         "bias_pct": 1.5
       },
       {
-        "rank": 15,
+        "rank": 14,
         "number": "20",
         "category": "温号",
         "category_code": "warm",
@@ -207,6 +194,19 @@
         "frequency_pct": 14.5,
         "current_omission": 10,
         "max_omission": 42,
+        "expected": 142.9,
+        "bias": 2.1,
+        "bias_pct": 1.5
+      },
+      {
+        "rank": 15,
+        "number": "31",
+        "category": "温号",
+        "category_code": "warm",
+        "frequency": 145,
+        "frequency_pct": 14.5,
+        "current_omission": 14,
+        "max_omission": 26,
         "expected": 142.9,
         "bias": 2.1,
         "bias_pct": 1.5
@@ -265,6 +265,19 @@
       },
       {
         "rank": 20,
+        "number": "29",
+        "category": "温号",
+        "category_code": "warm",
+        "frequency": 140,
+        "frequency_pct": 14.0,
+        "current_omission": 0,
+        "max_omission": 36,
+        "expected": 142.9,
+        "bias": -2.9,
+        "bias_pct": -2.0
+      },
+      {
+        "rank": 21,
         "number": "13",
         "category": "温号",
         "category_code": "warm",
@@ -277,7 +290,7 @@
         "bias_pct": -2.7
       },
       {
-        "rank": 21,
+        "rank": 22,
         "number": "17",
         "category": "温号",
         "category_code": "warm",
@@ -285,19 +298,6 @@
         "frequency_pct": 13.9,
         "current_omission": 3,
         "max_omission": 35,
-        "expected": 142.9,
-        "bias": -3.9,
-        "bias_pct": -2.7
-      },
-      {
-        "rank": 22,
-        "number": "23",
-        "category": "温号",
-        "category_code": "warm",
-        "frequency": 139,
-        "frequency_pct": 13.9,
-        "current_omission": 0,
-        "max_omission": 34,
         "expected": 142.9,
         "bias": -3.9,
         "bias_pct": -2.7
@@ -343,16 +343,16 @@
       },
       {
         "rank": 26,
-        "number": "29",
+        "number": "23",
         "category": "冷号",
         "category_code": "cold",
-        "frequency": 139,
-        "frequency_pct": 13.9,
-        "current_omission": 3,
-        "max_omission": 36,
+        "frequency": 138,
+        "frequency_pct": 13.8,
+        "current_omission": 9,
+        "max_omission": 34,
         "expected": 142.9,
-        "bias": -3.9,
-        "bias_pct": -2.7
+        "bias": -4.9,
+        "bias_pct": -3.4
       },
       {
         "rank": 27,
@@ -369,19 +369,6 @@
       },
       {
         "rank": 28,
-        "number": "18",
-        "category": "冷号",
-        "category_code": "cold",
-        "frequency": 135,
-        "frequency_pct": 13.5,
-        "current_omission": 0,
-        "max_omission": 32,
-        "expected": 142.9,
-        "bias": -7.9,
-        "bias_pct": -5.5
-      },
-      {
-        "rank": 29,
         "number": "10",
         "category": "冷号",
         "category_code": "cold",
@@ -389,6 +376,19 @@
         "frequency_pct": 13.4,
         "current_omission": 1,
         "max_omission": 37,
+        "expected": 142.9,
+        "bias": -8.9,
+        "bias_pct": -6.2
+      },
+      {
+        "rank": 29,
+        "number": "18",
+        "category": "冷号",
+        "category_code": "cold",
+        "frequency": 134,
+        "frequency_pct": 13.4,
+        "current_omission": 9,
+        "max_omission": 32,
         "expected": 142.9,
         "bias": -8.9,
         "bias_pct": -6.2
@@ -411,13 +411,13 @@
         "number": "05",
         "category": "冷号",
         "category_code": "cold",
-        "frequency": 130,
-        "frequency_pct": 13.0,
-        "current_omission": 0,
+        "frequency": 129,
+        "frequency_pct": 12.9,
+        "current_omission": 2,
         "max_omission": 42,
         "expected": 142.9,
-        "bias": -12.9,
-        "bias_pct": -9.0
+        "bias": -13.9,
+        "bias_pct": -9.7
       },
       {
         "rank": 32,
@@ -463,13 +463,13 @@
         "number": "30",
         "category": "冷号",
         "category_code": "cold",
-        "frequency": 123,
-        "frequency_pct": 12.3,
-        "current_omission": 15,
+        "frequency": 124,
+        "frequency_pct": 12.4,
+        "current_omission": 0,
         "max_omission": 38,
         "expected": 142.9,
-        "bias": -19.9,
-        "bias_pct": -13.9
+        "bias": -18.9,
+        "bias_pct": -13.2
       }
     ],
     "back_stats": [
@@ -478,13 +478,13 @@
         "number": "05",
         "category": "热号",
         "category_code": "hot",
-        "frequency": 186,
-        "frequency_pct": 18.6,
-        "current_omission": 0,
+        "frequency": 185,
+        "frequency_pct": 18.5,
+        "current_omission": 12,
         "max_omission": 30,
         "expected": 166.7,
-        "bias": 19.3,
-        "bias_pct": 11.6
+        "bias": 18.3,
+        "bias_pct": 11.0
       },
       {
         "rank": 2,
@@ -504,13 +504,13 @@
         "number": "11",
         "category": "热号",
         "category_code": "hot",
-        "frequency": 174,
-        "frequency_pct": 17.4,
-        "current_omission": 0,
+        "frequency": 173,
+        "frequency_pct": 17.3,
+        "current_omission": 14,
         "max_omission": 26,
         "expected": 166.7,
-        "bias": 7.3,
-        "bias_pct": 4.4
+        "bias": 6.3,
+        "bias_pct": 3.8
       },
       {
         "rank": 4,
@@ -569,26 +569,26 @@
         "number": "09",
         "category": "温号",
         "category_code": "warm",
-        "frequency": 161,
-        "frequency_pct": 16.1,
-        "current_omission": 2,
+        "frequency": 162,
+        "frequency_pct": 16.2,
+        "current_omission": 0,
         "max_omission": 35,
         "expected": 166.7,
-        "bias": -5.7,
-        "bias_pct": -3.4
+        "bias": -4.7,
+        "bias_pct": -2.8
       },
       {
         "rank": 9,
         "number": "12",
         "category": "冷号",
         "category_code": "cold",
-        "frequency": 160,
-        "frequency_pct": 16.0,
-        "current_omission": 7,
+        "frequency": 161,
+        "frequency_pct": 16.1,
+        "current_omission": 0,
         "max_omission": 24,
         "expected": 166.7,
-        "bias": -6.7,
-        "bias_pct": -4.0
+        "bias": -5.7,
+        "bias_pct": -3.4
       },
       {
         "rank": 10,
@@ -76561,57 +76561,55 @@
       "date": "2026-10-07",
       "weekday": "周三",
       "front": [
-        "05",
+        "08",
         "12",
-        "18",
-        "23",
-        "31"
+        "15",
+        "29",
+        "30"
       ],
       "back": [
-        "05",
-        "11"
+        "09",
+        "12"
       ],
-      "sum": 89,
-      "span": 26,
-      "ac": 5,
-      "odd_even": "3:2",
-      "big_small": "3:2",
-      "back_sum": 16,
-      "back_span": 6,
-      "back_oe": "2:0",
-      "back_bs": "1:1",
+      "sum": 94,
+      "span": 22,
+      "ac": 6,
+      "odd_even": "2:3",
+      "big_small": "2:3",
+      "back_sum": 21,
+      "back_span": 3,
       "front_omissions": {
         "01": 2,
         "02": 1,
         "03": 2,
         "04": 1,
-        "05": 0,
+        "05": 2,
         "06": 1,
         "07": 6,
-        "08": 14,
+        "08": 0,
         "09": 13,
         "10": 1,
         "11": 1,
         "12": 0,
         "13": 7,
         "14": 5,
-        "15": 10,
+        "15": 0,
         "16": 5,
         "17": 3,
-        "18": 0,
+        "18": 9,
         "19": 16,
         "20": 10,
         "21": 6,
         "22": 2,
-        "23": 0,
+        "23": 9,
         "24": 4,
         "25": 4,
         "26": 3,
         "27": 5,
         "28": 14,
-        "29": 3,
-        "30": 15,
-        "31": 0,
+        "29": 0,
+        "30": 0,
+        "31": 14,
         "32": 15,
         "33": 9,
         "34": 5,
@@ -76622,14 +76620,14 @@
         "02": 8,
         "03": 2,
         "04": 5,
-        "05": 0,
+        "05": 12,
         "06": 12,
         "07": 4,
         "08": 5,
-        "09": 2,
+        "09": 0,
         "10": 1,
-        "11": 0,
-        "12": 7
+        "11": 14,
+        "12": 0
       }
     }
   ]
