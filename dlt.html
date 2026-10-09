@@ -579,10 +579,9 @@
 
     /* Omission Matrix cells */
     .om-cell {
-      width: 32px;
-      height: 32px;
+      height: 27px;
       padding: 0 !important;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       color: var(--text-muted);
       position: relative;
@@ -625,6 +624,31 @@
     .om-heat-mid {
       background: rgba(217, 180, 91, 0.14);
       color: var(--warm-color);
+    }
+    /* 遗漏矩阵整表自适应：一屏放下全部号码列，不横向滚动 */
+    #omissionMatrixTable {
+      table-layout: fixed;
+    }
+    #omissionMatrixTable th {
+      padding: 6px 0;
+    }
+    #omissionMatrixTable th:first-child {
+      width: 62px;
+    }
+    #omissionMatrixTable th:nth-child(2) {
+      width: 44px;
+    }
+    #omissionMatrixTable .ball-sm {
+      width: 23px;
+      height: 23px;
+      font-size: 10px;
+    }
+    #omissionMatrixTable td.sticky-col {
+      font-size: 11px;
+    }
+    #omissionMatrixTable tfoot td {
+      font-size: 10px;
+      padding: 6px 0;
     }
 
     .chart-container {
@@ -1914,10 +1938,10 @@
 
       const thead = document.getElementById('omissionMatrixHead');
       let headHtml = `<tr>
-        <th class="sticky-col" style="width: 80px;">期号</th>
-        <th style="width: 75px;">开奖日期</th>`;
+        <th class="sticky-col" style="width: 62px;">期号</th>
+        <th style="width: 44px;">开奖日期</th>`;
       for (let num = 1; num <= numCount; num++) {
-        headHtml += `<th style="width: 32px; padding: 6px 2px;"><span class="ball ${catBallClass(isPri ? 'primary' : 'secondary', num)} ball-sm" style="margin: 0 auto;">${padZero(num)}</span></th>`;
+        headHtml += `<th style="padding: 4px 0;"><span class="ball ${catBallClass(isPri ? 'primary' : 'secondary', num)} ball-sm" style="margin: 0 auto;">${padZero(num)}</span></th>`;
       }
       headHtml += `</tr>`;
       thead.innerHTML = headHtml;
