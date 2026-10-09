@@ -18,12 +18,12 @@
       --gold-primary: #ffd60a;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffd60a 50%, #f5a300 84%, #cc7d00 100%);
       --accent-color: #2997ff;
-      --hot-color: #f57582;
-      --warm-color: #45dad1;
-      --cold-color: #c8a786;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffd0d4, #f57582 55%, #d14a55 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #c9f7f2, #45dad1 55%, #17a7a2 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #f0e2c8, #c8a786 55%, #9d7c4f 100%);
+      --hot-color: #d96c57;
+      --warm-color: #d9b45b;
+      --cold-color: #6fa8c9;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ecb6ab, #d96c57 55%, #9c4e3f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #ecdaad, #d9b45b 55%, #9c8242 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #b7d4e4, #6fa8c9 55%, #507991 100%);
       --table-hover: rgba(255, 255, 255, 0.045);
       --hit-red-bg: #ff3b30;
       --hit-blue-bg: #0a84ff;
@@ -49,12 +49,12 @@
       --gold-primary: #b8860b;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffc402 50%, #dd9200 84%, #b06f00 100%);
       --accent-color: #0071e3;
-      --hot-color: #d14750;
-      --warm-color: #06868a;
-      --cold-color: #96754a;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffd0d4, #f57582 55%, #d14a55 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #c9f7f2, #45dad1 55%, #17a7a2 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #f0e2c8, #c8a786 55%, #9d7c4f 100%);
+      --hot-color: #b54a38;
+      --warm-color: #8a6d1f;
+      --cold-color: #3f6f92;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ecb6ab, #d96c57 55%, #9c4e3f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #ecdaad, #d9b45b 55%, #9c8242 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #b7d4e4, #6fa8c9 55%, #507991 100%);
       --table-hover: rgba(0, 0, 0, 0.03);
       --hit-red-bg: #e03127;
       --hit-blue-bg: #0071e3;
@@ -333,17 +333,17 @@
     .ball-hot {
       background: var(--hot-gradient);
       color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(245, 117, 130, 0.35), 0 4px 16px rgba(245, 117, 130, 0.45);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(217, 108, 87, 0.35), 0 4px 16px rgba(217, 108, 87, 0.45);
     }
     .ball-warm {
       background: var(--warm-gradient);
-      color: #07332f;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(69, 218, 209, 0.35);
+      color: #3d2f05;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(217, 180, 91, 0.4);
     }
     .ball-cold {
       background: var(--cold-gradient);
-      color: #3a2c12;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(200, 167, 134, 0.4);
+      color: #16323f;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(111, 168, 201, 0.4);
     }
 
     .balls-row {
@@ -368,16 +368,16 @@
       box-shadow: var(--shadow-card);
     }
     .ov-cell.cell-hot {
-      border-color: rgba(245, 117, 130, 0.55);
-      background: linear-gradient(180deg, rgba(245, 117, 130, 0.12), rgba(245, 117, 130, 0.02));
+      border-color: rgba(217, 108, 87, 0.55);
+      background: linear-gradient(180deg, rgba(217, 108, 87, 0.12), rgba(217, 108, 87, 0.02));
     }
     .ov-cell.cell-warm {
-      border-color: rgba(69, 218, 209, 0.55);
-      background: linear-gradient(180deg, rgba(69, 218, 209, 0.12), rgba(69, 218, 209, 0.02));
+      border-color: rgba(217, 180, 91, 0.55);
+      background: linear-gradient(180deg, rgba(217, 180, 91, 0.12), rgba(217, 180, 91, 0.02));
     }
     .ov-cell.cell-cold {
-      border-color: rgba(200, 167, 134, 0.55);
-      background: linear-gradient(180deg, rgba(200, 167, 134, 0.12), rgba(200, 167, 134, 0.02));
+      border-color: rgba(111, 168, 201, 0.55);
+      background: linear-gradient(180deg, rgba(111, 168, 201, 0.12), rgba(111, 168, 201, 0.02));
     }
 
     /* 冷热图例（球样 + 文字） */
@@ -463,17 +463,17 @@
     }
     /* 冷热类别筛选：激活态按类别着色 */
     .filter-btn.fc-hot.active {
-      background: rgba(245, 117, 130, 0.16);
+      background: rgba(217, 108, 87, 0.16);
       color: var(--hot-color);
       box-shadow: none;
     }
     .filter-btn.fc-warm.active {
-      background: rgba(69, 218, 209, 0.16);
+      background: rgba(217, 180, 91, 0.18);
       color: var(--warm-color);
       box-shadow: none;
     }
     .filter-btn.fc-cold.active {
-      background: rgba(200, 167, 134, 0.18);
+      background: rgba(111, 168, 201, 0.16);
       color: var(--cold-color);
       box-shadow: none;
     }
@@ -597,12 +597,12 @@
     }
     .om-hit-cat-warm {
       background: var(--warm-gradient) !important;
-      color: #07332f !important;
+      color: #3d2f05 !important;
       box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
     }
     .om-hit-cat-cold {
       background: var(--cold-gradient) !important;
-      color: #3a2c12 !important;
+      color: #16323f !important;
       box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
     }
     .om-hit-red {
@@ -618,12 +618,12 @@
       box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
     }
     .om-heat-high {
-      background: rgba(245, 117, 130, 0.2);
+      background: rgba(217, 108, 87, 0.2);
       color: var(--hot-color);
       font-weight: 700;
     }
     .om-heat-mid {
-      background: rgba(69, 218, 209, 0.14);
+      background: rgba(217, 180, 91, 0.14);
       color: var(--warm-color);
     }
 
@@ -1928,7 +1928,7 @@
       const omMatrixData = isPri ? omissionMatrix.primary : omissionMatrix.secondary;
       const catByNum = {};
       for (let n = 1; n <= numCount; n++) catByNum[n] = catOf(isPri ? 'primary' : 'secondary', n);
-      const CAT_RGB = { hot: '245, 117, 130', warm: '69, 218, 209', cold: '200, 167, 134' };
+      const CAT_RGB = { hot: '217, 108, 87', warm: '217, 180, 91', cold: '111, 168, 201' };
       for (let idx of indices) {
         const rec = activeHistory[idx];
         const omRow = omMatrixData[idx];
