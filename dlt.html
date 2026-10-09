@@ -18,12 +18,12 @@
       --gold-primary: #ffd60a;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffd60a 50%, #f5a300 84%, #cc7d00 100%);
       --accent-color: #2997ff;
-      --hot-color: #f273b5;
-      --warm-color: #b889ea;
-      --cold-color: #45dad1;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffc2dd, #f273b5 55%, #c41d7f 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #dcc2ff, #b889ea 55%, #8049c6 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #b5f5ec, #45dad1 55%, #06868a 100%);
+      --hot-color: #f57582;
+      --warm-color: #45dad1;
+      --cold-color: #c8a786;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ffd0d4, #f57582 55%, #d14a55 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #c9f7f2, #45dad1 55%, #17a7a2 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #f0e2c8, #c8a786 55%, #9d7c4f 100%);
       --table-hover: rgba(255, 255, 255, 0.045);
       --hit-red-bg: #ff3b30;
       --hit-blue-bg: #0a84ff;
@@ -49,12 +49,12 @@
       --gold-primary: #b8860b;
       --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffc402 50%, #dd9200 84%, #b06f00 100%);
       --accent-color: #0071e3;
-      --hot-color: #c41d7f;
-      --warm-color: #8049c6;
-      --cold-color: #06868a;
-      --hot-gradient: radial-gradient(circle at 32% 28%, #ffadd2, #ec58a9 55%, #c41d7f 100%);
-      --warm-gradient: radial-gradient(circle at 32% 28%, #d3adf7, #9f69e2 55%, #531dab 100%);
-      --cold-gradient: radial-gradient(circle at 32% 28%, #87e8de, #0fb4b4 55%, #06868a 100%);
+      --hot-color: #d14750;
+      --warm-color: #06868a;
+      --cold-color: #96754a;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ffd0d4, #f57582 55%, #d14a55 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #c9f7f2, #45dad1 55%, #17a7a2 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #f0e2c8, #c8a786 55%, #9d7c4f 100%);
       --table-hover: rgba(0, 0, 0, 0.03);
       --hit-red-bg: #e03127;
       --hit-blue-bg: #0071e3;
@@ -333,17 +333,17 @@
     .ball-hot {
       background: var(--hot-gradient);
       color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(236, 88, 169, 0.35), 0 4px 16px rgba(236, 88, 169, 0.45);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(245, 117, 130, 0.35), 0 4px 16px rgba(245, 117, 130, 0.45);
     }
     .ball-warm {
       background: var(--warm-gradient);
-      color: #2b1c00;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(159, 105, 226, 0.35);
+      color: #07332f;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(69, 218, 209, 0.35);
     }
     .ball-cold {
       background: var(--cold-gradient);
-      color: #ffffff;
-      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(38, 201, 195, 0.4);
+      color: #3a2c12;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(200, 167, 134, 0.4);
     }
 
     .balls-row {
@@ -368,16 +368,16 @@
       box-shadow: var(--shadow-card);
     }
     .ov-cell.cell-hot {
-      border-color: rgba(236, 88, 169, 0.55);
-      background: linear-gradient(180deg, rgba(236, 88, 169, 0.12), rgba(236, 88, 169, 0.02));
+      border-color: rgba(245, 117, 130, 0.55);
+      background: linear-gradient(180deg, rgba(245, 117, 130, 0.12), rgba(245, 117, 130, 0.02));
     }
     .ov-cell.cell-warm {
-      border-color: rgba(159, 105, 226, 0.55);
-      background: linear-gradient(180deg, rgba(159, 105, 226, 0.12), rgba(159, 105, 226, 0.02));
+      border-color: rgba(69, 218, 209, 0.55);
+      background: linear-gradient(180deg, rgba(69, 218, 209, 0.12), rgba(69, 218, 209, 0.02));
     }
     .ov-cell.cell-cold {
-      border-color: rgba(38, 201, 195, 0.55);
-      background: linear-gradient(180deg, rgba(38, 201, 195, 0.12), rgba(38, 201, 195, 0.02));
+      border-color: rgba(200, 167, 134, 0.55);
+      background: linear-gradient(180deg, rgba(200, 167, 134, 0.12), rgba(200, 167, 134, 0.02));
     }
 
     /* 冷热图例（球样 + 文字） */
@@ -463,17 +463,17 @@
     }
     /* 冷热类别筛选：激活态按类别着色 */
     .filter-btn.fc-hot.active {
-      background: rgba(236, 88, 169, 0.16);
+      background: rgba(245, 117, 130, 0.16);
       color: var(--hot-color);
       box-shadow: none;
     }
     .filter-btn.fc-warm.active {
-      background: rgba(159, 105, 226, 0.16);
+      background: rgba(69, 218, 209, 0.16);
       color: var(--warm-color);
       box-shadow: none;
     }
     .filter-btn.fc-cold.active {
-      background: rgba(38, 201, 195, 0.16);
+      background: rgba(200, 167, 134, 0.18);
       color: var(--cold-color);
       box-shadow: none;
     }
@@ -604,12 +604,12 @@
       box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
     }
     .om-heat-high {
-      background: rgba(236, 88, 169, 0.2);
+      background: rgba(245, 117, 130, 0.2);
       color: var(--hot-color);
       font-weight: 700;
     }
     .om-heat-mid {
-      background: rgba(159, 105, 226, 0.14);
+      background: rgba(69, 218, 209, 0.14);
       color: var(--warm-color);
     }
 
@@ -1461,13 +1461,13 @@
       ballsRow.innerHTML = '';
       latest.primary.forEach(p => {
         const b = document.createElement('span');
-        b.className = 'ball ' + (isSSQ ? 'ball-red' : 'ball-gold');
+        b.className = 'ball ' + catBallClass('primary', p);
         b.textContent = padZero(p);
         ballsRow.appendChild(b);
       });
       latest.secondary.forEach(s => {
         const bb = document.createElement('span');
-        bb.className = 'ball ball-blue';
+        bb.className = 'ball ' + catBallClass('secondary', s);
         bb.textContent = padZero(s);
         ballsRow.appendChild(bb);
       });
@@ -1488,22 +1488,29 @@
 
       const topP = dynamicStats.primaryList[0];
       const diffP = topP.theoryDiff > 0 ? '+' + topP.theoryDiff : topP.theoryDiff;
-      const priBallClass = isSSQ ? 'ball-red' : 'ball-gold';
+      const priBallClass = 'ball-' + topP.catCode;
       document.getElementById('topPrimaryVal').innerHTML = `<span class="ball ${priBallClass} ball-lg" style="margin-right:8px;">${topP.numStr}</span> ${topP.count} 次出球`;
       document.getElementById('topPrimarySub').textContent = `出球率 ${topP.freq.toFixed(2)}% | 当前遗漏 ${topP.curOm} 期 | 最大遗漏 ${topP.maxOm} 期`;
       document.getElementById('topPrimaryDiff').textContent = diffP;
 
       const topS = dynamicStats.secondaryList[0];
       const diffS = topS.theoryDiff > 0 ? '+' + topS.theoryDiff : topS.theoryDiff;
-      document.getElementById('topSecondaryVal').innerHTML = `<span class="ball ball-blue ball-lg" style="margin-right:8px;">${topS.numStr}</span> ${topS.count} 次出球`;
+      document.getElementById('topSecondaryVal').innerHTML = `<span class="ball ball-${topS.catCode} ball-lg" style="margin-right:8px;">${topS.numStr}</span> ${topS.count} 次出球`;
       document.getElementById('topSecondarySub').textContent = `出球率 ${topS.freq.toFixed(2)}% | 当前遗漏 ${topS.curOm} 期 | 最大遗漏 ${topS.maxOm} 期`;
       document.getElementById('topSecondaryDiff').textContent = diffS;
 
       const maxOmP = [...dynamicStats.primaryList].sort((a,b) => b.curOm - a.curOm)[0];
       const maxOmS = [...dynamicStats.secondaryList].sort((a,b) => b.curOm - a.curOm)[0];
       document.getElementById('maxOmText').innerHTML =
-        `${isSSQ ? '红球' : '前区'} <strong style="color:var(--hot-color)">${maxOmP.numStr}</strong> (${maxOmP.curOm}期未出) / ${isSSQ ? '蓝球' : '后区'} <strong style="color:var(--blue-primary)">${maxOmS.numStr}</strong> (${maxOmS.curOm}期未出)`;
+        `${isSSQ ? '红球' : '前区'} <strong style="color:var(--${maxOmP.catCode}-color)">${maxOmP.numStr}</strong> (${maxOmP.curOm}期未出) / ${isSSQ ? '蓝球' : '后区'} <strong style="color:var(--${maxOmS.catCode}-color)">${maxOmS.numStr}</strong> (${maxOmS.curOm}期未出)`;
     }
+
+    function catOf(zone, num) {
+      const list = zone === 'primary' ? dynamicStats.primaryList : dynamicStats.secondaryList;
+      const it = list && list.find(x => x.num === num);
+      return it ? it.catCode : 'warm';
+    }
+    function catBallClass(zone, num) { return 'ball-' + catOf(zone, num); }
 
     function populateOverviewGrids() {
       const isSSQ = currentLottery === 'ssq';
@@ -1893,9 +1900,8 @@
       let headHtml = `<tr>
         <th class="sticky-col" style="width: 80px;">期号</th>
         <th style="width: 75px;">开奖日期</th>`;
-      const ballBallClass = isPri ? (isSSQ ? 'ball-red' : 'ball-gold') : 'ball-blue';
       for (let num = 1; num <= numCount; num++) {
-        headHtml += `<th style="width: 32px; padding: 6px 2px;"><span class="ball ${ballBallClass} ball-sm" style="margin: 0 auto;">${padZero(num)}</span></th>`;
+        headHtml += `<th style="width: 32px; padding: 6px 2px;"><span class="ball ${catBallClass(isPri ? 'primary' : 'secondary', num)} ball-sm" style="margin: 0 auto;">${padZero(num)}</span></th>`;
       }
       headHtml += `</tr>`;
       thead.innerHTML = headHtml;
@@ -2008,7 +2014,7 @@
       const ballStat = list.find(x => x.num === ballNum);
 
       const prefix = isPri ? (isSSQ ? '红球' : '前区') : (isSSQ ? '蓝球' : '后区');
-      const ballClass = isPri ? (isSSQ ? 'ball-red' : 'ball-gold') : 'ball-blue';
+      const ballClass = 'ball-' + (ballStat ? ballStat.catCode : 'warm');
 
       const badgeRow = document.getElementById('waveStatsBadgeRow');
       badgeRow.innerHTML = `
@@ -2096,7 +2102,7 @@
       ctx.fill();
 
       ctx.beginPath();
-      ctx.strokeStyle = isPri ? (isSSQ ? '#ff453a' : '#ffd60a') : '#0a84ff';
+      ctx.strokeStyle = cssVar('--' + catOf(waveZone, currentWaveBall) + '-color');
       ctx.lineWidth = 2;
       pts.forEach((p, idx) => {
         if (idx === 0) ctx.moveTo(p.x, p.y);
@@ -2108,7 +2114,7 @@
         if (p.data.om === 0) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, 3.5, 0, 2 * Math.PI);
-          ctx.fillStyle = isPri ? (isSSQ ? '#ff7b72' : '#ffd700') : '#79c0ff';
+          ctx.fillStyle = cssVar('--' + catOf(waveZone, currentWaveBall) + '-color');
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 1.5;
@@ -2195,8 +2201,8 @@
 
       pageItems.forEach(item => {
         const tr = document.createElement('tr');
-        const priBallsHtml = item.primary.map(p => `<span class="ball ${isSSQ ? 'ball-red' : 'ball-gold'} ball-sm">${padZero(p)}</span>`).join(' ');
-        const secBallsHtml = item.secondary.map(s => `<span class="ball ball-blue ball-sm">${padZero(s)}</span>`).join(' ');
+        const priBallsHtml = item.primary.map(p => `<span class="ball ${catBallClass('primary', p)} ball-sm">${padZero(p)}</span>`).join(' ');
+        const secBallsHtml = item.secondary.map(s => `<span class="ball ${catBallClass('secondary', s)} ball-sm">${padZero(s)}</span>`).join(' ');
 
         if (isSSQ) {
           tr.innerHTML = `
