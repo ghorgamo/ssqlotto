@@ -952,10 +952,10 @@
             </select>
 
             <select id="windowSelect" onchange="updateAnalysisWindow()">
-              <option value="1000" selected>最近 1000 期 (全样本)</option>
+              <option value="1000">最近 1000 期 (全样本)</option>
               <option value="500">最近 500 期</option>
               <option value="200">最近 200 期</option>
-              <option value="100">最近 100 期</option>
+              <option value="100" selected>最近 100 期</option>
               <option value="50">最近 50 期</option>
               <option value="30">最近 30 期 (超短期)</option>
             </select>
@@ -1240,7 +1240,7 @@
     let omZone = 'primary';
     let waveZone = 'primary';
     let currentWaveBall = 1;
-    let analysisWindow = 1000;
+    let analysisWindow = 100;
     let historyPage = 1;
     let historyPageSize = 50;
 
