@@ -1862,7 +1862,8 @@
 
       const centerX = dw / 2 - 40;
       const centerY = dh / 2;
-      const radius = Math.min(centerX, centerY) - 15;
+      // 面板隐藏时 dw/dh 为 0，半径会算成负数使 arc() 抛错、进而中断 switchLottery 后续渲染，故钳制为非负
+      const radius = Math.max(Math.min(centerX, centerY) - 15, 0);
       const innerRadius = radius * 0.58;
 
       let curAngle = -Math.PI / 2;
