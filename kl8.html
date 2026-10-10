@@ -1286,10 +1286,9 @@ function switchTab(tab) {
     const m = (btn.getAttribute('onclick') || '').match(/switchTab\('(\w+)'\)/);
     btn.classList.toggle('active', !!m && m[1] === tab);
   });
-  ['overview', 'hotcold', 'omission', 'waveform', 'history'].forEach(name => {
-    const p = $('panel-' + name);
-    if (p) p.style.display = name === tab ? '' : 'none';
-  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const target = $('panel-' + tab);
+  if (target) target.classList.add('active');
   if (tab === 'hotcold') renderRankings();
   if (tab === 'omission') renderOmissionMatrix();
   if (tab === 'waveform') renderWaveformChart();
@@ -1626,9 +1625,9 @@ function exportData(fmt) {
 // ---------- 同步 ----------
 function openSyncModal() {
   $('modalCurIssueText').textContent = '当前数据最新期：' + (RAW.length ? RAW[RAW.length - 1].i : '—');
-  $('syncModal').style.display = 'flex';
+  $('syncModal').classList.add('active');
 }
-function closeSyncModal() { $('syncModal').style.display = 'none'; }
+function closeSyncModal() { $('syncModal').classList.remove('active'); }
 function switchModalTab(name) {
   ['Online', 'File', 'Cli'].forEach(k => {
     $('modalSubTab' + k).style.display = k.toLowerCase() === name ? '' : 'none';
