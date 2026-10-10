@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title id="pageTitle">七星彩最近1000期大数据可视化分析 | 逐位遗漏与冷热排名</title>
+  <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #161617;
+      --card-border: #2c2c2e;
+      --text-main: #f5f5f7;
+      --text-muted: #86868b;
+      --red-primary: #ff453a;
+      --red-gradient: radial-gradient(circle at 32% 28%, #ff9d97, #ff3b30 52%, #d70015 84%, #a50011 100%);
+      --blue-primary: #0a84ff;
+      --blue-gradient: radial-gradient(circle at 32% 28%, #7ac5ff, #0a84ff 52%, #0057d6 84%, #003fa3 100%);
+      --gold-primary: #ffd60a;
+      --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffd60a 50%, #f5a300 84%, #cc7d00 100%);
+      --accent-color: #2997ff;
+      --hot-color: #d96c57;
+      --warm-color: #d9b45b;
+      --cold-color: #6fa8c9;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ecb6ab, #d96c57 55%, #9c4e3f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #ecdaad, #d9b45b 55%, #9c8242 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #b7d4e4, #6fa8c9 55%, #507991 100%);
+      --table-hover: rgba(255, 255, 255, 0.045);
+      --hit-red-bg: #ff3b30;
+      --hit-blue-bg: #0a84ff;
+      --hit-gold-bg: #f5a300;
+      --modal-overlay: rgba(0, 0, 0, 0.45);
+      --header-bg: rgba(22, 22, 23, 0.72);
+      --segment-bg: #1c1c1e;
+      --segment-active: #3a3a3c;
+      --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.25), 0 16px 40px rgba(0, 0, 0, 0.35);
+      --font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f5f5f7;
+      --card-bg: #ffffff;
+      --card-border: #d2d2d7;
+      --text-main: #1d1d1f;
+      --text-muted: #6e6e73;
+      --red-primary: #e03127;
+      --red-gradient: radial-gradient(circle at 32% 28%, #ff9d97, #f0281f 52%, #c81e1e 84%, #9e1414 100%);
+      --blue-primary: #0071e3;
+      --blue-gradient: radial-gradient(circle at 32% 28%, #7ac5ff, #0071e3 52%, #0057b8 84%, #00458f 100%);
+      --gold-primary: #b8860b;
+      --gold-gradient: radial-gradient(circle at 32% 28%, #ffedb0, #ffc402 50%, #dd9200 84%, #b06f00 100%);
+      --accent-color: #0071e3;
+      --hot-color: #b54a38;
+      --warm-color: #8a6d1f;
+      --cold-color: #3f6f92;
+      --hot-gradient: radial-gradient(circle at 32% 28%, #ecb6ab, #d96c57 55%, #9c4e3f 100%);
+      --warm-gradient: radial-gradient(circle at 32% 28%, #ecdaad, #d9b45b 55%, #9c8242 100%);
+      --cold-gradient: radial-gradient(circle at 32% 28%, #b7d4e4, #6fa8c9 55%, #507991 100%);
+      --table-hover: rgba(0, 0, 0, 0.03);
+      --hit-red-bg: #e03127;
+      --hit-blue-bg: #0071e3;
+      --hit-gold-bg: #dd9200;
+      --modal-overlay: rgba(0, 0, 0, 0.35);
+      --header-bg: rgba(251, 251, 253, 0.72);
+      --segment-bg: #e9e9ee;
+      --segment-active: #ffffff;
+      --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.55;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    :focus-visible {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .lottery-toggle-group {
+      display: inline-flex;
+      background: var(--segment-bg);
+      border: none;
+      border-radius: 980px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .lottery-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 16px;
+      border-radius: 980px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .lottery-toggle-btn:active { transform: scale(0.97); }
+    .lottery-toggle-btn.active-ssq {
+      background: var(--red-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(255, 59, 48, 0.4);
+    }
+    .lottery-toggle-btn.active-dlt {
+      background: var(--gold-primary);
+      color: #1d1d1f;
+      box-shadow: 0 2px 10px rgba(255, 214, 10, 0.35);
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(10, 132, 255, 0.12);
+      border: 1px solid rgba(10, 132, 255, 0.3);
+      padding: 4px 12px;
+      border-radius: 980px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--blue-primary);
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+      background: var(--segment-bg);
+      border-radius: 980px;
+      padding: 3px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 980px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+    .tab-btn.active {
+      background: var(--segment-active);
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      padding: 7px 14px;
+      border-radius: 980px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .btn:hover {
+      background: var(--table-hover);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: var(--accent-color);
+      border-color: transparent;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-color);
+      filter: brightness(1.1);
+    }
+    .btn-sync {
+      background: var(--accent-color);
+      border-color: transparent;
+      color: #ffffff;
+    }
+    .btn-sync:hover {
+      background: var(--accent-color);
+      filter: brightness(1.1);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+    }
+    .metric-card::before {
+      content: none;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .metric-val {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Ball Spheres */
+    .ball {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.35), 0 4px 10px rgba(0, 0, 0, 0.28);
+      user-select: none;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.25s;
+    }
+    .ball:hover {
+      transform: scale(1.14);
+    }
+    .ball-sm {
+      width: 26px;
+      height: 26px;
+      font-size: 12px;
+    }
+    .ball-lg {
+      width: 42px;
+      height: 42px;
+      font-size: 17px;
+    }
+    .ball-red { background: var(--red-gradient); }
+    .ball-blue { background: var(--blue-gradient); }
+    .ball-gold { background: var(--gold-gradient); color: #1d1d1f; }
+
+    /* 冷/温/热号码球：温度色通道 + 形态差异（不只靠颜色区分） */
+    .ball-hot {
+      background: var(--hot-gradient);
+      color: #ffffff;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 0 0 2px rgba(217, 108, 87, 0.35), 0 4px 16px rgba(217, 108, 87, 0.45);
+    }
+    .ball-warm {
+      background: var(--warm-gradient);
+      color: #3d2f05;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), inset 0 2px 3px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(217, 180, 91, 0.4);
+    }
+    .ball-cold {
+      background: var(--cold-gradient);
+      color: #16323f;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.22), inset 0 0 0 2px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(111, 168, 201, 0.4);
+    }
+
+    .balls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* 概览热度全览格子：按冷热类别染边与底色 */
+    .ov-cell {
+      border-radius: 14px;
+      padding: 10px 4px 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.25s, border-color 0.25s;
+    }
+    .ov-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+    .ov-cell.cell-hot {
+      border-color: rgba(217, 108, 87, 0.55);
+      background: linear-gradient(180deg, rgba(217, 108, 87, 0.12), rgba(217, 108, 87, 0.02));
+    }
+    .ov-cell.cell-warm {
+      border-color: rgba(217, 180, 91, 0.55);
+      background: linear-gradient(180deg, rgba(217, 180, 91, 0.12), rgba(217, 180, 91, 0.02));
+    }
+    .ov-cell.cell-cold {
+      border-color: rgba(111, 168, 201, 0.55);
+      background: linear-gradient(180deg, rgba(111, 168, 201, 0.12), rgba(111, 168, 201, 0.02));
+    }
+
+    /* 冷热图例（球样 + 文字） */
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .legend-item .ball {
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+    }
+    .legend-item .ball:hover { transform: none; }
+
+    /* Cards & Panels */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-body {
+      padding: 22px;
+    }
+
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-btn-group {
+      display: inline-flex;
+      background: var(--segment-bg);
+      border: none;
+      border-radius: 980px;
+      padding: 3px;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .filter-btn {
+      background: transparent;
+      border: none;
+      border-radius: 980px;
+      color: var(--text-muted);
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .filter-btn:active { transform: scale(0.97); }
+    .filter-btn.active {
+      background: var(--segment-active);
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    }
+    .filter-btn:hover:not(.active) {
+      color: var(--text-main);
+    }
+    /* 冷热类别筛选：激活态按类别着色 */
+    .filter-btn.fc-hot.active {
+      background: rgba(217, 108, 87, 0.16);
+      color: var(--hot-color);
+      box-shadow: none;
+    }
+    .filter-btn.fc-warm.active {
+      background: rgba(217, 180, 91, 0.18);
+      color: var(--warm-color);
+      box-shadow: none;
+    }
+    .filter-btn.fc-cold.active {
+      background: rgba(111, 168, 201, 0.16);
+      color: var(--cold-color);
+      box-shadow: none;
+    }
+
+    select, input[type="text"] {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.22);
+    }
+
+    /* Badges：冷热徽标改实心填充，提高对比与辨识 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 980px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+    .badge-hot {
+      background: var(--hot-color);
+      color: #1d1d1f;
+    }
+    .badge-warm {
+      background: var(--warm-color);
+      color: #1d1d1f;
+    }
+    .badge-cold {
+      background: var(--cold-color);
+      color: #1d1d1f;
+    }
+    [data-theme="light"] .badge-hot,
+    [data-theme="light"] .badge-warm,
+    [data-theme="light"] .badge-cold {
+      color: #ffffff;
+    }
+    /* 深色主题徽标加深底色：白字对比度 hot 3.41→4.68、cold 3.65→5.76（WCAG AA 小字需 ≥4.5） */
+    [data-theme="dark"] .badge-hot {
+      background: #e0281a;
+    }
+    [data-theme="dark"] .badge-cold {
+      background: #0060d6;
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      max-height: 680px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+    thead {
+      background: var(--card-bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      padding: 11px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    tr:hover td {
+      background-color: var(--table-hover);
+    }
+    .sticky-col {
+      position: sticky;
+      left: 0;
+      background: var(--card-bg);
+      z-index: 5;
+    }
+    tr:hover .sticky-col {
+      background: var(--table-hover);
+    }
+
+    /* Omission Matrix cells */
+    .om-cell {
+      height: 27px;
+      padding: 0 !important;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .om-hit {
+      font-weight: 700;
+    }
+    .om-hit-cat-hot {
+      background: var(--hot-gradient) !important;
+      color: #ffffff !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
+    }
+    .om-hit-cat-warm {
+      background: var(--warm-gradient) !important;
+      color: #3d2f05 !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+    }
+    .om-hit-cat-cold {
+      background: var(--cold-gradient) !important;
+      color: #16323f !important;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+    }
+    .om-hit-red {
+      background: var(--red-gradient) !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+    .om-hit-blue {
+      background: var(--blue-gradient) !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+    .om-hit-gold {
+      background: var(--gold-gradient) !important;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.4);
+    }
+    .om-heat-high {
+      background: rgba(217, 108, 87, 0.2);
+      color: var(--hot-color);
+      font-weight: 700;
+    }
+    .om-heat-mid {
+      background: rgba(217, 180, 91, 0.14);
+      color: var(--warm-color);
+    }
+    /* 遗漏矩阵整表自适应：一屏放下全部号码列，不横向滚动 */
+    #omissionMatrixTable {
+      table-layout: fixed;
+    }
+    #omissionMatrixTable th {
+      padding: 6px 0;
+    }
+    #omissionMatrixTable th:first-child {
+      width: 62px;
+    }
+    #omissionMatrixTable th:nth-child(2) {
+      width: 44px;
+    }
+    #omissionMatrixTable .ball-sm {
+      width: 23px;
+      height: 23px;
+      font-size: 10px;
+    }
+    #omissionMatrixTable td.sticky-col {
+      font-size: 11px;
+    }
+    #omissionMatrixTable tfoot td {
+      font-size: 10px;
+      padding: 6px 0;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      margin-top: 12px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .progress-bar-bg {
+      width: 100px;
+      height: 6px;
+      background: var(--segment-bg);
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 992px) {
+      .two-col-grid { grid-template-columns: 1fr; }
+    }
+
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    .rank-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .rank-1 { background: linear-gradient(145deg, #ffe97a, #ffb340); color: #1d1d1f; box-shadow: 0 2px 10px rgba(255, 179, 64, 0.5); }
+    .rank-2 { background: linear-gradient(145deg, #f2f2f4, #c7c7cc); color: #1d1d1f; }
+    .rank-3 { background: linear-gradient(145deg, #eda76a, #c7742c); color: #ffffff; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--modal-overlay);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 580px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      animation: modalFadeIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body {
+      padding: 22px;
+    }
+    .modal-footer {
+      padding: 16px 22px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-color);
+    }
+
+    footer {
+      max-width: 1440px;
+      margin: 48px auto 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 24px;
+    }
+
+    #chart-tooltip {
+      position: absolute;
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(8px);
+    }
+
+  </style>
+
+<style>
+.lottery-toggle-btn.active-kl8 { background: linear-gradient(135deg, #3f7d5a, #2e5d43); color: #fff; }
+.lottery-toggle-btn.active-qxc { background: linear-gradient(135deg, #7a5fa0, #5b4680); color: #fff; }
+.lottery-toggle-btn.active-pl5 { background: linear-gradient(135deg, #33608c, #274a6e); color: #fff; }
+.ov-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; }
+.ov-om { font-size: 10px; opacity: 0.65; }
+.wave-badge { display: inline-block; padding: 4px 10px; margin: 0 6px 6px 0; border-radius: 999px; background: rgba(128,128,128,0.16); font-size: 12px; }
+.pos-select { padding: 6px 10px; border-radius: 8px; font-size: 13px; }
+</style>
+</head>
+<body data-theme="dark">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo-area">
+        <!-- Prominent In-Page Multi-Lottery Switcher -->
+        <div class="lottery-toggle-group">
+          <button class="lottery-toggle-btn" id="btnLotterySSQ" onclick="switchLottery('ssq')">🎱 福彩双色球</button>
+          <button class="lottery-toggle-btn" id="btnLotteryDLT" onclick="switchLottery('dlt')">🏆 体彩大乐透</button>
+          <button class="lottery-toggle-btn" id="btnLotteryKL8" onclick="switchLottery('kl8')">🍀 福彩快乐8</button>
+          <button class="lottery-toggle-btn active-qxc" id="btnLotteryQXC" onclick="switchLottery('qxc')">⭐ 体彩七星彩</button>
+          <button class="lottery-toggle-btn" id="btnLotteryPL5" onclick="switchLottery('pl5')">🎯 体彩排列五</button>
+        </div>
+        <h1 id="lotteryTitleText">
+          <span>⭐ 七星彩最近1000期大数据可视化分析</span>
+        </h1>
+        <span class="logo-badge" id="headerCountBadge">1000期全量数据</span>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('overview')">📊 综合大盘概览</button>
+        <button class="tab-btn" onclick="switchTab('hotcold')">🔥 号码统计与冷热排名</button>
+        <button class="tab-btn" onclick="switchTab('omission')">📉 每期遗漏走势图阵</button>
+        <button class="tab-btn" onclick="switchTab('waveform')">🌊 单号码遗漏波浪图</button>
+        <button class="tab-btn" onclick="switchTab('history')">📋 1000期开奖历史明细</button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-sync" onclick="openSyncModal()" title="手动从官方接口同步最新开奖数据">🔄 实时更新官方数据</button>
+        <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ 切换浅色</button>
+        <button class="btn" onclick="exportData('json')">📥 导出JSON</button>
+        <button class="btn" onclick="exportData('csv')">📥 导出CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Executive Metric Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card red-top" id="cardLatestIssue">
+        <div class="metric-title">
+          <span>最新官方开奖期号</span>
+          <span id="latestIssueDate" class="badge">--</span>
+        </div>
+        <div class="metric-val" id="latestIssueNo">--</div>
+        <div class="metric-sub balls-row" id="latestBallsRow" style="margin-top: 10px;"></div>
+        <div class="metric-sub" id="latestMetricsText" style="margin-top: 8px;">--</div>
+      </div>
+
+      <div class="metric-card gold-top">
+        <div class="metric-title">
+          <span id="cardTopPrimaryTitle">前区/红球榜首 (最热号)</span>
+          <span class="badge badge-hot">🔥 热榜榜首</span>
+        </div>
+        <div class="metric-val" id="topPrimaryVal">--</div>
+        <div class="metric-sub" id="topPrimarySub">累计出球 -- 次 | 出现频率 --%</div>
+        <div class="metric-sub" style="color: var(--text-main); margin-top: 6px;">
+          理论期望: <span id="theoryPrimarySpan">--</span> 次 (偏差 <span id="topPrimaryDiff" style="color: var(--hot-color);">--</span> 次)
+        </div>
+      </div>
+
+      <div class="metric-card" id="cardTopSecondary">
+        <div class="metric-title">
+          <span id="cardTopSecondaryTitle">后区/蓝球榜首 (最热号)</span>
+          <span class="badge badge-hot">🔥 热榜榜首</span>
+        </div>
+        <div class="metric-val" id="topSecondaryVal">--</div>
+        <div class="metric-sub" id="topSecondarySub">累计出球 -- 次 | 出现频率 --%</div>
+        <div class="metric-sub" style="color: var(--text-main); margin-top: 6px;">
+          理论期望: <span id="theorySecondarySpan">--</span> 次 (偏差 <span id="topSecondaryDiff" style="color: var(--hot-color);">--</span> 次)
+        </div>
+      </div>
+
+      <div class="metric-card green-top">
+        <div class="metric-title">
+          <span>当前最大遗漏预警</span>
+          <span class="badge badge-cold">❄️ 极冷蓄势</span>
+        </div>
+        <div class="metric-val" style="font-size: 18px;" id="maxOmText">--</div>
+        <div class="metric-sub" id="maxOmSub">长遗漏冷态号码状态追踪</div>
+        <div class="metric-sub" style="margin-top: 6px;">
+          当前样本容量: <strong id="totalIssuesDisplay">1000 期</strong> (共计 <span id="totalBallsCountDisplay">7000</span> 个开奖球)
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: 综合大盘概览 (Overview) -->
+    <div id="panel-overview" class="tab-panel active">
+      <div class="two-col-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="primaryGridTitle">🔴 红球出球分布与热度全览</div>
+            <div class="controls-bar">
+              <span class="legend-item"><span class="ball ball-hot">热</span> 热号</span>
+              <span class="legend-item"><span class="ball ball-warm">温</span> 温号</span>
+              <span class="legend-item"><span class="ball ball-cold">冷</span> 冷号</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="primaryOverviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="secondaryGridTitle">🔵 蓝球出球分布与热度全览</div>
+            <div class="controls-bar">
+              <span class="legend-item"><span class="ball ball-hot">热</span> 热号</span>
+              <span class="legend-item"><span class="ball ball-warm">温</span> 温号</span>
+              <span class="legend-item"><span class="ball ball-cold">冷</span> 冷号</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="secondaryOverviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="sumChartTitle">📊 和值 (Sum) 走势与正态分布</div>
+            <span class="metric-sub">实际均值: <span id="actualSumMean">--</span></span>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="sumDistChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚖️ 奇偶比与大小比结构分布</div>
+            <span class="metric-sub">形态特征分布统计</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="ratioChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: 号码统计与冷热排名 (Hot/Warm/Cold Rankings) -->
+    <div id="panel-hotcold" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🔥 号码出球数排行榜与冷/热/温分类矩阵</span>
+          </div>
+          <div class="controls-bar">
+            <div class="filter-btn-group">
+              <select id="rankingPosSelect" class="pos-select" onchange="onRankPosChange()"></select>
+              <button class="filter-btn" id="btnRankingSecondary" style="display:none" onclick="setRankingZone('secondary')">🔵 次区</button>
+            </div>
+
+            <div class="filter-btn-group">
+              <button class="filter-btn active" onclick="setCategoryFilter('all')">全部</button>
+              <button class="filter-btn fc-hot" onclick="setCategoryFilter('hot')">🔥 热号</button>
+              <button class="filter-btn fc-warm" onclick="setCategoryFilter('warm')">🌤️ 温号</button>
+              <button class="filter-btn fc-cold" onclick="setCategoryFilter('cold')">❄️ 冷号</button>
+            </div>
+
+            <select id="sortSelect" onchange="renderRankings()">
+              <option value="count_desc">按出球数排名 (降序，默认)</option>
+              <option value="count_asc">按出球数排名 (升序)</option>
+              <option value="num_asc">按号码自然升序</option>
+              <option value="om_desc">按当前遗漏 (降序，最冷在先)</option>
+              <option value="om_asc">按当前遗漏 (升序，近期最热)</option>
+              <option value="max_om_desc">按最大遗漏 (降序)</option>
+            </select>
+
+            <select id="windowSelect" onchange="updateAnalysisWindow()">
+              <option value="1000">最近 1000 期 (全样本)</option>
+              <option value="500">最近 500 期</option>
+              <option value="200">最近 200 期</option>
+              <option value="100" selected>最近 100 期</option>
+              <option value="50">最近 50 期</option>
+              <option value="30">最近 30 期 (超短期)</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="two-col-grid" style="margin-bottom: 24px;">
+            <div class="card" style="border: 1px solid var(--card-border); margin-bottom: 0;">
+              <div class="card-header" style="padding: 10px 14px;">
+                <span class="card-title" style="font-size: 13px;">📊 出球总数直观对比图 (虚线为理论期望均值)</span>
+              </div>
+              <div class="card-body" style="padding: 10px;">
+                <div class="chart-container" style="height: 480px;">
+                  <canvas id="rankingBarChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--card-border); margin-bottom: 0;">
+              <div class="card-header" style="padding: 10px 14px;">
+                <span class="card-title" style="font-size: 13px;">🍩 冷/热/温号占比与极值概览</span>
+              </div>
+              <div class="card-body" style="padding: 14px;">
+                <div class="chart-container" style="height: 240px;">
+                  <canvas id="hotColdDonutChart"></canvas>
+                </div>
+                <div id="hotColdSummaryText" style="margin-top: 14px; font-size: 13px; line-height: 1.8; color: var(--text-muted);"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table id="rankingsTable">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">出球排名</th>
+                  <th style="width: 70px;">号码</th>
+                  <th style="width: 160px;">出球频次 (对比进度条)</th>
+                  <th style="width: 90px;">出现概率%</th>
+                  <th style="width: 100px;">理论出号偏差</th>
+                  <th style="width: 100px;">当前遗漏期数</th>
+                  <th style="width: 100px;">历史最大遗漏</th>
+                  <th style="width: 100px;">平均遗漏期数</th>
+                  <th style="width: 100px;">冷热温状态</th>
+                  <th style="width: 90px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="rankingsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 每期数字遗漏走势图阵 (Omission Matrix) -->
+    <div id="panel-omission" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span id="omMatrixCardTitle">📉 每期全量数字遗漏走势图阵 (Omission Matrix)</span>
+          </div>
+          <div class="controls-bar">
+            <div class="filter-btn-group">
+              <select id="omPosSelect" class="pos-select" onchange="onOmPosChange()"></select>
+              <button class="filter-btn" id="omZoneSecondary" style="display:none" onclick="setOmZone('secondary')">次区走势</button>
+            </div>
+
+            <select id="omIssueCount" onchange="renderOmissionMatrix()">
+              <option value="30">显示最近 30 期</option>
+              <option value="50" selected>显示最近 50 期</option>
+              <option value="100">显示最近 100 期</option>
+              <option value="200">显示最近 200 期</option>
+              <option value="500">显示最近 500 期</option>
+              <option value="1000">显示全量 1000 期</option>
+            </select>
+
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkShowOmNumber" checked onchange="renderOmissionMatrix()"> 显示遗漏数值
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkHeatmap" checked onchange="renderOmissionMatrix()"> 遗漏深度热力着色
+            </label>
+            <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+              <input type="checkbox" id="chkOrderDesc" checked onchange="renderOmissionMatrix()"> 最新期在顶部
+            </label>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom: 12px; font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              💡 <strong>图阵说明：</strong> 实心彩色球表示该期<strong>开出中奖</strong>（遗漏值为0）；其余格子数字为该号码<strong>距离上次开出的遗漏期数</strong>；背景渐深表示遗漏期数较长（偏冷）。
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--hot-color);border-radius:50%;vertical-align:middle;"></span> 热号</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--warm-color);border-radius:50%;vertical-align:middle;"></span> 温号</span>
+              <span><span style="display:inline-block;width:12px;height:12px;background:var(--cold-color);border-radius:50%;vertical-align:middle;"></span> 冷号</span>
+              <span style="color:var(--text-muted);">实心格 = 该期开出，底色越深遗漏越久</span>
+            </div>
+          </div>
+
+          <div class="table-container" style="max-height: 720px;">
+            <table id="omissionMatrixTable">
+              <thead id="omissionMatrixHead"></thead>
+              <tbody id="omissionMatrixBody"></tbody>
+              <tfoot id="omissionMatrixFoot" style="position: sticky; bottom: 0; background: var(--card-bg); z-index: 10;"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 单号码遗漏波浪折线图 (Single-ball Omission Waveform) -->
+    <div id="panel-waveform" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🌊 单号码遗漏波浪波动折线图 (Omission Waves)</span>
+          </div>
+          <div class="controls-bar">
+            <span>选择号码:</span>
+            <div class="filter-btn-group">
+              <select id="wavePosSelect" class="pos-select" onchange="onWavePosChange()"></select>
+              <button class="filter-btn" id="waveZoneSecondary" style="display:none" onclick="setWaveZone('secondary')">次区</button>
+            </div>
+            <select id="waveBallSelect" onchange="renderWaveformChart()"></select>
+            <select id="waveRangeSelect" onchange="renderWaveformChart()">
+              <option value="1000">全量 1000 期</option>
+              <option value="500" selected>最近 500 期</option>
+              <option value="200">最近 200 期</option>
+              <option value="100">最近 100 期</option>
+              <option value="50">最近 50 期</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="waveStatsBadgeRow" style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;"></div>
+          <div class="chart-container" style="height: 480px;">
+            <canvas id="waveformCanvas"></canvas>
+          </div>
+          <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted);">
+            💡 <strong>说明：</strong> 折线纵轴表示该号码在各期的遗漏期数。折线落到底部 0 点代表中奖开出；波峰越高代表遗漏期数越长。虚线为当前所选周期内的平均遗漏线。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: 1000期开奖历史明细 (History Archive) -->
+    <div id="panel-history" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span id="historyTableTitle">📋 最近 1000 期开奖完整明细与形态统计</span>
+          </div>
+          <div class="controls-bar">
+            <input type="text" id="historySearchInput" placeholder="输入期号或日期搜索 (如 2026114)..." oninput="filterHistoryTable()">
+            <select id="historyFilterBall" onchange="filterHistoryTable()">
+              <option value="all">全部号码包含</option>
+            </select>
+            <select id="historyPageSize" onchange="changeHistoryPageSize()">
+              <option value="25">每页 25 条</option>
+              <option value="50" selected>每页 50 条</option>
+              <option value="100">每页 100 条</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table>
+              <thead id="historyTableHead"></thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 12px;">
+            <div id="historyPageInfo" style="font-size: 13px; color: var(--text-muted);">显示第 1 至 50 条，共 1000 条</div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn" id="btnPrevPage" onclick="prevHistoryPage()">上一页</button>
+              <span id="currentPageNum" style="padding: 6px 12px; font-weight: 600;">1</span>
+              <button class="btn" id="btnNextPage" onclick="nextHistoryPage()">下一页</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sync Official Data Modal Dialog -->
+  <div class="modal-overlay" id="syncModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          <span>🔄 实时同步官方数据</span>
+        </h3>
+        <button onclick="closeSyncModal()" style="background:transparent; border:none; font-size:18px; color:var(--text-muted); cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px; display: flex; gap: 8px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px;">
+          <button class="filter-btn active" id="modalTabBtnOnline" onclick="switchModalTab('online')">🌐 在线直接更新</button>
+          <button class="filter-btn" id="modalTabBtnFile" onclick="switchModalTab('file')">📁 导入最新文件</button>
+          <button class="filter-btn" id="modalTabBtnCli" onclick="switchModalTab('cli')">💻 命令行抓取</button>
+        </div>
+
+        <div id="modalSubTabOnline">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;" id="modalOnlineDesc">从本站同源数据文件（data/qxc_history_1000.json）拉取最新 1000 期并与本地比对合并；仓库由定时任务在每期开奖后经多源核对更新。</p>
+
+          <div style="background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px;">
+              <span>当前最高期号:</span>
+              <strong id="modalCurIssueText">--</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span>同步目标期数:</span>
+              <select id="modalSyncCountSelect" style="padding: 2px 6px;">
+                <option value="1000" selected>最新 1000 期</option>
+                <option value="500">最新 500 期</option>
+                <option value="200">最新 200 期</option>
+                <option value="50">最新 50 期</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="syncStatusBox" style="display: none; background: rgba(56, 139, 253, 0.1); border: 1px solid rgba(56, 139, 253, 0.3); border-radius: 6px; padding: 12px; margin-bottom: 14px; font-size: 12px;">
+            <div id="syncStatusText" style="color: var(--blue-primary); font-weight: 600; margin-bottom: 6px;">正在准备连接...</div>
+            <div style="height: 6px; background: var(--table-hover); border-radius: 3px; overflow: hidden;">
+              <div id="syncProgressBar" style="width: 0%; height: 100%; background: #1f6feb; transition: width 0.3s;"></div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="btnStartOnlineSync" style="width: 100%; justify-content: center; padding: 10px;" onclick="executeOnlineSync()">
+            ⚡ 立即从官方接口同步数据
+          </button>
+        </div>
+
+        <div id="modalSubTabFile" style="display: none;">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+            支持上传由爬虫导出的 <code>JSON</code> 或 <code>CSV</code> 数据文件：
+          </p>
+          <div style="border: 2px dashed var(--card-border); border-radius: 8px; padding: 30px; text-align: center; cursor: pointer; background: var(--bg-color);" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 28px; margin-bottom: 8px;">📂</div>
+            <div style="font-size: 13px; font-weight: 600;">点击选择文件，或直接拖拽文件至此</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">支持 .json 或 .csv 格式</div>
+            <input type="file" id="fileInput" accept=".json,.csv" style="display:none;" onchange="handleFileImport(event)">
+          </div>
+        </div>
+
+        <div id="modalSubTabCli" style="display: none;">
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+            在本地电脑终端运行以下官方同步脚本：
+          </p>
+          <div style="background: #000; border: 1px solid var(--card-border); border-radius: 6px; padding: 12px; font-family: monospace; font-size: 12px; color: #7ee787; position: relative;">
+            <code id="cliCommandText">python3 scripts/fetch_ssq_data.py --count 1000</code>
+            <button class="btn" style="position: absolute; right: 8px; top: 6px; padding: 2px 8px; font-size: 11px;" onclick="copyCliCommand()">复制</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeSyncModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chart-tooltip"></div>
+
+  <footer>
+    <p>双色球 · 大乐透 · 快乐8 · 七星彩 · 排列五 1000期大数据可视化系统 · GitHub & Cloudflare Pages 开源架构设计</p>
+    <p style="margin-top: 4px; font-size: 11px; opacity: 0.7;">本工具纯粹基于公开开奖历史数据进行数理统计与遗漏算法建模，不构成任何投注建议。理性分析，量力而行。</p>
+  </footer>
+
+  
+<script>
+const RAW_POS = [{"i":"2020003","d":"2020-01-07","w":"周二","g":[4,2,2,2,9,7,5],"s":31,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2020004","d":"2020-01-10","w":"周五","g":[9,5,9,1,3,7,8],"s":42,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2020005","d":"2020-01-12","w":"周日","g":[9,4,5,0,5,0,8],"s":31,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2020006","d":"2020-01-14","w":"周二","g":[0,9,0,8,9,9,8],"s":43,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2020007","d":"2020-01-17","w":"周五","g":[9,4,3,1,8,4,0],"s":29,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2020008","d":"2020-01-19","w":"周日","g":[7,0,8,2,6,0,4],"s":27,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2020009","d":"2020-01-21","w":"周二","g":[6,7,4,2,4,1,4],"s":28,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2020010","d":"2020-03-13","w":"周五","g":[3,3,3,1,4,1,7],"s":22,"p":6,"oe":"6:1","bs":"1:6"},{"i":"2020011","d":"2020-03-15","w":"周日","g":[7,8,8,7,5,8,6],"s":49,"p":3,"oe":"3:4","bs":"6:1"},{"i":"2020012","d":"2020-03-17","w":"周二","g":[7,3,6,8,2,1,4],"s":31,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020013","d":"2020-03-20","w":"周五","g":[4,5,8,5,1,0,1],"s":24,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2020014","d":"2020-03-22","w":"周日","g":[6,6,0,2,4,4,0],"s":22,"p":6,"oe":"0:7","bs":"2:5"},{"i":"2020015","d":"2020-03-24","w":"周二","g":[5,8,6,2,2,2,0],"s":25,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2020016","d":"2020-03-27","w":"周五","g":[2,6,6,1,3,1,8],"s":27,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020017","d":"2020-03-29","w":"周日","g":[7,4,5,5,5,3,7],"s":36,"p":4,"oe":"6:1","bs":"5:2"},{"i":"2020018","d":"2020-03-31","w":"周二","g":[6,1,8,3,3,3,9],"s":33,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2020019","d":"2020-04-03","w":"周五","g":[4,8,1,4,2,0,7],"s":26,"p":8,"oe":"2:5","bs":"2:5"},{"i":"2020020","d":"2020-04-05","w":"周日","g":[3,3,2,9,1,7,2],"s":27,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2020021","d":"2020-04-07","w":"周二","g":[7,0,3,1,8,4,1],"s":24,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2020022","d":"2020-04-10","w":"周五","g":[3,1,5,0,6,7,0],"s":22,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2020023","d":"2020-04-12","w":"周日","g":[7,5,3,3,6,0,5],"s":29,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2020024","d":"2020-04-14","w":"周二","g":[8,1,5,1,5,0,7],"s":27,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2020025","d":"2020-04-17","w":"周五","g":[5,3,2,1,1,5,7],"s":24,"p":6,"oe":"6:1","bs":"3:4"},{"i":"2020026","d":"2020-04-19","w":"周日","g":[9,3,3,9,2,9,4],"s":39,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2020027","d":"2020-04-21","w":"周二","g":[8,9,4,4,6,2,7],"s":40,"p":7,"oe":"2:5","bs":"4:3"},{"i":"2020028","d":"2020-04-24","w":"周五","g":[1,3,1,7,8,4,8],"s":32,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2020029","d":"2020-04-26","w":"周日","g":[2,7,6,0,2,1,4],"s":22,"p":7,"oe":"2:5","bs":"2:5"},{"i":"2020030","d":"2020-04-28","w":"周二","g":[2,2,8,3,2,1,1],"s":19,"p":7,"oe":"3:4","bs":"1:6"},{"i":"2020031","d":"2020-05-01","w":"周五","g":[7,5,2,5,3,2,5],"s":29,"p":5,"oe":"5:2","bs":"3:4"},{"i":"2020032","d":"2020-05-03","w":"周日","g":[2,6,3,3,9,2,3],"s":28,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2020033","d":"2020-05-05","w":"周二","g":[7,4,8,3,9,0,5],"s":36,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2020034","d":"2020-05-08","w":"周五","g":[2,4,8,9,3,9,0],"s":35,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2020035","d":"2020-05-10","w":"周日","g":[3,1,8,4,1,2,3],"s":22,"p":7,"oe":"4:3","bs":"1:6"},{"i":"2020036","d":"2020-05-12","w":"周二","g":[5,2,7,7,6,9,6],"s":42,"p":7,"oe":"4:3","bs":"5:2"},{"i":"2020037","d":"2020-05-15","w":"周五","g":[9,5,3,5,2,7,0],"s":31,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2020038","d":"2020-05-17","w":"周日","g":[3,8,0,6,3,4,5],"s":29,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2020039","d":"2020-05-19","w":"周二","g":[3,7,2,7,6,3,7],"s":35,"p":5,"oe":"5:2","bs":"4:3"},{"i":"2020040","d":"2020-05-22","w":"周五","g":[8,9,3,8,2,5,4],"s":39,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2020041","d":"2020-05-24","w":"周日","g":[4,9,3,5,1,9,7],"s":38,"p":8,"oe":"6:1","bs":"4:3"},{"i":"2020042","d":"2020-05-26","w":"周二","g":[3,2,2,0,8,1,3],"s":19,"p":8,"oe":"3:4","bs":"1:6"},{"i":"2020043","d":"2020-05-29","w":"周五","g":[7,7,5,7,0,8,6],"s":40,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2020044","d":"2020-05-31","w":"周日","g":[7,9,7,2,1,4,7],"s":37,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2020045","d":"2020-06-02","w":"周二","g":[5,4,8,0,4,3,2],"s":26,"p":8,"oe":"2:5","bs":"2:5"},{"i":"2020046","d":"2020-06-05","w":"周五","g":[5,9,5,0,2,4,0],"s":25,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2020047","d":"2020-06-07","w":"周日","g":[7,8,8,5,4,1,9],"s":42,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2020048","d":"2020-06-09","w":"周二","g":[1,5,7,3,2,6,6],"s":30,"p":6,"oe":"4:3","bs":"3:4"},{"i":"2020049","d":"2020-06-12","w":"周五","g":[3,1,0,3,8,5,0],"s":20,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2020050","d":"2020-06-14","w":"周日","g":[4,6,7,4,8,4,4],"s":37,"p":4,"oe":"1:6","bs":"3:4"},{"i":"2020051","d":"2020-06-16","w":"周二","g":[1,0,3,9,2,3,3],"s":21,"p":9,"oe":"5:2","bs":"1:6"},{"i":"2020052","d":"2020-06-19","w":"周五","g":[5,3,4,8,9,3,6],"s":38,"p":6,"oe":"4:3","bs":"3:4"},{"i":"2020053","d":"2020-06-21","w":"周日","g":[8,2,0,5,9,3,3],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2020054","d":"2020-06-23","w":"周二","g":[5,2,8,2,7,8,6],"s":38,"p":6,"oe":"2:5","bs":"4:3"},{"i":"2020055","d":"2020-06-26","w":"周五","g":[9,5,7,2,0,4,6],"s":33,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2020056","d":"2020-06-28","w":"周日","g":[8,2,6,5,5,5,3],"s":34,"p":6,"oe":"4:3","bs":"5:2"},{"i":"2020057","d":"2020-06-30","w":"周二","g":[8,3,2,3,3,7,1],"s":27,"p":7,"oe":"5:2","bs":"2:5"},{"i":"2020058","d":"2020-07-03","w":"周五","g":[5,3,3,8,0,1,8],"s":28,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2020059","d":"2020-07-05","w":"周日","g":[5,2,8,6,8,8,9],"s":46,"p":7,"oe":"2:5","bs":"6:1"},{"i":"2020060","d":"2020-07-07","w":"周二","g":[4,2,1,0,4,9,7],"s":27,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2020061","d":"2020-07-10","w":"周五","g":[9,4,1,5,7,1,1],"s":28,"p":8,"oe":"6:1","bs":"3:4"},{"i":"2020062","d":"2020-07-12","w":"周日","g":[9,3,6,4,1,4,9],"s":36,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2020063","d":"2020-07-14","w":"周二","g":[5,8,7,2,3,3,0],"s":28,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2020064","d":"2020-07-17","w":"周五","g":[4,2,5,4,4,6,8],"s":33,"p":6,"oe":"1:6","bs":"3:4"},{"i":"2020065","d":"2020-07-19","w":"周日","g":[9,2,8,5,6,6,4],"s":40,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2020066","d":"2020-07-21","w":"周二","g":[8,4,3,8,3,2,8],"s":36,"p":6,"oe":"2:5","bs":"3:4"},{"i":"2020067","d":"2020-07-24","w":"周五","g":[5,6,9,2,8,1,5],"s":36,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2020068","d":"2020-07-26","w":"周日","g":[9,6,8,0,8,5,4],"s":40,"p":9,"oe":"2:5","bs":"5:2"},{"i":"2020069","d":"2020-07-28","w":"周二","g":[3,1,1,4,5,1,5],"s":20,"p":4,"oe":"6:1","bs":"1:6"},{"i":"2020070","d":"2020-07-31","w":"周五","g":[4,7,8,6,2,8,7],"s":42,"p":6,"oe":"2:5","bs":"5:2"},{"i":"2020071","d":"2020-08-02","w":"周日","g":[5,7,7,1,1,3,4],"s":28,"p":6,"oe":"6:1","bs":"3:4"},{"i":"2020072","d":"2020-08-04","w":"周二","g":[0,1,9,3,7,1,4],"s":25,"p":9,"oe":"5:2","bs":"2:5"},{"i":"2020073","d":"2020-08-07","w":"周五","g":[5,9,1,0,4,5,6],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2020074","d":"2020-08-09","w":"周日","g":[9,7,9,3,8,2,7],"s":45,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2020075","d":"2020-08-11","w":"周二","g":[9,7,0,5,5,3,5],"s":34,"p":9,"oe":"6:1","bs":"4:3"},{"i":"2020076","d":"2020-08-14","w":"周五","g":[4,8,9,0,8,7,9],"s":45,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2020077","d":"2020-08-16","w":"周日","g":[0,0,6,1,8,7,9],"s":31,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2020078","d":"2020-08-18","w":"周二","g":[5,3,1,1,6,6,2],"s":24,"p":5,"oe":"4:3","bs":"3:4"},{"i":"2020079","d":"2020-08-21","w":"周五","g":[0,3,0,9,6,4,1],"s":23,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2020080","d":"2020-08-23","w":"周日","g":[5,8,3,6,8,8,6],"s":44,"p":5,"oe":"2:5","bs":"5:2"},{"i":"2020081","d":"2020-08-25","w":"周二","g":[1,7,9,0,5,9,5],"s":36,"p":9,"oe":"6:1","bs":"4:3"},{"i":"2020082","d":"2020-08-28","w":"周五","g":[0,0,4,4,1,5,1],"s":15,"p":5,"oe":"3:4","bs":"1:6"},{"i":"2020083","d":"2020-08-30","w":"周日","g":[8,4,4,3,1,1,2],"s":23,"p":7,"oe":"3:4","bs":"1:6"},{"i":"2020084","d":"2020-09-01","w":"周二","g":[4,8,4,1,5,5,2],"s":29,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020085","d":"2020-09-04","w":"周五","g":[1,4,5,9,5,9,9],"s":42,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2020086","d":"2020-09-06","w":"周日","g":[7,2,4,2,3,8,9],"s":35,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020087","d":"2020-09-08","w":"周二","g":[1,3,9,2,1,0,8],"s":24,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2020088","d":"2020-09-11","w":"周五","g":[5,5,8,9,8,5,7],"s":47,"p":4,"oe":"5:2","bs":"7:0"},{"i":"2020089","d":"2020-09-13","w":"周日","g":[9,3,3,6,8,6,3],"s":38,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2020090","d":"2020-09-15","w":"周二","g":[2,5,1,7,8,6,1],"s":30,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2020091","d":"2020-09-18","w":"周五","g":[2,3,3,3,9,3,6],"s":29,"p":7,"oe":"5:2","bs":"1:6"},{"i":"2020092","d":"2020-09-20","w":"周日","g":[8,8,3,2,6,7,9],"s":43,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2020093","d":"2020-09-22","w":"周二","g":[6,9,3,0,0,5,0],"s":23,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2020094","d":"2020-09-25","w":"周五","g":[6,9,0,8,5,5,4],"s":37,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2020095","d":"2020-09-27","w":"周日","g":[2,5,2,2,8,8,2],"s":29,"p":6,"oe":"1:6","bs":"3:4"},{"i":"2020096","d":"2020-09-29","w":"周二","g":[4,3,5,6,2,9,7],"s":36,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2020097","d":"2020-10-06","w":"周二","g":[9,7,9,3,0,9,4],"s":41,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2020098","d":"2020-10-09","w":"周五","g":[1,2,9,2,1,6,0],"s":21,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2020099","d":"2020-10-11","w":"周日","g":[2,3,8,1,1,5,0],"s":20,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2020100","d":"2020-10-13","w":"周二","g":[5,6,0,0,2,1,7],"s":21,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020101","d":"2020-10-16","w":"周五","g":[3,6,9,5,4,3,12],"s":42,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2020102","d":"2020-10-18","w":"周日","g":[9,5,3,3,3,3,9],"s":35,"p":6,"oe":"7:0","bs":"3:4"},{"i":"2020103","d":"2020-10-20","w":"周二","g":[0,8,1,6,5,3,6],"s":29,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2020104","d":"2020-10-23","w":"周五","g":[5,0,9,9,3,1,0],"s":27,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2020105","d":"2020-10-25","w":"周日","g":[4,1,7,1,8,2,4],"s":27,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2020106","d":"2020-10-27","w":"周二","g":[3,1,8,9,0,8,1],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2020107","d":"2020-10-30","w":"周五","g":[2,3,8,9,3,7,0],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2020108","d":"2020-11-01","w":"周日","g":[3,3,2,0,5,1,6],"s":20,"p":6,"oe":"4:3","bs":"1:6"},{"i":"2020109","d":"2020-11-03","w":"周二","g":[9,1,9,4,1,8,3],"s":35,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2020110","d":"2020-11-06","w":"周五","g":[6,4,5,7,5,8,2],"s":37,"p":6,"oe":"3:4","bs":"5:2"},{"i":"2020111","d":"2020-11-08","w":"周日","g":[3,3,9,0,5,8,14],"s":42,"p":14,"oe":"4:3","bs":"4:3"},{"i":"2020112","d":"2020-11-10","w":"周二","g":[0,4,4,4,9,4,6],"s":31,"p":9,"oe":"1:6","bs":"1:6"},{"i":"2020113","d":"2020-11-13","w":"周五","g":[4,9,8,0,0,3,4],"s":28,"p":9,"oe":"2:5","bs":"2:5"},{"i":"2020114","d":"2020-11-15","w":"周日","g":[8,8,7,3,4,5,0],"s":35,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2020115","d":"2020-11-17","w":"周二","g":[1,3,4,8,8,5,4],"s":33,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2020116","d":"2020-11-20","w":"周五","g":[9,7,3,0,3,1,10],"s":33,"p":10,"oe":"5:2","bs":"3:4"},{"i":"2020117","d":"2020-11-22","w":"周日","g":[7,9,0,5,0,6,5],"s":32,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2020118","d":"2020-11-24","w":"周二","g":[7,5,1,1,6,8,14],"s":42,"p":13,"oe":"4:3","bs":"5:2"},{"i":"2020119","d":"2020-11-27","w":"周五","g":[2,2,2,7,2,3,7],"s":25,"p":5,"oe":"3:4","bs":"2:5"},{"i":"2020120","d":"2020-11-29","w":"周日","g":[5,0,4,0,4,8,14],"s":35,"p":14,"oe":"1:6","bs":"3:4"},{"i":"2020121","d":"2020-12-01","w":"周二","g":[1,2,7,9,8,4,9],"s":40,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2020122","d":"2020-12-04","w":"周五","g":[6,0,1,9,8,7,9],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2020123","d":"2020-12-06","w":"周日","g":[7,7,1,6,4,1,4],"s":30,"p":6,"oe":"4:3","bs":"3:4"},{"i":"2020124","d":"2020-12-08","w":"周二","g":[4,1,0,9,5,2,11],"s":32,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2020125","d":"2020-12-11","w":"周五","g":[1,9,1,1,7,4,6],"s":29,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2020126","d":"2020-12-13","w":"周日","g":[9,7,1,3,8,3,13],"s":44,"p":12,"oe":"6:1","bs":"4:3"},{"i":"2020127","d":"2020-12-15","w":"周二","g":[3,5,8,5,8,2,13],"s":44,"p":11,"oe":"4:3","bs":"5:2"},{"i":"2020128","d":"2020-12-18","w":"周五","g":[4,2,9,7,1,8,1],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2020129","d":"2020-12-20","w":"周日","g":[7,8,3,9,1,8,5],"s":41,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2020130","d":"2020-12-22","w":"周二","g":[5,3,9,8,0,6,4],"s":35,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2020131","d":"2020-12-25","w":"周五","g":[8,5,0,0,3,8,9],"s":33,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2020132","d":"2020-12-27","w":"周日","g":[5,5,2,9,7,9,6],"s":43,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2020133","d":"2020-12-29","w":"周二","g":[1,9,5,9,0,2,12],"s":38,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2021001","d":"2021-01-01","w":"周五","g":[5,2,1,0,3,5,13],"s":29,"p":13,"oe":"5:2","bs":"3:4"},{"i":"2021002","d":"2021-01-03","w":"周日","g":[7,0,7,0,7,8,8],"s":37,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2021003","d":"2021-01-05","w":"周二","g":[9,7,2,3,8,1,14],"s":44,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2021004","d":"2021-01-08","w":"周五","g":[0,0,7,8,4,9,1],"s":29,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2021005","d":"2021-01-10","w":"周日","g":[0,9,5,3,7,0,0],"s":24,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2021006","d":"2021-01-12","w":"周二","g":[2,3,9,2,5,4,13],"s":38,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2021007","d":"2021-01-15","w":"周五","g":[1,8,2,9,0,1,12],"s":33,"p":12,"oe":"3:4","bs":"3:4"},{"i":"2021008","d":"2021-01-17","w":"周日","g":[5,0,7,4,3,7,14],"s":40,"p":14,"oe":"4:3","bs":"4:3"},{"i":"2021009","d":"2021-01-19","w":"周二","g":[9,7,9,0,8,8,5],"s":46,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2021010","d":"2021-01-22","w":"周五","g":[4,8,1,5,5,7,6],"s":36,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2021011","d":"2021-01-24","w":"周日","g":[5,6,5,6,3,0,4],"s":29,"p":6,"oe":"3:4","bs":"4:3"},{"i":"2021012","d":"2021-01-26","w":"周二","g":[0,3,7,0,1,1,9],"s":21,"p":9,"oe":"5:2","bs":"2:5"},{"i":"2021013","d":"2021-01-29","w":"周五","g":[6,7,2,0,4,4,9],"s":32,"p":9,"oe":"2:5","bs":"3:4"},{"i":"2021014","d":"2021-01-31","w":"周日","g":[7,7,1,7,6,2,11],"s":41,"p":10,"oe":"5:2","bs":"5:2"},{"i":"2021015","d":"2021-02-02","w":"周二","g":[7,7,6,5,4,8,11],"s":48,"p":7,"oe":"4:3","bs":"6:1"},{"i":"2021016","d":"2021-02-05","w":"周五","g":[7,5,2,9,1,8,4],"s":36,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2021017","d":"2021-02-07","w":"周日","g":[5,2,2,0,7,9,11],"s":36,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2021018","d":"2021-02-19","w":"周五","g":[7,9,2,7,8,0,1],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021019","d":"2021-02-21","w":"周日","g":[4,5,9,0,8,2,6],"s":34,"p":9,"oe":"2:5","bs":"3:4"},{"i":"2021020","d":"2021-02-23","w":"周二","g":[9,9,4,0,0,3,14],"s":39,"p":14,"oe":"3:4","bs":"3:4"},{"i":"2021021","d":"2021-02-26","w":"周五","g":[2,8,5,4,8,5,8],"s":40,"p":6,"oe":"2:5","bs":"5:2"},{"i":"2021022","d":"2021-02-28","w":"周日","g":[0,2,5,9,2,6,0],"s":24,"p":9,"oe":"2:5","bs":"3:4"},{"i":"2021023","d":"2021-03-02","w":"周二","g":[9,3,9,7,9,2,14],"s":53,"p":12,"oe":"5:2","bs":"5:2"},{"i":"2021024","d":"2021-03-05","w":"周五","g":[5,6,5,1,7,2,3],"s":29,"p":6,"oe":"5:2","bs":"4:3"},{"i":"2021025","d":"2021-03-07","w":"周日","g":[4,4,1,8,0,0,10],"s":27,"p":10,"oe":"1:6","bs":"2:5"},{"i":"2021026","d":"2021-03-09","w":"周二","g":[3,9,9,2,1,7,4],"s":35,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2021027","d":"2021-03-12","w":"周五","g":[9,3,7,6,3,2,0],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2021028","d":"2021-03-14","w":"周日","g":[9,3,5,4,4,4,6],"s":35,"p":6,"oe":"3:4","bs":"2:5"},{"i":"2021029","d":"2021-03-16","w":"周二","g":[5,5,4,4,0,8,6],"s":32,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2021030","d":"2021-03-19","w":"周五","g":[0,2,9,2,6,3,10],"s":32,"p":10,"oe":"2:5","bs":"3:4"},{"i":"2021031","d":"2021-03-21","w":"周日","g":[8,6,8,6,1,7,1],"s":37,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2021032","d":"2021-03-23","w":"周二","g":[4,5,2,5,2,0,0],"s":18,"p":5,"oe":"2:5","bs":"2:5"},{"i":"2021033","d":"2021-03-26","w":"周五","g":[0,7,6,2,3,7,9],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021034","d":"2021-03-28","w":"周日","g":[3,5,2,3,1,1,3],"s":18,"p":4,"oe":"6:1","bs":"1:6"},{"i":"2021035","d":"2021-03-30","w":"周二","g":[1,3,6,5,7,8,4],"s":34,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2021036","d":"2021-04-02","w":"周五","g":[2,3,3,9,5,1,2],"s":25,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2021037","d":"2021-04-04","w":"周日","g":[7,8,1,0,0,2,13],"s":31,"p":13,"oe":"3:4","bs":"3:4"},{"i":"2021038","d":"2021-04-06","w":"周二","g":[1,5,8,1,4,1,11],"s":31,"p":10,"oe":"5:2","bs":"3:4"},{"i":"2021039","d":"2021-04-09","w":"周五","g":[0,7,0,2,8,4,14],"s":35,"p":14,"oe":"1:6","bs":"3:4"},{"i":"2021040","d":"2021-04-11","w":"周日","g":[4,9,3,9,5,0,12],"s":42,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2021041","d":"2021-04-13","w":"周二","g":[7,2,8,8,9,0,14],"s":48,"p":14,"oe":"2:5","bs":"5:2"},{"i":"2021042","d":"2021-04-16","w":"周五","g":[1,9,6,3,9,7,2],"s":37,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2021043","d":"2021-04-18","w":"周日","g":[4,6,0,2,1,3,5],"s":21,"p":6,"oe":"3:4","bs":"1:6"},{"i":"2021044","d":"2021-04-20","w":"周二","g":[0,4,4,9,6,3,5],"s":31,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2021045","d":"2021-04-23","w":"周五","g":[2,6,0,0,2,8,14],"s":32,"p":14,"oe":"0:7","bs":"3:4"},{"i":"2021046","d":"2021-04-25","w":"周日","g":[9,3,5,9,5,3,14],"s":48,"p":11,"oe":"6:1","bs":"5:2"},{"i":"2021047","d":"2021-04-27","w":"周二","g":[4,0,1,9,8,3,13],"s":38,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2021048","d":"2021-04-30","w":"周五","g":[2,3,9,6,2,1,5],"s":28,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2021049","d":"2021-05-02","w":"周日","g":[3,4,4,4,0,5,14],"s":34,"p":14,"oe":"2:5","bs":"2:5"},{"i":"2021050","d":"2021-05-04","w":"周二","g":[3,1,9,0,3,0,2],"s":18,"p":9,"oe":"4:3","bs":"1:6"},{"i":"2021051","d":"2021-05-07","w":"周五","g":[4,6,0,0,3,9,14],"s":36,"p":14,"oe":"2:5","bs":"3:4"},{"i":"2021052","d":"2021-05-09","w":"周日","g":[7,3,3,5,5,8,14],"s":45,"p":11,"oe":"5:2","bs":"5:2"},{"i":"2021053","d":"2021-05-11","w":"周二","g":[1,4,3,6,4,6,11],"s":35,"p":10,"oe":"3:4","bs":"3:4"},{"i":"2021054","d":"2021-05-14","w":"周五","g":[4,9,6,6,4,9,4],"s":42,"p":5,"oe":"2:5","bs":"4:3"},{"i":"2021055","d":"2021-05-16","w":"周日","g":[5,1,8,4,7,3,14],"s":42,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2021056","d":"2021-05-18","w":"周二","g":[3,8,1,0,0,3,11],"s":26,"p":11,"oe":"4:3","bs":"2:5"},{"i":"2021057","d":"2021-05-21","w":"周五","g":[8,6,1,1,5,2,7],"s":30,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2021058","d":"2021-05-23","w":"周日","g":[4,1,5,7,1,4,12],"s":34,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2021059","d":"2021-05-25","w":"周二","g":[8,9,6,6,6,2,14],"s":51,"p":12,"oe":"1:6","bs":"6:1"},{"i":"2021060","d":"2021-05-28","w":"周五","g":[6,0,4,5,8,4,7],"s":34,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2021061","d":"2021-05-30","w":"周日","g":[4,5,4,6,0,2,8],"s":29,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2021062","d":"2021-06-01","w":"周二","g":[8,6,1,1,8,7,2],"s":33,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2021063","d":"2021-06-04","w":"周五","g":[9,5,4,8,2,9,3],"s":40,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2021064","d":"2021-06-06","w":"周日","g":[2,0,2,5,5,5,3],"s":22,"p":5,"oe":"4:3","bs":"3:4"},{"i":"2021065","d":"2021-06-08","w":"周二","g":[8,7,4,0,8,6,10],"s":43,"p":10,"oe":"1:6","bs":"5:2"},{"i":"2021066","d":"2021-06-11","w":"周五","g":[5,9,1,0,4,4,2],"s":25,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2021067","d":"2021-06-13","w":"周日","g":[7,0,8,8,8,1,3],"s":35,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2021068","d":"2021-06-15","w":"周二","g":[8,8,4,8,5,1,14],"s":48,"p":13,"oe":"2:5","bs":"5:2"},{"i":"2021069","d":"2021-06-18","w":"周五","g":[2,5,4,9,5,3,2],"s":30,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2021070","d":"2021-06-20","w":"周日","g":[2,0,3,3,6,9,11],"s":34,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2021071","d":"2021-06-22","w":"周二","g":[7,6,3,7,5,3,11],"s":42,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2021072","d":"2021-06-25","w":"周五","g":[2,5,4,8,7,5,11],"s":42,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2021073","d":"2021-06-27","w":"周日","g":[3,5,9,3,3,4,5],"s":32,"p":6,"oe":"6:1","bs":"2:5"},{"i":"2021074","d":"2021-06-29","w":"周二","g":[2,0,7,2,1,5,12],"s":29,"p":12,"oe":"3:4","bs":"3:4"},{"i":"2021075","d":"2021-07-02","w":"周五","g":[1,9,5,4,2,7,10],"s":38,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021076","d":"2021-07-04","w":"周日","g":[8,1,6,8,0,0,3],"s":26,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2021077","d":"2021-07-06","w":"周二","g":[1,2,8,6,2,6,11],"s":36,"p":10,"oe":"2:5","bs":"4:3"},{"i":"2021078","d":"2021-07-09","w":"周五","g":[0,7,3,3,1,8,7],"s":29,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2021079","d":"2021-07-11","w":"周日","g":[1,1,2,5,0,8,11],"s":28,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2021080","d":"2021-07-13","w":"周二","g":[7,2,2,8,2,4,7],"s":32,"p":6,"oe":"2:5","bs":"3:4"},{"i":"2021081","d":"2021-07-16","w":"周五","g":[5,2,7,3,0,3,4],"s":24,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2021082","d":"2021-07-18","w":"周日","g":[4,7,5,1,3,5,5],"s":30,"p":6,"oe":"6:1","bs":"3:4"},{"i":"2021083","d":"2021-07-20","w":"周二","g":[9,8,8,4,7,9,13],"s":58,"p":9,"oe":"4:3","bs":"6:1"},{"i":"2021084","d":"2021-07-23","w":"周五","g":[4,3,1,6,6,7,0],"s":27,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2021085","d":"2021-07-25","w":"周日","g":[0,3,5,9,3,2,7],"s":29,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2021086","d":"2021-07-27","w":"周二","g":[1,1,9,4,2,0,0],"s":17,"p":9,"oe":"3:4","bs":"1:6"},{"i":"2021087","d":"2021-07-30","w":"周五","g":[3,6,2,9,8,8,3],"s":39,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2021088","d":"2021-08-01","w":"周日","g":[9,7,5,6,2,5,5],"s":39,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2021089","d":"2021-08-03","w":"周二","g":[3,8,5,9,8,3,10],"s":46,"p":7,"oe":"4:3","bs":"5:2"},{"i":"2021090","d":"2021-08-06","w":"周五","g":[2,6,8,7,0,4,6],"s":33,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2021091","d":"2021-08-08","w":"周日","g":[8,6,9,4,7,3,5],"s":42,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2021092","d":"2021-08-10","w":"周二","g":[9,9,7,9,1,2,14],"s":51,"p":13,"oe":"5:2","bs":"5:2"},{"i":"2021093","d":"2021-08-13","w":"周五","g":[7,5,6,7,3,9,8],"s":45,"p":6,"oe":"5:2","bs":"6:1"},{"i":"2021094","d":"2021-08-15","w":"周日","g":[4,8,1,5,7,1,1],"s":27,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2021095","d":"2021-08-17","w":"周二","g":[4,6,5,7,6,7,6],"s":41,"p":3,"oe":"3:4","bs":"5:2"},{"i":"2021096","d":"2021-08-20","w":"周五","g":[6,0,5,5,9,3,13],"s":41,"p":13,"oe":"5:2","bs":"5:2"},{"i":"2021097","d":"2021-08-22","w":"周日","g":[0,5,5,4,4,5,0],"s":23,"p":5,"oe":"3:4","bs":"3:4"},{"i":"2021098","d":"2021-08-24","w":"周二","g":[1,0,7,7,9,6,5],"s":35,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2021099","d":"2021-08-27","w":"周五","g":[4,0,0,3,7,8,7],"s":29,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2021100","d":"2021-08-29","w":"周日","g":[0,2,3,5,5,9,14],"s":38,"p":14,"oe":"4:3","bs":"4:3"},{"i":"2021101","d":"2021-08-31","w":"周二","g":[8,1,5,6,0,8,10],"s":38,"p":10,"oe":"2:5","bs":"5:2"},{"i":"2021102","d":"2021-09-03","w":"周五","g":[1,1,6,4,7,6,4],"s":29,"p":6,"oe":"3:4","bs":"3:4"},{"i":"2021103","d":"2021-09-05","w":"周日","g":[5,5,6,9,9,8,3],"s":45,"p":6,"oe":"5:2","bs":"6:1"},{"i":"2021104","d":"2021-09-07","w":"周二","g":[0,1,8,2,5,7,9],"s":32,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021105","d":"2021-09-10","w":"周五","g":[3,8,2,8,1,3,2],"s":27,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2021106","d":"2021-09-12","w":"周日","g":[4,7,9,0,2,8,5],"s":35,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2021107","d":"2021-09-14","w":"周二","g":[3,9,3,1,9,2,0],"s":27,"p":9,"oe":"5:2","bs":"2:5"},{"i":"2021108","d":"2021-09-17","w":"周五","g":[4,7,0,0,8,7,8],"s":34,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2021109","d":"2021-09-19","w":"周日","g":[4,3,0,7,9,4,13],"s":40,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2021110","d":"2021-09-21","w":"周二","g":[7,1,9,6,4,9,7],"s":43,"p":8,"oe":"5:2","bs":"5:2"},{"i":"2021111","d":"2021-09-24","w":"周五","g":[1,9,9,9,0,5,5],"s":38,"p":9,"oe":"6:1","bs":"4:3"},{"i":"2021112","d":"2021-09-26","w":"周日","g":[1,0,2,4,6,6,6],"s":25,"p":6,"oe":"1:6","bs":"2:5"},{"i":"2021113","d":"2021-09-28","w":"周二","g":[0,5,4,0,1,8,5],"s":23,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2021114","d":"2021-10-05","w":"周二","g":[8,4,0,1,8,7,14],"s":42,"p":14,"oe":"2:5","bs":"4:3"},{"i":"2021115","d":"2021-10-08","w":"周五","g":[5,3,7,8,0,6,11],"s":40,"p":11,"oe":"4:3","bs":"5:2"},{"i":"2021116","d":"2021-10-10","w":"周日","g":[7,7,0,3,4,0,7],"s":28,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2021117","d":"2021-10-12","w":"周二","g":[6,9,6,1,7,9,9],"s":47,"p":8,"oe":"5:2","bs":"6:1"},{"i":"2021118","d":"2021-10-15","w":"周五","g":[8,2,1,3,7,6,0],"s":27,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2021119","d":"2021-10-17","w":"周日","g":[5,6,2,6,8,9,14],"s":50,"p":12,"oe":"2:5","bs":"6:1"},{"i":"2021120","d":"2021-10-19","w":"周二","g":[3,4,3,7,8,1,10],"s":36,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2021121","d":"2021-10-22","w":"周五","g":[5,9,5,7,0,2,8],"s":36,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2021122","d":"2021-10-24","w":"周日","g":[6,8,8,1,6,8,3],"s":40,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2021123","d":"2021-10-26","w":"周二","g":[2,4,2,0,0,7,0],"s":15,"p":7,"oe":"1:6","bs":"1:6"},{"i":"2021124","d":"2021-10-29","w":"周五","g":[7,2,4,1,1,3,12],"s":30,"p":11,"oe":"4:3","bs":"2:5"},{"i":"2021125","d":"2021-10-31","w":"周日","g":[0,6,5,3,7,7,11],"s":39,"p":11,"oe":"5:2","bs":"5:2"},{"i":"2021126","d":"2021-11-02","w":"周二","g":[7,8,6,1,9,8,2],"s":41,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2021127","d":"2021-11-05","w":"周五","g":[2,3,2,9,3,4,0],"s":23,"p":9,"oe":"3:4","bs":"1:6"},{"i":"2021128","d":"2021-11-07","w":"周日","g":[7,6,4,1,0,5,9],"s":32,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021129","d":"2021-11-09","w":"周二","g":[1,8,3,1,1,7,7],"s":28,"p":7,"oe":"6:1","bs":"3:4"},{"i":"2021130","d":"2021-11-12","w":"周五","g":[1,1,5,3,4,5,6],"s":25,"p":5,"oe":"5:2","bs":"2:5"},{"i":"2021131","d":"2021-11-14","w":"周日","g":[1,2,4,9,9,2,6],"s":33,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2021132","d":"2021-11-16","w":"周二","g":[1,0,6,1,2,0,6],"s":16,"p":6,"oe":"2:5","bs":"1:6"},{"i":"2021133","d":"2021-11-19","w":"周五","g":[0,2,7,2,5,1,11],"s":28,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2021134","d":"2021-11-21","w":"周日","g":[2,8,1,3,9,2,8],"s":33,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2021135","d":"2021-11-23","w":"周二","g":[4,3,6,2,3,3,9],"s":30,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2021136","d":"2021-11-26","w":"周五","g":[5,3,2,7,0,5,2],"s":24,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2021137","d":"2021-11-28","w":"周日","g":[5,6,4,6,2,3,11],"s":37,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2021138","d":"2021-11-30","w":"周二","g":[2,3,6,6,6,9,9],"s":41,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2021139","d":"2021-12-03","w":"周五","g":[2,8,3,0,6,0,14],"s":33,"p":14,"oe":"1:6","bs":"3:4"},{"i":"2021140","d":"2021-12-05","w":"周日","g":[9,8,2,7,1,0,7],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2021141","d":"2021-12-07","w":"周二","g":[4,0,4,7,0,0,13],"s":28,"p":13,"oe":"2:5","bs":"2:5"},{"i":"2021142","d":"2021-12-10","w":"周五","g":[3,2,0,4,1,1,13],"s":24,"p":13,"oe":"4:3","bs":"1:6"},{"i":"2021143","d":"2021-12-12","w":"周日","g":[8,0,6,4,5,6,10],"s":39,"p":10,"oe":"1:6","bs":"5:2"},{"i":"2021144","d":"2021-12-14","w":"周二","g":[4,7,4,8,3,9,2],"s":37,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2021145","d":"2021-12-17","w":"周五","g":[6,0,7,3,0,2,4],"s":22,"p":7,"oe":"2:5","bs":"2:5"},{"i":"2021146","d":"2021-12-19","w":"周日","g":[0,1,3,8,0,1,11],"s":24,"p":11,"oe":"4:3","bs":"2:5"},{"i":"2021147","d":"2021-12-21","w":"周二","g":[1,6,0,2,7,9,3],"s":28,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2021148","d":"2021-12-24","w":"周五","g":[6,4,0,0,2,4,4],"s":20,"p":6,"oe":"0:7","bs":"1:6"},{"i":"2021149","d":"2021-12-26","w":"周日","g":[7,8,0,8,0,7,9],"s":39,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2021150","d":"2021-12-28","w":"周二","g":[8,8,4,6,3,8,5],"s":42,"p":5,"oe":"2:5","bs":"4:3"},{"i":"2021151","d":"2021-12-31","w":"周五","g":[6,1,3,6,6,1,13],"s":36,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2022001","d":"2022-01-02","w":"周日","g":[3,4,5,6,7,1,14],"s":40,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2022002","d":"2022-01-04","w":"周二","g":[6,6,3,6,8,8,13],"s":50,"p":10,"oe":"2:5","bs":"6:1"},{"i":"2022003","d":"2022-01-07","w":"周五","g":[4,3,5,3,9,7,0],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2022004","d":"2022-01-09","w":"周日","g":[9,0,6,2,4,4,11],"s":36,"p":11,"oe":"2:5","bs":"3:4"},{"i":"2022005","d":"2022-01-11","w":"周二","g":[3,9,9,8,5,4,12],"s":50,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2022006","d":"2022-01-14","w":"周五","g":[8,7,5,8,8,0,9],"s":45,"p":9,"oe":"3:4","bs":"6:1"},{"i":"2022007","d":"2022-01-16","w":"周日","g":[6,2,1,9,8,1,7],"s":34,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2022008","d":"2022-01-18","w":"周二","g":[6,2,7,6,5,8,5],"s":39,"p":6,"oe":"3:4","bs":"5:2"},{"i":"2022009","d":"2022-01-21","w":"周五","g":[9,3,5,6,8,4,8],"s":43,"p":6,"oe":"3:4","bs":"5:2"},{"i":"2022010","d":"2022-01-23","w":"周日","g":[1,1,5,8,3,9,0],"s":27,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2022011","d":"2022-01-25","w":"周二","g":[8,0,2,9,2,9,10],"s":40,"p":10,"oe":"2:5","bs":"4:3"},{"i":"2022012","d":"2022-01-28","w":"周五","g":[2,3,1,2,3,8,9],"s":28,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2022013","d":"2022-02-08","w":"周二","g":[5,7,6,6,5,4,8],"s":41,"p":4,"oe":"3:4","bs":"6:1"},{"i":"2022014","d":"2022-02-11","w":"周五","g":[3,1,3,8,2,5,6],"s":28,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2022015","d":"2022-02-13","w":"周日","g":[1,2,8,9,9,1,8],"s":38,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2022016","d":"2022-02-15","w":"周二","g":[6,4,6,5,6,6,9],"s":42,"p":5,"oe":"2:5","bs":"6:1"},{"i":"2022017","d":"2022-02-18","w":"周五","g":[7,0,5,4,9,8,13],"s":46,"p":13,"oe":"4:3","bs":"5:2"},{"i":"2022018","d":"2022-02-20","w":"周日","g":[7,4,9,4,7,3,0],"s":34,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2022019","d":"2022-02-22","w":"周二","g":[8,8,0,6,3,0,6],"s":31,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2022020","d":"2022-02-25","w":"周五","g":[2,6,5,9,5,0,1],"s":28,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2022021","d":"2022-02-27","w":"周日","g":[6,1,3,0,2,9,0],"s":21,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2022022","d":"2022-03-01","w":"周二","g":[4,1,0,4,8,1,12],"s":30,"p":12,"oe":"2:5","bs":"2:5"},{"i":"2022023","d":"2022-03-04","w":"周五","g":[5,1,2,3,7,2,11],"s":31,"p":10,"oe":"5:2","bs":"3:4"},{"i":"2022024","d":"2022-03-06","w":"周日","g":[8,2,6,5,3,5,12],"s":41,"p":10,"oe":"3:4","bs":"5:2"},{"i":"2022025","d":"2022-03-08","w":"周二","g":[6,6,0,4,6,6,3],"s":31,"p":6,"oe":"1:6","bs":"4:3"},{"i":"2022026","d":"2022-03-11","w":"周五","g":[1,6,4,8,1,7,1],"s":28,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2022027","d":"2022-03-13","w":"周日","g":[9,1,1,3,2,3,7],"s":26,"p":8,"oe":"6:1","bs":"2:5"},{"i":"2022028","d":"2022-03-15","w":"周二","g":[1,1,2,8,1,4,5],"s":22,"p":7,"oe":"4:3","bs":"1:6"},{"i":"2022029","d":"2022-03-18","w":"周五","g":[6,1,6,1,3,5,7],"s":29,"p":6,"oe":"5:2","bs":"4:3"},{"i":"2022030","d":"2022-03-20","w":"周日","g":[2,8,4,9,2,5,8],"s":38,"p":7,"oe":"2:5","bs":"4:3"},{"i":"2022031","d":"2022-03-22","w":"周二","g":[7,1,8,0,8,5,7],"s":36,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2022032","d":"2022-03-25","w":"周五","g":[9,3,9,8,2,1,13],"s":45,"p":12,"oe":"5:2","bs":"4:3"},{"i":"2022033","d":"2022-03-27","w":"周日","g":[5,8,3,5,1,1,13],"s":36,"p":12,"oe":"6:1","bs":"4:3"},{"i":"2022034","d":"2022-03-29","w":"周二","g":[0,4,3,0,6,5,9],"s":27,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2022035","d":"2022-04-01","w":"周五","g":[2,9,1,6,5,8,3],"s":34,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2022036","d":"2022-04-03","w":"周日","g":[3,2,1,0,1,6,9],"s":22,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2022037","d":"2022-04-05","w":"周二","g":[9,3,5,0,1,2,3],"s":23,"p":9,"oe":"5:2","bs":"2:5"},{"i":"2022038","d":"2022-04-08","w":"周五","g":[1,9,5,5,7,7,12],"s":46,"p":11,"oe":"6:1","bs":"6:1"},{"i":"2022039","d":"2022-04-10","w":"周日","g":[0,9,3,3,3,6,9],"s":33,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2022040","d":"2022-04-12","w":"周二","g":[2,9,5,8,8,9,0],"s":41,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2022041","d":"2022-04-15","w":"周五","g":[4,2,6,5,1,9,3],"s":30,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2022042","d":"2022-04-17","w":"周日","g":[9,6,4,2,0,1,5],"s":27,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2022043","d":"2022-04-19","w":"周二","g":[6,5,6,5,6,4,2],"s":34,"p":4,"oe":"2:5","bs":"5:2"},{"i":"2022044","d":"2022-04-22","w":"周五","g":[5,0,5,6,9,9,6],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2022045","d":"2022-04-24","w":"周日","g":[5,6,0,4,0,9,8],"s":32,"p":9,"oe":"2:5","bs":"4:3"},{"i":"2022046","d":"2022-04-26","w":"周二","g":[4,5,0,1,1,3,8],"s":22,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2022047","d":"2022-04-29","w":"周五","g":[2,9,5,1,6,3,9],"s":35,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2022048","d":"2022-05-01","w":"周日","g":[6,5,3,3,9,4,14],"s":44,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2022049","d":"2022-05-03","w":"周二","g":[4,9,0,1,7,0,5],"s":26,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2022050","d":"2022-05-06","w":"周五","g":[5,5,3,4,2,4,0],"s":23,"p":5,"oe":"3:4","bs":"2:5"},{"i":"2022051","d":"2022-05-08","w":"周日","g":[4,6,8,2,8,8,6],"s":42,"p":6,"oe":"0:7","bs":"4:3"},{"i":"2022052","d":"2022-05-10","w":"周二","g":[7,3,9,1,5,6,11],"s":42,"p":10,"oe":"6:1","bs":"5:2"},{"i":"2022053","d":"2022-05-13","w":"周五","g":[3,5,9,2,0,4,13],"s":36,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2022054","d":"2022-05-15","w":"周日","g":[3,7,3,7,1,9,1],"s":31,"p":8,"oe":"7:0","bs":"3:4"},{"i":"2022055","d":"2022-05-17","w":"周二","g":[3,1,9,4,6,2,13],"s":38,"p":12,"oe":"4:3","bs":"3:4"},{"i":"2022056","d":"2022-05-20","w":"周五","g":[6,5,6,3,5,0,14],"s":39,"p":14,"oe":"3:4","bs":"5:2"},{"i":"2022057","d":"2022-05-22","w":"周日","g":[8,5,6,6,8,9,0],"s":42,"p":9,"oe":"2:5","bs":"6:1"},{"i":"2022058","d":"2022-05-24","w":"周二","g":[4,4,1,7,4,0,14],"s":34,"p":14,"oe":"2:5","bs":"2:5"},{"i":"2022059","d":"2022-05-27","w":"周五","g":[6,1,9,1,4,3,3],"s":27,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2022060","d":"2022-05-29","w":"周日","g":[1,3,1,4,4,9,9],"s":31,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2022061","d":"2022-05-31","w":"周二","g":[6,5,6,5,4,1,13],"s":40,"p":12,"oe":"4:3","bs":"5:2"},{"i":"2022062","d":"2022-06-03","w":"周五","g":[4,2,1,0,3,0,3],"s":13,"p":4,"oe":"3:4","bs":"0:7"},{"i":"2022063","d":"2022-06-05","w":"周日","g":[9,7,1,6,9,2,7],"s":41,"p":8,"oe":"5:2","bs":"5:2"},{"i":"2022064","d":"2022-06-07","w":"周二","g":[6,3,8,3,3,0,7],"s":30,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2022065","d":"2022-06-10","w":"周五","g":[8,4,1,4,4,7,8],"s":36,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2022066","d":"2022-06-12","w":"周日","g":[0,1,2,8,7,2,13],"s":33,"p":13,"oe":"3:4","bs":"3:4"},{"i":"2022067","d":"2022-06-14","w":"周二","g":[3,1,0,5,6,8,13],"s":36,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2022068","d":"2022-06-17","w":"周五","g":[8,3,9,1,6,8,4],"s":39,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2022069","d":"2022-06-19","w":"周日","g":[3,1,3,5,7,0,13],"s":32,"p":13,"oe":"6:1","bs":"3:4"},{"i":"2022070","d":"2022-06-21","w":"周二","g":[1,6,8,6,9,9,5],"s":44,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2022071","d":"2022-06-24","w":"周五","g":[7,1,7,2,6,2,12],"s":37,"p":11,"oe":"3:4","bs":"4:3"},{"i":"2022072","d":"2022-06-26","w":"周日","g":[4,1,3,8,9,3,9],"s":37,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2022073","d":"2022-06-28","w":"周二","g":[8,3,8,3,6,1,13],"s":42,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2022074","d":"2022-07-01","w":"周五","g":[2,9,0,3,1,1,14],"s":30,"p":14,"oe":"4:3","bs":"2:5"},{"i":"2022075","d":"2022-07-03","w":"周日","g":[3,5,3,9,0,8,8],"s":36,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2022076","d":"2022-07-05","w":"周二","g":[1,7,8,5,3,8,5],"s":37,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2022077","d":"2022-07-08","w":"周五","g":[6,5,1,0,3,0,11],"s":26,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2022078","d":"2022-07-10","w":"周日","g":[6,9,4,2,8,8,2],"s":39,"p":7,"oe":"1:6","bs":"4:3"},{"i":"2022079","d":"2022-07-12","w":"周二","g":[9,3,0,5,4,3,6],"s":30,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2022080","d":"2022-07-15","w":"周五","g":[0,3,9,9,8,0,13],"s":42,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2022081","d":"2022-07-17","w":"周日","g":[6,5,2,5,6,2,0],"s":26,"p":6,"oe":"2:5","bs":"4:3"},{"i":"2022082","d":"2022-07-19","w":"周二","g":[9,5,2,9,7,0,8],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2022083","d":"2022-07-22","w":"周五","g":[3,9,2,5,4,1,12],"s":36,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2022084","d":"2022-07-24","w":"周日","g":[9,4,2,8,9,2,11],"s":45,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2022085","d":"2022-07-26","w":"周二","g":[5,6,7,7,8,7,0],"s":40,"p":8,"oe":"4:3","bs":"6:1"},{"i":"2022086","d":"2022-07-29","w":"周五","g":[4,6,4,9,6,3,2],"s":34,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2022087","d":"2022-07-31","w":"周日","g":[7,8,0,7,3,9,13],"s":47,"p":13,"oe":"5:2","bs":"5:2"},{"i":"2022088","d":"2022-08-02","w":"周二","g":[6,9,6,2,6,4,6],"s":39,"p":7,"oe":"1:6","bs":"4:3"},{"i":"2022089","d":"2022-08-05","w":"周五","g":[9,8,7,7,3,1,13],"s":48,"p":12,"oe":"6:1","bs":"5:2"},{"i":"2022090","d":"2022-08-07","w":"周日","g":[4,2,4,2,6,2,4],"s":24,"p":4,"oe":"0:7","bs":"1:6"},{"i":"2022091","d":"2022-08-09","w":"周二","g":[1,7,9,2,0,7,9],"s":35,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2022092","d":"2022-08-12","w":"周五","g":[8,7,8,3,7,5,4],"s":42,"p":5,"oe":"4:3","bs":"5:2"},{"i":"2022093","d":"2022-08-14","w":"周日","g":[4,1,7,7,7,4,0],"s":30,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2022094","d":"2022-08-16","w":"周二","g":[4,1,6,3,3,1,14],"s":32,"p":13,"oe":"4:3","bs":"2:5"},{"i":"2022095","d":"2022-08-19","w":"周五","g":[3,5,7,0,1,6,14],"s":36,"p":14,"oe":"4:3","bs":"4:3"},{"i":"2022096","d":"2022-08-21","w":"周日","g":[1,7,8,7,0,6,10],"s":39,"p":10,"oe":"3:4","bs":"5:2"},{"i":"2022097","d":"2022-08-23","w":"周二","g":[5,1,0,5,6,2,11],"s":30,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2022098","d":"2022-08-26","w":"周五","g":[1,6,8,5,4,4,12],"s":40,"p":11,"oe":"2:5","bs":"4:3"},{"i":"2022099","d":"2022-08-28","w":"周日","g":[9,7,9,4,2,0,10],"s":41,"p":10,"oe":"3:4","bs":"4:3"},{"i":"2022100","d":"2022-08-30","w":"周二","g":[0,7,4,2,5,6,6],"s":30,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2022101","d":"2022-09-02","w":"周五","g":[3,7,7,6,9,0,11],"s":43,"p":11,"oe":"5:2","bs":"5:2"},{"i":"2022102","d":"2022-09-04","w":"周日","g":[7,2,5,7,0,5,9],"s":35,"p":9,"oe":"5:2","bs":"5:2"},{"i":"2022103","d":"2022-09-06","w":"周二","g":[2,0,2,0,2,3,12],"s":21,"p":12,"oe":"1:6","bs":"1:6"},{"i":"2022104","d":"2022-09-09","w":"周五","g":[3,9,5,0,1,6,2],"s":26,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2022105","d":"2022-09-11","w":"周日","g":[4,2,3,4,9,4,6],"s":32,"p":7,"oe":"2:5","bs":"1:6"},{"i":"2022106","d":"2022-09-13","w":"周二","g":[5,8,0,0,7,9,3],"s":32,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2022107","d":"2022-09-16","w":"周五","g":[9,6,3,1,4,7,5],"s":35,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2022108","d":"2022-09-18","w":"周日","g":[2,8,5,7,7,2,10],"s":41,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2022109","d":"2022-09-20","w":"周二","g":[9,4,8,0,6,8,14],"s":49,"p":14,"oe":"1:6","bs":"5:2"},{"i":"2022110","d":"2022-09-23","w":"周五","g":[4,7,7,1,0,8,12],"s":39,"p":12,"oe":"3:4","bs":"4:3"},{"i":"2022111","d":"2022-09-25","w":"周日","g":[0,5,0,5,2,0,5],"s":17,"p":5,"oe":"3:4","bs":"2:5"},{"i":"2022112","d":"2022-09-27","w":"周二","g":[8,9,2,0,1,1,11],"s":32,"p":11,"oe":"4:3","bs":"3:4"},{"i":"2022113","d":"2022-09-30","w":"周五","g":[7,9,1,6,7,3,7],"s":40,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2022114","d":"2022-10-07","w":"周五","g":[8,8,9,5,2,6,13],"s":51,"p":11,"oe":"3:4","bs":"6:1"},{"i":"2022115","d":"2022-10-09","w":"周日","g":[8,2,3,4,5,0,13],"s":35,"p":13,"oe":"3:4","bs":"3:4"},{"i":"2022116","d":"2022-10-11","w":"周二","g":[2,5,9,7,9,1,4],"s":37,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2022117","d":"2022-10-14","w":"周五","g":[3,1,2,5,6,9,5],"s":31,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2022118","d":"2022-10-16","w":"周日","g":[8,1,0,7,7,1,12],"s":36,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2022119","d":"2022-10-18","w":"周二","g":[0,7,8,8,1,6,5],"s":35,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2022120","d":"2022-10-21","w":"周五","g":[6,0,8,3,9,4,7],"s":37,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2022121","d":"2022-10-23","w":"周日","g":[6,2,8,3,4,9,11],"s":43,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2022122","d":"2022-10-25","w":"周二","g":[2,6,4,7,4,9,5],"s":37,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2022123","d":"2022-10-28","w":"周五","g":[1,4,6,4,9,8,12],"s":44,"p":11,"oe":"2:5","bs":"4:3"},{"i":"2022124","d":"2022-10-30","w":"周日","g":[3,8,4,5,4,9,0],"s":33,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2022125","d":"2022-11-01","w":"周二","g":[5,1,9,4,0,5,14],"s":38,"p":14,"oe":"4:3","bs":"4:3"},{"i":"2022126","d":"2022-11-04","w":"周五","g":[3,4,4,5,3,3,13],"s":35,"p":10,"oe":"5:2","bs":"2:5"},{"i":"2022127","d":"2022-11-06","w":"周日","g":[8,9,4,7,0,0,13],"s":41,"p":13,"oe":"3:4","bs":"4:3"},{"i":"2022128","d":"2022-11-08","w":"周二","g":[2,3,6,9,7,1,12],"s":40,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2022129","d":"2022-11-11","w":"周五","g":[8,7,3,3,4,0,7],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2022130","d":"2022-11-13","w":"周日","g":[7,8,0,3,4,8,4],"s":34,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2022131","d":"2022-11-15","w":"周二","g":[0,8,2,6,5,1,2],"s":24,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2022132","d":"2022-11-18","w":"周五","g":[2,4,7,9,1,2,8],"s":33,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2022133","d":"2022-11-20","w":"周日","g":[1,4,7,8,6,1,4],"s":31,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2022134","d":"2022-11-22","w":"周二","g":[4,7,9,6,7,2,6],"s":41,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2022135","d":"2022-11-25","w":"周五","g":[8,8,1,3,0,7,11],"s":38,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2022136","d":"2022-11-27","w":"周日","g":[5,2,2,3,5,4,12],"s":33,"p":10,"oe":"3:4","bs":"3:4"},{"i":"2022137","d":"2022-11-29","w":"周二","g":[2,3,9,4,9,0,9],"s":36,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2022138","d":"2022-12-02","w":"周五","g":[8,4,5,1,1,4,6],"s":29,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2022139","d":"2022-12-04","w":"周日","g":[1,3,3,6,4,9,3],"s":29,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2022140","d":"2022-12-06","w":"周二","g":[8,2,4,8,0,4,10],"s":36,"p":10,"oe":"0:7","bs":"3:4"},{"i":"2022141","d":"2022-12-09","w":"周五","g":[0,6,0,3,6,7,13],"s":35,"p":13,"oe":"3:4","bs":"4:3"},{"i":"2022142","d":"2022-12-11","w":"周日","g":[3,0,3,6,2,7,12],"s":33,"p":12,"oe":"3:4","bs":"3:4"},{"i":"2022143","d":"2022-12-13","w":"周二","g":[5,0,4,6,8,6,2],"s":31,"p":8,"oe":"1:6","bs":"4:3"},{"i":"2022144","d":"2022-12-16","w":"周五","g":[2,8,7,9,7,7,5],"s":45,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2022145","d":"2022-12-18","w":"周日","g":[7,1,6,3,8,8,6],"s":39,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2022146","d":"2022-12-20","w":"周二","g":[1,2,0,1,4,1,5],"s":14,"p":5,"oe":"4:3","bs":"0:7"},{"i":"2022147","d":"2022-12-23","w":"周五","g":[4,7,1,3,7,8,7],"s":37,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2022148","d":"2022-12-25","w":"周日","g":[7,2,9,3,3,1,9],"s":34,"p":8,"oe":"6:1","bs":"3:4"},{"i":"2022149","d":"2022-12-27","w":"周二","g":[6,9,8,2,2,4,3],"s":34,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2022150","d":"2022-12-30","w":"周五","g":[9,6,9,0,9,0,13],"s":46,"p":13,"oe":"4:3","bs":"5:2"},{"i":"2023001","d":"2023-01-01","w":"周日","g":[3,5,0,9,7,8,12],"s":44,"p":12,"oe":"4:3","bs":"5:2"},{"i":"2023002","d":"2023-01-03","w":"周二","g":[9,8,4,3,0,4,10],"s":38,"p":10,"oe":"2:5","bs":"3:4"},{"i":"2023003","d":"2023-01-06","w":"周五","g":[9,0,1,0,2,9,10],"s":31,"p":10,"oe":"3:4","bs":"3:4"},{"i":"2023004","d":"2023-01-08","w":"周日","g":[1,2,5,7,7,9,7],"s":38,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2023005","d":"2023-01-10","w":"周二","g":[0,0,4,2,6,2,11],"s":25,"p":11,"oe":"1:6","bs":"2:5"},{"i":"2023006","d":"2023-01-13","w":"周五","g":[4,1,0,4,9,4,9],"s":31,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2023007","d":"2023-01-15","w":"周日","g":[2,5,2,8,0,7,7],"s":31,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2023008","d":"2023-01-17","w":"周二","g":[2,8,3,2,7,8,11],"s":41,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2023009","d":"2023-01-29","w":"周日","g":[0,4,2,2,4,2,14],"s":28,"p":14,"oe":"0:7","bs":"1:6"},{"i":"2023010","d":"2023-01-31","w":"周二","g":[3,3,9,4,2,9,5],"s":35,"p":7,"oe":"5:2","bs":"2:5"},{"i":"2023011","d":"2023-02-03","w":"周五","g":[7,6,8,9,5,9,1],"s":45,"p":8,"oe":"5:2","bs":"6:1"},{"i":"2023012","d":"2023-02-05","w":"周日","g":[4,7,6,3,0,0,0],"s":20,"p":7,"oe":"2:5","bs":"2:5"},{"i":"2023013","d":"2023-02-07","w":"周二","g":[5,8,2,4,4,1,13],"s":37,"p":12,"oe":"3:4","bs":"3:4"},{"i":"2023014","d":"2023-02-10","w":"周五","g":[1,5,2,4,1,6,11],"s":30,"p":10,"oe":"4:3","bs":"3:4"},{"i":"2023015","d":"2023-02-12","w":"周日","g":[7,5,7,3,9,2,9],"s":42,"p":7,"oe":"6:1","bs":"5:2"},{"i":"2023016","d":"2023-02-14","w":"周二","g":[5,2,7,8,1,8,10],"s":41,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2023017","d":"2023-02-17","w":"周五","g":[6,6,5,7,2,9,1],"s":36,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2023018","d":"2023-02-19","w":"周日","g":[2,8,0,4,2,3,4],"s":23,"p":8,"oe":"1:6","bs":"1:6"},{"i":"2023019","d":"2023-02-21","w":"周二","g":[1,7,4,7,6,7,2],"s":34,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2023020","d":"2023-02-24","w":"周五","g":[2,2,5,4,9,5,3],"s":30,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2023021","d":"2023-02-26","w":"周日","g":[6,1,6,8,2,6,7],"s":36,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2023022","d":"2023-02-28","w":"周二","g":[7,9,9,7,7,6,11],"s":56,"p":5,"oe":"6:1","bs":"7:0"},{"i":"2023023","d":"2023-03-03","w":"周五","g":[5,6,0,0,8,5,12],"s":36,"p":12,"oe":"2:5","bs":"5:2"},{"i":"2023024","d":"2023-03-05","w":"周日","g":[6,6,9,2,0,8,1],"s":32,"p":9,"oe":"2:5","bs":"4:3"},{"i":"2023025","d":"2023-03-07","w":"周二","g":[7,8,5,4,3,3,9],"s":39,"p":6,"oe":"5:2","bs":"4:3"},{"i":"2023026","d":"2023-03-10","w":"周五","g":[0,7,3,3,2,2,4],"s":21,"p":7,"oe":"3:4","bs":"1:6"},{"i":"2023027","d":"2023-03-12","w":"周日","g":[8,6,9,8,6,4,12],"s":53,"p":8,"oe":"1:6","bs":"6:1"},{"i":"2023028","d":"2023-03-14","w":"周二","g":[5,1,2,6,0,1,13],"s":28,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2023029","d":"2023-03-17","w":"周五","g":[3,6,0,8,0,7,4],"s":28,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2023030","d":"2023-03-19","w":"周日","g":[1,1,4,4,8,5,10],"s":33,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2023031","d":"2023-03-21","w":"周二","g":[4,5,0,7,2,6,10],"s":34,"p":10,"oe":"2:5","bs":"4:3"},{"i":"2023032","d":"2023-03-24","w":"周五","g":[0,8,0,4,1,4,10],"s":27,"p":10,"oe":"1:6","bs":"2:5"},{"i":"2023033","d":"2023-03-26","w":"周日","g":[6,8,8,2,1,6,14],"s":45,"p":13,"oe":"1:6","bs":"5:2"},{"i":"2023034","d":"2023-03-28","w":"周二","g":[7,2,4,5,0,6,13],"s":37,"p":13,"oe":"3:4","bs":"4:3"},{"i":"2023035","d":"2023-03-31","w":"周五","g":[6,1,7,1,2,3,1],"s":21,"p":6,"oe":"5:2","bs":"2:5"},{"i":"2023036","d":"2023-04-02","w":"周日","g":[9,8,0,9,6,5,12],"s":49,"p":12,"oe":"3:4","bs":"6:1"},{"i":"2023037","d":"2023-04-04","w":"周二","g":[1,9,5,0,9,0,6],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2023038","d":"2023-04-07","w":"周五","g":[1,8,5,8,3,5,1],"s":31,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2023039","d":"2023-04-09","w":"周日","g":[0,7,3,0,7,4,5],"s":26,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2023040","d":"2023-04-11","w":"周二","g":[8,2,1,4,6,5,3],"s":29,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2023041","d":"2023-04-14","w":"周五","g":[8,6,0,0,4,5,1],"s":24,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2023042","d":"2023-04-16","w":"周日","g":[0,2,0,5,6,0,5],"s":18,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2023043","d":"2023-04-18","w":"周二","g":[1,4,5,3,8,3,9],"s":33,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2023044","d":"2023-04-21","w":"周五","g":[8,1,3,5,3,8,5],"s":33,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2023045","d":"2023-04-23","w":"周日","g":[1,4,5,3,3,0,5],"s":21,"p":5,"oe":"5:2","bs":"1:6"},{"i":"2023046","d":"2023-04-25","w":"周二","g":[3,8,2,8,4,1,12],"s":38,"p":11,"oe":"2:5","bs":"3:4"},{"i":"2023047","d":"2023-04-28","w":"周五","g":[9,0,0,5,1,0,5],"s":20,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2023048","d":"2023-04-30","w":"周日","g":[1,1,7,8,0,7,12],"s":36,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2023049","d":"2023-05-02","w":"周二","g":[8,7,9,5,6,1,9],"s":45,"p":8,"oe":"5:2","bs":"6:1"},{"i":"2023050","d":"2023-05-05","w":"周五","g":[4,0,9,8,7,3,7],"s":38,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2023051","d":"2023-05-07","w":"周日","g":[0,3,0,9,5,5,2],"s":24,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2023052","d":"2023-05-09","w":"周二","g":[1,7,3,6,7,1,7],"s":32,"p":6,"oe":"6:1","bs":"4:3"},{"i":"2023053","d":"2023-05-12","w":"周五","g":[5,5,7,7,4,3,2],"s":33,"p":5,"oe":"5:2","bs":"4:3"},{"i":"2023054","d":"2023-05-14","w":"周日","g":[9,9,9,9,2,7,8],"s":53,"p":7,"oe":"5:2","bs":"6:1"},{"i":"2023055","d":"2023-05-16","w":"周二","g":[7,8,6,5,0,6,7],"s":39,"p":8,"oe":"3:4","bs":"6:1"},{"i":"2023056","d":"2023-05-19","w":"周五","g":[6,4,8,8,8,7,13],"s":54,"p":9,"oe":"2:5","bs":"6:1"},{"i":"2023057","d":"2023-05-21","w":"周日","g":[0,4,2,1,8,4,5],"s":24,"p":8,"oe":"2:5","bs":"1:6"},{"i":"2023058","d":"2023-05-23","w":"周二","g":[1,9,2,8,7,5,12],"s":44,"p":11,"oe":"4:3","bs":"5:2"},{"i":"2023059","d":"2023-05-26","w":"周五","g":[7,3,6,0,7,2,2],"s":27,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2023060","d":"2023-05-28","w":"周日","g":[8,7,1,4,2,9,13],"s":44,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2023061","d":"2023-05-30","w":"周二","g":[4,7,1,1,2,4,9],"s":28,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2023062","d":"2023-06-02","w":"周五","g":[6,2,6,9,2,9,5],"s":39,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2023063","d":"2023-06-04","w":"周日","g":[6,2,1,9,3,2,5],"s":28,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2023064","d":"2023-06-06","w":"周二","g":[2,6,1,5,7,7,0],"s":28,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2023065","d":"2023-06-09","w":"周五","g":[3,0,9,6,9,2,6],"s":35,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2023066","d":"2023-06-11","w":"周日","g":[2,2,4,3,8,5,3],"s":27,"p":6,"oe":"3:4","bs":"2:5"},{"i":"2023067","d":"2023-06-13","w":"周二","g":[2,9,0,3,0,6,1],"s":21,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2023068","d":"2023-06-16","w":"周五","g":[9,1,0,1,0,1,11],"s":23,"p":11,"oe":"5:2","bs":"2:5"},{"i":"2023069","d":"2023-06-18","w":"周日","g":[4,2,8,8,2,7,5],"s":36,"p":6,"oe":"2:5","bs":"3:4"},{"i":"2023070","d":"2023-06-20","w":"周二","g":[8,7,9,2,6,2,9],"s":43,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2023071","d":"2023-06-23","w":"周五","g":[4,9,9,3,1,2,4],"s":32,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2023072","d":"2023-06-25","w":"周日","g":[8,7,0,2,5,8,4],"s":34,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2023073","d":"2023-06-27","w":"周二","g":[3,0,7,7,7,0,9],"s":33,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2023074","d":"2023-06-30","w":"周五","g":[0,8,1,6,3,2,12],"s":32,"p":12,"oe":"2:5","bs":"3:4"},{"i":"2023075","d":"2023-07-02","w":"周日","g":[5,4,2,3,1,9,1],"s":25,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2023076","d":"2023-07-04","w":"周二","g":[9,9,3,2,5,8,4],"s":40,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2023077","d":"2023-07-07","w":"周五","g":[4,7,7,1,0,8,14],"s":41,"p":14,"oe":"3:4","bs":"4:3"},{"i":"2023078","d":"2023-07-09","w":"周日","g":[3,4,4,7,1,2,5],"s":26,"p":6,"oe":"4:3","bs":"1:6"},{"i":"2023079","d":"2023-07-11","w":"周二","g":[8,5,2,7,9,4,5],"s":40,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2023080","d":"2023-07-14","w":"周五","g":[8,4,1,7,8,6,10],"s":44,"p":9,"oe":"2:5","bs":"5:2"},{"i":"2023081","d":"2023-07-16","w":"周日","g":[3,1,0,7,1,9,14],"s":35,"p":14,"oe":"5:2","bs":"3:4"},{"i":"2023082","d":"2023-07-18","w":"周二","g":[6,4,3,8,3,8,11],"s":43,"p":8,"oe":"3:4","bs":"4:3"},{"i":"2023083","d":"2023-07-21","w":"周五","g":[4,9,9,1,2,3,4],"s":32,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2023084","d":"2023-07-23","w":"周日","g":[0,1,5,8,7,0,10],"s":31,"p":10,"oe":"3:4","bs":"4:3"},{"i":"2023085","d":"2023-07-25","w":"周二","g":[9,7,4,6,7,3,8],"s":44,"p":6,"oe":"4:3","bs":"5:2"},{"i":"2023086","d":"2023-07-28","w":"周五","g":[7,0,9,8,2,5,5],"s":36,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2023087","d":"2023-07-30","w":"周日","g":[4,1,1,1,3,6,14],"s":30,"p":13,"oe":"4:3","bs":"2:5"},{"i":"2023088","d":"2023-08-01","w":"周二","g":[5,6,2,5,0,7,10],"s":35,"p":10,"oe":"3:4","bs":"5:2"},{"i":"2023089","d":"2023-08-04","w":"周五","g":[3,2,2,5,1,4,8],"s":25,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2023090","d":"2023-08-06","w":"周日","g":[3,3,9,1,8,7,12],"s":43,"p":11,"oe":"5:2","bs":"4:3"},{"i":"2023091","d":"2023-08-08","w":"周二","g":[9,9,3,9,5,3,4],"s":42,"p":6,"oe":"6:1","bs":"4:3"},{"i":"2023092","d":"2023-08-11","w":"周五","g":[2,1,1,1,2,6,5],"s":18,"p":5,"oe":"4:3","bs":"1:6"},{"i":"2023093","d":"2023-08-13","w":"周日","g":[1,8,0,0,3,7,2],"s":21,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2023094","d":"2023-08-15","w":"周二","g":[3,6,4,2,2,8,2],"s":27,"p":6,"oe":"1:6","bs":"2:5"},{"i":"2023095","d":"2023-08-18","w":"周五","g":[9,3,3,7,7,9,11],"s":49,"p":8,"oe":"7:0","bs":"5:2"},{"i":"2023096","d":"2023-08-20","w":"周日","g":[4,5,6,2,8,4,11],"s":40,"p":9,"oe":"2:5","bs":"4:3"},{"i":"2023097","d":"2023-08-22","w":"周二","g":[7,6,4,5,6,3,14],"s":45,"p":11,"oe":"3:4","bs":"5:2"},{"i":"2023098","d":"2023-08-25","w":"周五","g":[1,6,0,9,4,9,1],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2023099","d":"2023-08-27","w":"周日","g":[9,5,4,5,3,6,14],"s":46,"p":11,"oe":"4:3","bs":"5:2"},{"i":"2023100","d":"2023-08-29","w":"周二","g":[9,4,3,9,3,1,6],"s":35,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2023101","d":"2023-09-01","w":"周五","g":[5,6,6,2,9,8,6],"s":42,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2023102","d":"2023-09-03","w":"周日","g":[5,9,0,4,3,1,0],"s":22,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2023103","d":"2023-09-05","w":"周二","g":[3,4,0,8,9,5,11],"s":40,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2023104","d":"2023-09-08","w":"周五","g":[9,4,4,8,2,8,10],"s":45,"p":8,"oe":"1:6","bs":"4:3"},{"i":"2023105","d":"2023-09-10","w":"周日","g":[3,2,9,7,6,1,0],"s":28,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2023106","d":"2023-09-12","w":"周二","g":[0,5,8,1,2,5,7],"s":28,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2023107","d":"2023-09-15","w":"周五","g":[0,2,0,5,6,4,5],"s":22,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2023108","d":"2023-09-17","w":"周日","g":[0,1,9,8,9,9,13],"s":49,"p":13,"oe":"5:2","bs":"5:2"},{"i":"2023109","d":"2023-09-19","w":"周二","g":[3,8,3,1,9,7,0],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2023110","d":"2023-09-22","w":"周五","g":[3,5,1,4,3,0,6],"s":22,"p":6,"oe":"4:3","bs":"1:6"},{"i":"2023111","d":"2023-09-24","w":"周日","g":[5,3,8,8,4,8,14],"s":50,"p":11,"oe":"2:5","bs":"5:2"},{"i":"2023112","d":"2023-09-26","w":"周二","g":[1,8,1,6,8,8,9],"s":41,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2023113","d":"2023-09-29","w":"周五","g":[2,5,1,9,8,0,3],"s":28,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2023114","d":"2023-10-06","w":"周五","g":[6,1,5,3,3,1,14],"s":33,"p":13,"oe":"5:2","bs":"3:4"},{"i":"2023115","d":"2023-10-08","w":"周日","g":[0,8,1,0,7,7,10],"s":33,"p":10,"oe":"3:4","bs":"4:3"},{"i":"2023116","d":"2023-10-10","w":"周二","g":[1,2,5,5,3,5,6],"s":27,"p":5,"oe":"5:2","bs":"3:4"},{"i":"2023117","d":"2023-10-13","w":"周五","g":[6,9,3,5,8,2,4],"s":37,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2023118","d":"2023-10-15","w":"周日","g":[4,0,4,5,4,4,11],"s":32,"p":11,"oe":"2:5","bs":"2:5"},{"i":"2023119","d":"2023-10-17","w":"周二","g":[9,1,9,2,5,5,10],"s":41,"p":9,"oe":"5:2","bs":"5:2"},{"i":"2023120","d":"2023-10-20","w":"周五","g":[6,9,3,6,7,8,14],"s":53,"p":11,"oe":"3:4","bs":"6:1"},{"i":"2023121","d":"2023-10-22","w":"周日","g":[8,5,6,8,3,4,10],"s":44,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2023122","d":"2023-10-24","w":"周二","g":[3,6,1,5,9,8,12],"s":44,"p":11,"oe":"4:3","bs":"5:2"},{"i":"2023123","d":"2023-10-27","w":"周五","g":[2,3,5,2,3,4,11],"s":30,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2023124","d":"2023-10-29","w":"周日","g":[8,3,0,9,5,1,8],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2023125","d":"2023-10-31","w":"周二","g":[0,8,5,6,7,1,9],"s":36,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2023126","d":"2023-11-03","w":"周五","g":[2,8,1,9,6,3,10],"s":39,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2023127","d":"2023-11-05","w":"周日","g":[7,3,1,1,7,9,5],"s":33,"p":8,"oe":"7:0","bs":"3:4"},{"i":"2023128","d":"2023-11-07","w":"周二","g":[5,2,1,2,7,4,11],"s":32,"p":10,"oe":"4:3","bs":"3:4"},{"i":"2023129","d":"2023-11-10","w":"周五","g":[4,4,0,4,5,4,11],"s":32,"p":11,"oe":"2:5","bs":"2:5"},{"i":"2023130","d":"2023-11-12","w":"周日","g":[7,5,6,8,0,9,12],"s":47,"p":12,"oe":"3:4","bs":"6:1"},{"i":"2023131","d":"2023-11-14","w":"周二","g":[4,7,4,2,3,5,2],"s":27,"p":5,"oe":"3:4","bs":"2:5"},{"i":"2023132","d":"2023-11-17","w":"周五","g":[7,2,0,7,9,3,1],"s":29,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2023133","d":"2023-11-19","w":"周日","g":[3,4,5,6,9,3,10],"s":40,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2023134","d":"2023-11-21","w":"周二","g":[9,9,0,6,5,8,11],"s":48,"p":11,"oe":"4:3","bs":"6:1"},{"i":"2023135","d":"2023-11-24","w":"周五","g":[4,6,9,5,5,5,9],"s":43,"p":5,"oe":"5:2","bs":"6:1"},{"i":"2023136","d":"2023-11-26","w":"周日","g":[7,9,7,1,9,1,5],"s":39,"p":8,"oe":"7:0","bs":"4:3"},{"i":"2023137","d":"2023-11-28","w":"周二","g":[7,8,6,4,7,6,13],"s":51,"p":9,"oe":"3:4","bs":"6:1"},{"i":"2023138","d":"2023-12-01","w":"周五","g":[4,6,7,2,7,5,7],"s":38,"p":5,"oe":"4:3","bs":"5:2"},{"i":"2023139","d":"2023-12-03","w":"周日","g":[6,1,4,6,1,4,9],"s":31,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2023140","d":"2023-12-05","w":"周二","g":[0,0,0,3,6,9,2],"s":20,"p":9,"oe":"2:5","bs":"2:5"},{"i":"2023141","d":"2023-12-08","w":"周五","g":[5,1,4,4,6,2,6],"s":28,"p":5,"oe":"2:5","bs":"2:5"},{"i":"2023142","d":"2023-12-10","w":"周日","g":[3,3,8,6,1,5,3],"s":29,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2023143","d":"2023-12-12","w":"周二","g":[1,2,6,0,9,5,13],"s":36,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2023144","d":"2023-12-15","w":"周五","g":[1,2,1,9,7,0,0],"s":20,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2023145","d":"2023-12-17","w":"周日","g":[5,1,6,2,4,4,8],"s":30,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2023146","d":"2023-12-19","w":"周二","g":[1,2,9,8,0,1,6],"s":27,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2023147","d":"2023-12-22","w":"周五","g":[7,3,1,1,8,1,9],"s":30,"p":8,"oe":"6:1","bs":"3:4"},{"i":"2023148","d":"2023-12-24","w":"周日","g":[0,4,8,1,0,6,3],"s":22,"p":8,"oe":"2:5","bs":"2:5"},{"i":"2023149","d":"2023-12-26","w":"周二","g":[8,3,5,9,2,8,6],"s":41,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2023150","d":"2023-12-29","w":"周五","g":[1,6,1,2,9,3,5],"s":27,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2023151","d":"2023-12-31","w":"周日","g":[3,2,8,5,7,0,11],"s":36,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2024001","d":"2024-01-02","w":"周二","g":[9,8,8,4,3,1,9],"s":42,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2024002","d":"2024-01-05","w":"周五","g":[8,9,2,9,2,1,11],"s":42,"p":10,"oe":"4:3","bs":"4:3"},{"i":"2024003","d":"2024-01-07","w":"周日","g":[0,5,1,4,6,2,11],"s":29,"p":11,"oe":"3:4","bs":"3:4"},{"i":"2024004","d":"2024-01-09","w":"周二","g":[3,4,1,1,8,2,6],"s":25,"p":7,"oe":"3:4","bs":"1:6"},{"i":"2024005","d":"2024-01-12","w":"周五","g":[9,1,7,5,9,5,7],"s":43,"p":8,"oe":"7:0","bs":"6:1"},{"i":"2024006","d":"2024-01-14","w":"周日","g":[3,2,3,4,1,6,4],"s":23,"p":5,"oe":"3:4","bs":"1:6"},{"i":"2024007","d":"2024-01-16","w":"周二","g":[2,0,9,9,7,2,3],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2024008","d":"2024-01-19","w":"周五","g":[5,9,9,0,9,2,1],"s":35,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2024009","d":"2024-01-21","w":"周日","g":[4,3,5,1,8,7,9],"s":37,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2024010","d":"2024-01-23","w":"周二","g":[6,7,9,3,1,1,4],"s":31,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2024011","d":"2024-01-26","w":"周五","g":[2,1,9,2,5,9,10],"s":38,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024012","d":"2024-01-28","w":"周日","g":[1,5,7,3,4,5,10],"s":35,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2024013","d":"2024-01-30","w":"周二","g":[1,0,2,1,6,6,4],"s":20,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2024014","d":"2024-02-02","w":"周五","g":[3,7,1,9,0,5,5],"s":30,"p":9,"oe":"6:1","bs":"3:4"},{"i":"2024015","d":"2024-02-04","w":"周日","g":[2,1,1,7,4,0,11],"s":26,"p":11,"oe":"4:3","bs":"2:5"},{"i":"2024016","d":"2024-02-06","w":"周二","g":[5,9,3,5,8,4,10],"s":44,"p":7,"oe":"4:3","bs":"5:2"},{"i":"2024017","d":"2024-02-18","w":"周日","g":[1,3,9,5,7,1,3],"s":29,"p":8,"oe":"7:0","bs":"3:4"},{"i":"2024018","d":"2024-02-20","w":"周二","g":[9,4,7,8,2,1,0],"s":31,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2024019","d":"2024-02-23","w":"周五","g":[5,8,2,7,4,5,4],"s":35,"p":6,"oe":"3:4","bs":"4:3"},{"i":"2024020","d":"2024-02-25","w":"周日","g":[1,6,5,3,2,3,14],"s":34,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2024021","d":"2024-02-27","w":"周二","g":[1,9,6,4,7,5,6],"s":38,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2024022","d":"2024-03-01","w":"周五","g":[1,6,7,6,4,6,6],"s":36,"p":6,"oe":"2:5","bs":"4:3"},{"i":"2024023","d":"2024-03-03","w":"周日","g":[4,0,2,0,4,4,13],"s":27,"p":13,"oe":"1:6","bs":"1:6"},{"i":"2024024","d":"2024-03-05","w":"周二","g":[2,0,4,4,6,2,1],"s":19,"p":6,"oe":"1:6","bs":"1:6"},{"i":"2024025","d":"2024-03-08","w":"周五","g":[4,1,8,1,3,0,13],"s":30,"p":13,"oe":"4:3","bs":"2:5"},{"i":"2024026","d":"2024-03-10","w":"周日","g":[2,6,1,0,4,7,10],"s":30,"p":10,"oe":"2:5","bs":"3:4"},{"i":"2024027","d":"2024-03-12","w":"周二","g":[3,1,4,3,4,8,1],"s":24,"p":7,"oe":"4:3","bs":"1:6"},{"i":"2024028","d":"2024-03-15","w":"周五","g":[7,9,2,5,6,4,3],"s":36,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2024029","d":"2024-03-17","w":"周日","g":[0,4,1,5,7,2,8],"s":27,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2024030","d":"2024-03-19","w":"周二","g":[7,5,8,2,7,9,3],"s":41,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2024031","d":"2024-03-22","w":"周五","g":[5,6,8,6,3,6,8],"s":42,"p":5,"oe":"2:5","bs":"6:1"},{"i":"2024032","d":"2024-03-24","w":"周日","g":[7,5,6,9,5,7,4],"s":43,"p":5,"oe":"5:2","bs":"6:1"},{"i":"2024033","d":"2024-03-26","w":"周二","g":[8,3,4,0,2,1,12],"s":30,"p":12,"oe":"2:5","bs":"2:5"},{"i":"2024034","d":"2024-03-29","w":"周五","g":[9,1,7,3,3,5,3],"s":31,"p":8,"oe":"7:0","bs":"3:4"},{"i":"2024035","d":"2024-03-31","w":"周日","g":[5,0,7,9,7,9,7],"s":44,"p":9,"oe":"6:1","bs":"6:1"},{"i":"2024036","d":"2024-04-02","w":"周二","g":[1,7,5,5,2,9,8],"s":37,"p":8,"oe":"5:2","bs":"5:2"},{"i":"2024037","d":"2024-04-05","w":"周五","g":[1,1,0,8,1,9,0],"s":20,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2024038","d":"2024-04-07","w":"周日","g":[7,8,9,9,2,2,4],"s":41,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2024039","d":"2024-04-09","w":"周二","g":[1,5,5,3,1,2,9],"s":26,"p":8,"oe":"6:1","bs":"3:4"},{"i":"2024040","d":"2024-04-12","w":"周五","g":[6,2,2,0,7,2,7],"s":26,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2024041","d":"2024-04-14","w":"周日","g":[9,8,9,8,8,8,1],"s":51,"p":8,"oe":"3:4","bs":"6:1"},{"i":"2024042","d":"2024-04-16","w":"周二","g":[8,0,1,5,3,0,2],"s":19,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2024043","d":"2024-04-19","w":"周五","g":[6,7,2,3,3,8,11],"s":40,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024044","d":"2024-04-21","w":"周日","g":[1,9,9,6,7,0,2],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024045","d":"2024-04-23","w":"周二","g":[5,2,9,7,6,9,7],"s":45,"p":7,"oe":"5:2","bs":"6:1"},{"i":"2024046","d":"2024-04-26","w":"周五","g":[4,3,8,5,2,4,6],"s":32,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2024047","d":"2024-04-28","w":"周日","g":[4,2,7,6,4,5,2],"s":30,"p":5,"oe":"2:5","bs":"3:4"},{"i":"2024048","d":"2024-04-30","w":"周二","g":[5,5,6,7,0,2,5],"s":30,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2024049","d":"2024-05-03","w":"周五","g":[3,5,3,8,8,1,1],"s":29,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2024050","d":"2024-05-05","w":"周日","g":[4,9,6,9,2,6,3],"s":39,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2024051","d":"2024-05-07","w":"周二","g":[5,6,5,5,7,7,1],"s":36,"p":6,"oe":"6:1","bs":"6:1"},{"i":"2024052","d":"2024-05-10","w":"周五","g":[1,3,5,0,9,4,14],"s":36,"p":14,"oe":"4:3","bs":"3:4"},{"i":"2024053","d":"2024-05-12","w":"周日","g":[1,9,6,3,6,9,10],"s":44,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2024054","d":"2024-05-14","w":"周二","g":[8,6,2,3,1,4,7],"s":31,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2024055","d":"2024-05-17","w":"周五","g":[6,5,2,7,6,3,14],"s":43,"p":12,"oe":"3:4","bs":"5:2"},{"i":"2024056","d":"2024-05-19","w":"周日","g":[8,6,3,3,8,9,8],"s":45,"p":6,"oe":"3:4","bs":"5:2"},{"i":"2024057","d":"2024-05-21","w":"周二","g":[1,9,6,8,6,2,10],"s":42,"p":9,"oe":"2:5","bs":"5:2"},{"i":"2024058","d":"2024-05-24","w":"周五","g":[3,9,3,1,7,8,12],"s":43,"p":11,"oe":"5:2","bs":"4:3"},{"i":"2024059","d":"2024-05-26","w":"周日","g":[7,0,8,5,2,6,4],"s":32,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2024060","d":"2024-05-28","w":"周二","g":[2,4,7,0,7,1,1],"s":22,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2024061","d":"2024-05-31","w":"周五","g":[1,5,9,0,3,7,1],"s":26,"p":9,"oe":"6:1","bs":"3:4"},{"i":"2024062","d":"2024-06-02","w":"周日","g":[4,7,3,1,8,9,6],"s":38,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2024063","d":"2024-06-04","w":"周二","g":[6,3,1,5,3,6,3],"s":27,"p":5,"oe":"5:2","bs":"3:4"},{"i":"2024064","d":"2024-06-07","w":"周五","g":[8,4,4,4,2,1,10],"s":33,"p":9,"oe":"1:6","bs":"2:5"},{"i":"2024065","d":"2024-06-09","w":"周日","g":[9,5,5,1,4,4,6],"s":34,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2024066","d":"2024-06-11","w":"周二","g":[7,1,5,6,3,4,0],"s":26,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2024067","d":"2024-06-14","w":"周五","g":[3,4,6,4,3,0,8],"s":28,"p":8,"oe":"2:5","bs":"2:5"},{"i":"2024068","d":"2024-06-16","w":"周日","g":[6,5,8,3,2,3,7],"s":34,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2024069","d":"2024-06-18","w":"周二","g":[8,0,7,2,1,8,2],"s":28,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2024070","d":"2024-06-21","w":"周五","g":[5,5,8,8,3,8,14],"s":51,"p":11,"oe":"3:4","bs":"6:1"},{"i":"2024071","d":"2024-06-23","w":"周日","g":[3,9,9,2,2,7,5],"s":37,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2024072","d":"2024-06-25","w":"周二","g":[5,4,2,7,7,6,12],"s":43,"p":10,"oe":"3:4","bs":"5:2"},{"i":"2024073","d":"2024-06-28","w":"周五","g":[7,4,1,7,8,3,10],"s":40,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024074","d":"2024-06-30","w":"周日","g":[5,2,8,1,7,9,5],"s":37,"p":8,"oe":"5:2","bs":"4:3"},{"i":"2024075","d":"2024-07-02","w":"周二","g":[6,5,9,8,8,1,11],"s":48,"p":10,"oe":"4:3","bs":"6:1"},{"i":"2024076","d":"2024-07-05","w":"周五","g":[2,4,1,2,4,8,4],"s":25,"p":7,"oe":"1:6","bs":"1:6"},{"i":"2024077","d":"2024-07-07","w":"周日","g":[6,2,3,2,8,8,0],"s":29,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2024078","d":"2024-07-09","w":"周二","g":[9,3,4,9,1,3,11],"s":40,"p":10,"oe":"6:1","bs":"3:4"},{"i":"2024079","d":"2024-07-12","w":"周五","g":[8,3,2,0,4,9,11],"s":37,"p":11,"oe":"3:4","bs":"3:4"},{"i":"2024080","d":"2024-07-14","w":"周日","g":[4,5,9,7,9,0,0],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024081","d":"2024-07-16","w":"周二","g":[2,7,4,8,2,5,1],"s":29,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2024082","d":"2024-07-19","w":"周五","g":[5,7,7,6,7,7,0],"s":39,"p":7,"oe":"5:2","bs":"6:1"},{"i":"2024083","d":"2024-07-21","w":"周日","g":[4,6,6,2,0,8,10],"s":36,"p":10,"oe":"0:7","bs":"4:3"},{"i":"2024084","d":"2024-07-23","w":"周二","g":[1,5,6,6,5,3,9],"s":35,"p":8,"oe":"5:2","bs":"5:2"},{"i":"2024085","d":"2024-07-26","w":"周五","g":[4,3,7,6,3,7,4],"s":34,"p":4,"oe":"4:3","bs":"3:4"},{"i":"2024086","d":"2024-07-28","w":"周日","g":[7,5,8,0,3,4,11],"s":38,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2024087","d":"2024-07-30","w":"周二","g":[0,1,1,7,6,3,0],"s":18,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2024088","d":"2024-08-02","w":"周五","g":[5,6,3,9,9,1,1],"s":34,"p":8,"oe":"6:1","bs":"4:3"},{"i":"2024089","d":"2024-08-04","w":"周日","g":[2,9,2,0,1,6,8],"s":28,"p":9,"oe":"2:5","bs":"3:4"},{"i":"2024090","d":"2024-08-06","w":"周二","g":[4,6,1,6,8,0,3],"s":28,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2024091","d":"2024-08-09","w":"周五","g":[7,6,1,1,9,4,4],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2024092","d":"2024-08-11","w":"周日","g":[3,0,4,7,2,2,8],"s":26,"p":8,"oe":"2:5","bs":"2:5"},{"i":"2024093","d":"2024-08-13","w":"周二","g":[2,3,0,0,7,9,13],"s":34,"p":13,"oe":"4:3","bs":"3:4"},{"i":"2024094","d":"2024-08-16","w":"周五","g":[6,3,3,3,5,6,6],"s":32,"p":3,"oe":"4:3","bs":"3:4"},{"i":"2024095","d":"2024-08-18","w":"周日","g":[7,6,9,0,3,6,2],"s":33,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2024096","d":"2024-08-20","w":"周二","g":[2,2,7,5,9,0,6],"s":31,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2024097","d":"2024-08-23","w":"周五","g":[9,8,0,1,5,0,2],"s":25,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2024098","d":"2024-08-25","w":"周日","g":[2,4,3,9,5,7,9],"s":39,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2024099","d":"2024-08-27","w":"周二","g":[1,1,7,7,7,1,3],"s":27,"p":6,"oe":"7:0","bs":"3:4"},{"i":"2024100","d":"2024-08-30","w":"周五","g":[8,8,7,2,8,5,12],"s":50,"p":10,"oe":"2:5","bs":"6:1"},{"i":"2024101","d":"2024-09-01","w":"周日","g":[6,2,5,0,3,3,6],"s":25,"p":6,"oe":"3:4","bs":"2:5"},{"i":"2024102","d":"2024-09-03","w":"周二","g":[4,9,7,2,2,9,8],"s":41,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2024103","d":"2024-09-06","w":"周五","g":[0,6,2,5,8,5,6],"s":32,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2024104","d":"2024-09-08","w":"周日","g":[5,0,8,2,6,8,0],"s":29,"p":8,"oe":"1:6","bs":"4:3"},{"i":"2024105","d":"2024-09-10","w":"周二","g":[1,4,4,0,2,0,2],"s":13,"p":4,"oe":"1:6","bs":"0:7"},{"i":"2024106","d":"2024-09-13","w":"周五","g":[3,4,9,3,2,8,5],"s":34,"p":7,"oe":"4:3","bs":"2:5"},{"i":"2024107","d":"2024-09-15","w":"周日","g":[3,8,5,7,9,0,2],"s":34,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2024108","d":"2024-09-17","w":"周二","g":[3,7,5,7,6,2,14],"s":44,"p":12,"oe":"4:3","bs":"5:2"},{"i":"2024109","d":"2024-09-20","w":"周五","g":[9,6,9,3,2,1,14],"s":44,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2024110","d":"2024-09-22","w":"周日","g":[5,4,1,5,4,1,5],"s":25,"p":4,"oe":"5:2","bs":"2:5"},{"i":"2024111","d":"2024-09-24","w":"周二","g":[3,4,2,4,1,1,0],"s":15,"p":4,"oe":"3:4","bs":"0:7"},{"i":"2024112","d":"2024-09-27","w":"周五","g":[5,3,1,6,7,3,4],"s":29,"p":6,"oe":"5:2","bs":"3:4"},{"i":"2024113","d":"2024-09-29","w":"周日","g":[2,4,6,3,4,4,10],"s":33,"p":8,"oe":"1:6","bs":"2:5"},{"i":"2024114","d":"2024-10-06","w":"周日","g":[7,8,1,6,7,4,1],"s":34,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2024115","d":"2024-10-08","w":"周二","g":[8,4,4,8,8,9,5],"s":46,"p":5,"oe":"2:5","bs":"4:3"},{"i":"2024116","d":"2024-10-11","w":"周五","g":[0,4,6,7,3,4,9],"s":33,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2024117","d":"2024-10-13","w":"周日","g":[1,4,8,4,7,5,6],"s":35,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2024118","d":"2024-10-15","w":"周二","g":[9,9,6,9,7,0,6],"s":46,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2024119","d":"2024-10-18","w":"周五","g":[0,7,3,1,9,5,6],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2024120","d":"2024-10-20","w":"周日","g":[0,8,3,0,4,8,4],"s":27,"p":8,"oe":"1:6","bs":"2:5"},{"i":"2024121","d":"2024-10-22","w":"周二","g":[2,0,7,8,8,1,4],"s":30,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2024122","d":"2024-10-25","w":"周五","g":[3,7,6,8,2,1,11],"s":38,"p":10,"oe":"4:3","bs":"4:3"},{"i":"2024123","d":"2024-10-27","w":"周日","g":[0,3,1,6,2,1,10],"s":23,"p":10,"oe":"3:4","bs":"2:5"},{"i":"2024124","d":"2024-10-29","w":"周二","g":[3,7,7,5,3,0,9],"s":34,"p":9,"oe":"6:1","bs":"4:3"},{"i":"2024125","d":"2024-11-01","w":"周五","g":[9,9,2,9,9,0,11],"s":49,"p":11,"oe":"5:2","bs":"5:2"},{"i":"2024126","d":"2024-11-03","w":"周日","g":[9,8,0,2,5,1,0],"s":25,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2024127","d":"2024-11-05","w":"周二","g":[7,7,6,5,8,2,2],"s":37,"p":6,"oe":"3:4","bs":"5:2"},{"i":"2024128","d":"2024-11-08","w":"周五","g":[9,3,0,0,9,8,1],"s":30,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2024129","d":"2024-11-10","w":"周日","g":[4,0,6,6,4,7,5],"s":32,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2024130","d":"2024-11-12","w":"周二","g":[7,8,0,0,8,3,6],"s":32,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2024131","d":"2024-11-15","w":"周五","g":[5,2,2,9,9,3,12],"s":42,"p":10,"oe":"4:3","bs":"4:3"},{"i":"2024132","d":"2024-11-17","w":"周日","g":[5,4,2,8,0,3,5],"s":27,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2024133","d":"2024-11-19","w":"周二","g":[2,7,7,2,9,5,5],"s":37,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2024134","d":"2024-11-22","w":"周五","g":[1,3,9,8,8,8,10],"s":47,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2024135","d":"2024-11-24","w":"周日","g":[0,2,5,3,9,7,12],"s":38,"p":12,"oe":"4:3","bs":"4:3"},{"i":"2024136","d":"2024-11-26","w":"周二","g":[7,7,7,8,1,6,1],"s":37,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2024137","d":"2024-11-29","w":"周五","g":[3,9,1,9,2,8,0],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2024138","d":"2024-12-01","w":"周日","g":[4,6,5,1,7,2,14],"s":39,"p":13,"oe":"3:4","bs":"4:3"},{"i":"2024139","d":"2024-12-03","w":"周二","g":[9,7,0,1,5,4,5],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2024140","d":"2024-12-06","w":"周五","g":[2,9,6,1,2,6,3],"s":29,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2024141","d":"2024-12-08","w":"周日","g":[1,5,8,5,1,3,8],"s":31,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2024142","d":"2024-12-10","w":"周二","g":[5,8,9,9,3,2,9],"s":45,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2024143","d":"2024-12-13","w":"周五","g":[2,8,7,1,2,9,4],"s":33,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2024144","d":"2024-12-15","w":"周日","g":[3,9,9,3,5,9,10],"s":48,"p":7,"oe":"6:1","bs":"5:2"},{"i":"2024145","d":"2024-12-17","w":"周二","g":[9,1,3,8,7,0,4],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2024146","d":"2024-12-20","w":"周五","g":[0,2,6,2,0,9,13],"s":32,"p":13,"oe":"2:5","bs":"3:4"},{"i":"2024147","d":"2024-12-22","w":"周日","g":[4,8,2,9,0,4,6],"s":33,"p":9,"oe":"1:6","bs":"2:5"},{"i":"2024148","d":"2024-12-24","w":"周二","g":[4,6,5,0,9,8,11],"s":43,"p":11,"oe":"3:4","bs":"5:2"},{"i":"2024149","d":"2024-12-27","w":"周五","g":[0,7,0,8,4,8,2],"s":29,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2024150","d":"2024-12-29","w":"周日","g":[3,4,6,7,6,6,10],"s":42,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2024151","d":"2024-12-31","w":"周二","g":[7,6,4,0,8,5,0],"s":30,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2025001","d":"2025-01-03","w":"周五","g":[2,3,3,0,9,2,0],"s":19,"p":9,"oe":"3:4","bs":"1:6"},{"i":"2025002","d":"2025-01-05","w":"周日","g":[6,9,6,4,2,8,14],"s":49,"p":12,"oe":"1:6","bs":"5:2"},{"i":"2025003","d":"2025-01-07","w":"周二","g":[8,9,3,5,4,8,11],"s":48,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2025004","d":"2025-01-10","w":"周五","g":[4,7,2,0,0,2,5],"s":20,"p":7,"oe":"2:5","bs":"1:6"},{"i":"2025005","d":"2025-01-12","w":"周日","g":[1,6,3,3,2,4,3],"s":22,"p":5,"oe":"4:3","bs":"1:6"},{"i":"2025006","d":"2025-01-14","w":"周二","g":[6,6,4,1,2,5,11],"s":35,"p":10,"oe":"3:4","bs":"4:3"},{"i":"2025007","d":"2025-01-17","w":"周五","g":[0,2,7,5,0,2,1],"s":17,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2025008","d":"2025-01-19","w":"周日","g":[1,1,3,8,2,4,10],"s":29,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2025009","d":"2025-01-21","w":"周二","g":[8,3,7,8,7,4,6],"s":43,"p":5,"oe":"3:4","bs":"4:3"},{"i":"2025010","d":"2025-01-24","w":"周五","g":[3,4,8,4,1,0,3],"s":23,"p":8,"oe":"3:4","bs":"1:6"},{"i":"2025011","d":"2025-01-26","w":"周日","g":[1,8,7,2,7,9,14],"s":48,"p":13,"oe":"4:3","bs":"5:2"},{"i":"2025012","d":"2025-02-07","w":"周五","g":[4,5,6,7,9,5,11],"s":47,"p":7,"oe":"5:2","bs":"6:1"},{"i":"2025013","d":"2025-02-09","w":"周日","g":[3,7,4,7,9,0,7],"s":37,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2025014","d":"2025-02-11","w":"周二","g":[6,7,5,1,3,5,3],"s":30,"p":6,"oe":"6:1","bs":"4:3"},{"i":"2025015","d":"2025-02-14","w":"周五","g":[0,3,6,5,4,9,13],"s":40,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2025016","d":"2025-02-16","w":"周日","g":[9,1,5,4,7,6,11],"s":43,"p":10,"oe":"5:2","bs":"5:2"},{"i":"2025017","d":"2025-02-18","w":"周二","g":[1,3,0,6,6,8,10],"s":34,"p":10,"oe":"2:5","bs":"4:3"},{"i":"2025018","d":"2025-02-21","w":"周五","g":[6,9,6,6,4,2,10],"s":43,"p":8,"oe":"1:6","bs":"5:2"},{"i":"2025019","d":"2025-02-23","w":"周日","g":[0,5,0,5,2,3,10],"s":25,"p":10,"oe":"3:4","bs":"3:4"},{"i":"2025020","d":"2025-02-25","w":"周二","g":[7,9,8,2,0,5,9],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025021","d":"2025-02-28","w":"周五","g":[3,2,2,1,2,8,13],"s":31,"p":12,"oe":"3:4","bs":"2:5"},{"i":"2025022","d":"2025-03-02","w":"周日","g":[1,2,0,4,0,6,5],"s":18,"p":6,"oe":"2:5","bs":"1:6"},{"i":"2025023","d":"2025-03-04","w":"周二","g":[1,2,4,5,5,7,8],"s":32,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2025024","d":"2025-03-07","w":"周五","g":[9,0,7,0,7,0,0],"s":23,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2025025","d":"2025-03-09","w":"周日","g":[8,8,6,4,0,1,14],"s":41,"p":14,"oe":"1:6","bs":"4:3"},{"i":"2025026","d":"2025-03-11","w":"周二","g":[9,5,4,3,4,8,12],"s":45,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2025027","d":"2025-03-14","w":"周五","g":[8,2,3,5,6,0,12],"s":36,"p":12,"oe":"2:5","bs":"4:3"},{"i":"2025028","d":"2025-03-16","w":"周日","g":[3,4,1,6,9,7,3],"s":33,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2025029","d":"2025-03-18","w":"周二","g":[1,4,9,0,5,7,1],"s":27,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2025030","d":"2025-03-21","w":"周五","g":[6,4,7,8,8,8,14],"s":55,"p":10,"oe":"1:6","bs":"6:1"},{"i":"2025031","d":"2025-03-23","w":"周日","g":[4,7,8,1,3,5,7],"s":35,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2025032","d":"2025-03-25","w":"周二","g":[9,0,5,0,2,5,9],"s":30,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2025033","d":"2025-03-28","w":"周五","g":[1,7,7,7,6,6,8],"s":42,"p":7,"oe":"4:3","bs":"6:1"},{"i":"2025034","d":"2025-03-30","w":"周日","g":[0,9,2,8,4,0,6],"s":29,"p":9,"oe":"1:6","bs":"2:5"},{"i":"2025035","d":"2025-04-01","w":"周二","g":[6,6,6,8,0,3,8],"s":37,"p":8,"oe":"1:6","bs":"5:2"},{"i":"2025036","d":"2025-04-04","w":"周五","g":[2,8,4,8,6,5,9],"s":42,"p":7,"oe":"2:5","bs":"5:2"},{"i":"2025037","d":"2025-04-06","w":"周日","g":[0,2,2,2,6,6,7],"s":25,"p":7,"oe":"1:6","bs":"3:4"},{"i":"2025038","d":"2025-04-08","w":"周二","g":[9,4,9,1,3,5,2],"s":33,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2025039","d":"2025-04-11","w":"周五","g":[3,4,5,7,3,3,4],"s":29,"p":4,"oe":"5:2","bs":"2:5"},{"i":"2025040","d":"2025-04-13","w":"周日","g":[7,8,3,3,9,8,9],"s":47,"p":6,"oe":"5:2","bs":"5:2"},{"i":"2025041","d":"2025-04-15","w":"周二","g":[7,5,1,8,7,1,4],"s":33,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2025042","d":"2025-04-18","w":"周五","g":[6,3,9,7,9,7,4],"s":45,"p":6,"oe":"5:2","bs":"5:2"},{"i":"2025043","d":"2025-04-20","w":"周日","g":[0,3,0,8,5,7,11],"s":34,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2025044","d":"2025-04-22","w":"周二","g":[0,6,1,9,0,8,11],"s":35,"p":11,"oe":"3:4","bs":"4:3"},{"i":"2025045","d":"2025-04-25","w":"周五","g":[2,3,4,6,5,1,1],"s":22,"p":5,"oe":"4:3","bs":"2:5"},{"i":"2025046","d":"2025-04-27","w":"周日","g":[8,5,7,2,6,2,2],"s":32,"p":6,"oe":"2:5","bs":"4:3"},{"i":"2025047","d":"2025-04-29","w":"周二","g":[3,5,2,1,0,3,12],"s":26,"p":12,"oe":"4:3","bs":"2:5"},{"i":"2025048","d":"2025-05-02","w":"周五","g":[2,1,7,8,7,8,2],"s":35,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2025049","d":"2025-05-04","w":"周日","g":[2,3,5,4,8,7,5],"s":34,"p":6,"oe":"4:3","bs":"3:4"},{"i":"2025050","d":"2025-05-06","w":"周二","g":[7,8,3,1,1,1,4],"s":25,"p":7,"oe":"5:2","bs":"2:5"},{"i":"2025051","d":"2025-05-09","w":"周五","g":[0,3,3,0,5,4,11],"s":26,"p":11,"oe":"4:3","bs":"2:5"},{"i":"2025052","d":"2025-05-11","w":"周日","g":[1,5,9,2,7,0,8],"s":32,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2025053","d":"2025-05-13","w":"周二","g":[5,0,0,6,3,4,10],"s":28,"p":10,"oe":"2:5","bs":"3:4"},{"i":"2025054","d":"2025-05-16","w":"周五","g":[9,4,1,3,1,5,4],"s":27,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2025055","d":"2025-05-18","w":"周日","g":[1,4,6,1,1,7,1],"s":21,"p":6,"oe":"5:2","bs":"2:5"},{"i":"2025056","d":"2025-05-20","w":"周二","g":[6,0,7,4,8,2,2],"s":29,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2025057","d":"2025-05-23","w":"周五","g":[0,8,7,0,0,6,3],"s":24,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2025058","d":"2025-05-25","w":"周日","g":[1,3,6,6,8,6,13],"s":43,"p":12,"oe":"3:4","bs":"5:2"},{"i":"2025059","d":"2025-05-27","w":"周二","g":[6,4,6,7,9,5,14],"s":51,"p":10,"oe":"3:4","bs":"6:1"},{"i":"2025060","d":"2025-05-30","w":"周五","g":[0,5,1,7,7,0,5],"s":25,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2025061","d":"2025-06-01","w":"周日","g":[2,7,0,6,3,6,5],"s":29,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2025062","d":"2025-06-03","w":"周二","g":[1,2,6,6,8,2,5],"s":30,"p":7,"oe":"2:5","bs":"3:4"},{"i":"2025063","d":"2025-06-06","w":"周五","g":[5,4,9,2,7,5,12],"s":44,"p":10,"oe":"4:3","bs":"5:2"},{"i":"2025064","d":"2025-06-08","w":"周日","g":[0,2,9,3,8,3,6],"s":31,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2025065","d":"2025-06-10","w":"周二","g":[2,0,0,8,5,8,10],"s":33,"p":10,"oe":"1:6","bs":"4:3"},{"i":"2025066","d":"2025-06-13","w":"周五","g":[6,8,5,7,4,4,1],"s":35,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2025067","d":"2025-06-15","w":"周日","g":[2,2,1,9,1,4,2],"s":21,"p":8,"oe":"3:4","bs":"1:6"},{"i":"2025068","d":"2025-06-17","w":"周二","g":[3,9,0,7,7,2,3],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2025069","d":"2025-06-20","w":"周五","g":[5,3,5,4,2,5,3],"s":27,"p":3,"oe":"5:2","bs":"3:4"},{"i":"2025070","d":"2025-06-22","w":"周日","g":[2,6,5,9,2,5,11],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025071","d":"2025-06-24","w":"周二","g":[5,0,3,7,2,5,0],"s":22,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2025072","d":"2025-06-27","w":"周五","g":[0,8,5,7,0,3,1],"s":24,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2025073","d":"2025-06-29","w":"周日","g":[1,4,2,6,3,5,12],"s":33,"p":11,"oe":"3:4","bs":"3:4"},{"i":"2025074","d":"2025-07-01","w":"周二","g":[4,8,9,7,7,3,6],"s":44,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2025075","d":"2025-07-04","w":"周五","g":[2,9,1,7,1,8,5],"s":33,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2025076","d":"2025-07-06","w":"周日","g":[7,1,7,2,8,3,1],"s":29,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2025077","d":"2025-07-08","w":"周二","g":[0,2,3,4,5,2,6],"s":22,"p":6,"oe":"2:5","bs":"1:6"},{"i":"2025078","d":"2025-07-11","w":"周五","g":[3,2,8,7,0,5,3],"s":28,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2025079","d":"2025-07-13","w":"周日","g":[5,7,2,7,6,4,11],"s":42,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025080","d":"2025-07-15","w":"周二","g":[3,1,1,9,7,1,2],"s":24,"p":8,"oe":"6:1","bs":"2:5"},{"i":"2025081","d":"2025-07-18","w":"周五","g":[4,1,9,0,2,3,2],"s":21,"p":9,"oe":"3:4","bs":"1:6"},{"i":"2025082","d":"2025-07-20","w":"周日","g":[1,8,5,9,6,3,10],"s":42,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025083","d":"2025-07-22","w":"周二","g":[5,4,5,0,7,5,7],"s":33,"p":7,"oe":"5:2","bs":"5:2"},{"i":"2025084","d":"2025-07-25","w":"周五","g":[1,4,5,6,0,6,4],"s":26,"p":6,"oe":"2:5","bs":"3:4"},{"i":"2025085","d":"2025-07-27","w":"周日","g":[9,4,5,4,3,8,2],"s":35,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2025086","d":"2025-07-29","w":"周二","g":[9,7,6,3,1,6,13],"s":45,"p":12,"oe":"5:2","bs":"5:2"},{"i":"2025087","d":"2025-08-01","w":"周五","g":[1,6,4,7,6,4,14],"s":42,"p":13,"oe":"2:5","bs":"4:3"},{"i":"2025088","d":"2025-08-03","w":"周日","g":[5,4,6,6,0,4,14],"s":39,"p":14,"oe":"1:6","bs":"4:3"},{"i":"2025089","d":"2025-08-05","w":"周二","g":[7,1,9,6,0,0,14],"s":37,"p":14,"oe":"3:4","bs":"4:3"},{"i":"2025090","d":"2025-08-08","w":"周五","g":[9,5,1,8,0,8,6],"s":37,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2025091","d":"2025-08-10","w":"周日","g":[2,0,4,9,3,8,8],"s":34,"p":9,"oe":"2:5","bs":"3:4"},{"i":"2025092","d":"2025-08-12","w":"周二","g":[9,7,0,2,0,1,4],"s":23,"p":9,"oe":"3:4","bs":"2:5"},{"i":"2025093","d":"2025-08-15","w":"周五","g":[0,7,4,8,2,8,10],"s":39,"p":10,"oe":"1:6","bs":"4:3"},{"i":"2025094","d":"2025-08-17","w":"周日","g":[6,1,0,6,4,1,12],"s":30,"p":12,"oe":"2:5","bs":"3:4"},{"i":"2025095","d":"2025-08-19","w":"周二","g":[6,1,5,2,9,3,13],"s":39,"p":12,"oe":"5:2","bs":"4:3"},{"i":"2025096","d":"2025-08-22","w":"周五","g":[2,6,3,0,4,7,9],"s":31,"p":9,"oe":"3:4","bs":"3:4"},{"i":"2025097","d":"2025-08-24","w":"周日","g":[3,9,7,3,6,5,6],"s":39,"p":6,"oe":"5:2","bs":"4:3"},{"i":"2025098","d":"2025-08-26","w":"周二","g":[2,4,8,4,0,7,8],"s":33,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2025099","d":"2025-08-29","w":"周五","g":[7,2,3,9,4,5,12],"s":42,"p":10,"oe":"4:3","bs":"4:3"},{"i":"2025100","d":"2025-08-31","w":"周日","g":[0,7,4,3,4,6,8],"s":32,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2025101","d":"2025-09-02","w":"周二","g":[5,0,5,0,3,6,12],"s":31,"p":12,"oe":"3:4","bs":"4:3"},{"i":"2025102","d":"2025-09-05","w":"周五","g":[7,7,7,6,6,8,8],"s":49,"p":2,"oe":"3:4","bs":"7:0"},{"i":"2025103","d":"2025-09-07","w":"周日","g":[7,6,2,2,4,0,3],"s":24,"p":7,"oe":"2:5","bs":"2:5"},{"i":"2025104","d":"2025-09-09","w":"周二","g":[9,1,2,3,7,9,0],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2025105","d":"2025-09-12","w":"周五","g":[7,8,7,3,4,7,0],"s":36,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2025106","d":"2025-09-14","w":"周日","g":[9,2,6,9,2,1,3],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2025107","d":"2025-09-16","w":"周二","g":[8,4,8,8,2,0,3],"s":33,"p":8,"oe":"1:6","bs":"3:4"},{"i":"2025108","d":"2025-09-19","w":"周五","g":[0,2,1,1,9,1,9],"s":23,"p":9,"oe":"5:2","bs":"2:5"},{"i":"2025109","d":"2025-09-21","w":"周日","g":[3,6,7,1,8,3,13],"s":41,"p":12,"oe":"5:2","bs":"4:3"},{"i":"2025110","d":"2025-09-23","w":"周二","g":[6,5,2,8,1,9,12],"s":43,"p":11,"oe":"3:4","bs":"5:2"},{"i":"2025111","d":"2025-09-26","w":"周五","g":[9,0,4,8,4,2,11],"s":38,"p":11,"oe":"2:5","bs":"3:4"},{"i":"2025112","d":"2025-09-28","w":"周日","g":[5,5,7,1,4,6,10],"s":38,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025113","d":"2025-09-30","w":"周二","g":[0,9,1,4,1,1,8],"s":24,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2025114","d":"2025-10-05","w":"周日","g":[8,3,3,2,8,3,3],"s":30,"p":6,"oe":"4:3","bs":"2:5"},{"i":"2025115","d":"2025-10-07","w":"周二","g":[1,7,0,6,2,9,12],"s":37,"p":12,"oe":"3:4","bs":"4:3"},{"i":"2025116","d":"2025-10-10","w":"周五","g":[6,6,4,2,3,1,9],"s":31,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2025117","d":"2025-10-12","w":"周日","g":[4,5,4,2,7,1,4],"s":27,"p":6,"oe":"3:4","bs":"2:5"},{"i":"2025118","d":"2025-10-14","w":"周二","g":[7,0,4,1,7,7,11],"s":37,"p":11,"oe":"5:2","bs":"4:3"},{"i":"2025119","d":"2025-10-17","w":"周五","g":[3,9,8,9,5,9,10],"s":53,"p":7,"oe":"5:2","bs":"6:1"},{"i":"2025120","d":"2025-10-19","w":"周日","g":[8,5,1,1,9,6,8],"s":38,"p":8,"oe":"4:3","bs":"5:2"},{"i":"2025121","d":"2025-10-21","w":"周二","g":[8,4,8,1,4,5,3],"s":33,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2025122","d":"2025-10-24","w":"周五","g":[8,3,5,2,6,5,10],"s":39,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2025123","d":"2025-10-26","w":"周日","g":[8,0,6,5,7,9,7],"s":42,"p":9,"oe":"4:3","bs":"6:1"},{"i":"2025124","d":"2025-10-28","w":"周二","g":[4,0,0,8,8,0,10],"s":30,"p":10,"oe":"0:7","bs":"3:4"},{"i":"2025125","d":"2025-10-31","w":"周五","g":[4,5,6,3,8,7,9],"s":42,"p":6,"oe":"4:3","bs":"5:2"},{"i":"2025126","d":"2025-11-02","w":"周日","g":[2,9,6,6,2,4,12],"s":41,"p":10,"oe":"1:6","bs":"4:3"},{"i":"2025127","d":"2025-11-04","w":"周二","g":[4,1,9,0,7,5,6],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2025128","d":"2025-11-07","w":"周五","g":[3,2,1,1,1,2,12],"s":22,"p":11,"oe":"4:3","bs":"1:6"},{"i":"2025129","d":"2025-11-09","w":"周日","g":[9,7,0,6,3,7,3],"s":35,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2025130","d":"2025-11-11","w":"周二","g":[7,0,4,0,3,4,5],"s":23,"p":7,"oe":"3:4","bs":"1:6"},{"i":"2025131","d":"2025-11-14","w":"周五","g":[3,5,0,2,1,1,0],"s":12,"p":5,"oe":"4:3","bs":"1:6"},{"i":"2025132","d":"2025-11-16","w":"周日","g":[3,2,3,6,9,9,9],"s":41,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2025133","d":"2025-11-18","w":"周二","g":[2,4,7,9,1,3,4],"s":30,"p":8,"oe":"4:3","bs":"2:5"},{"i":"2025134","d":"2025-11-21","w":"周五","g":[3,4,9,8,8,9,13],"s":54,"p":10,"oe":"4:3","bs":"5:2"},{"i":"2025135","d":"2025-11-23","w":"周日","g":[8,6,7,2,6,1,9],"s":39,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2025136","d":"2025-11-25","w":"周二","g":[8,9,5,9,9,4,0],"s":44,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2025137","d":"2025-11-28","w":"周五","g":[6,4,9,7,5,8,2],"s":41,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2025138","d":"2025-11-30","w":"周日","g":[9,2,3,5,1,0,0],"s":20,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2025139","d":"2025-12-02","w":"周二","g":[7,8,3,4,9,8,3],"s":42,"p":6,"oe":"4:3","bs":"4:3"},{"i":"2025140","d":"2025-12-05","w":"周五","g":[3,0,6,9,2,7,11],"s":38,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2025141","d":"2025-12-07","w":"周日","g":[4,1,9,5,3,0,4],"s":26,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2025142","d":"2025-12-09","w":"周二","g":[4,2,4,9,9,1,6],"s":35,"p":8,"oe":"3:4","bs":"2:5"},{"i":"2025143","d":"2025-12-12","w":"周五","g":[0,1,6,3,7,6,7],"s":30,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2025144","d":"2025-12-14","w":"周日","g":[0,5,1,2,0,4,7],"s":19,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2025145","d":"2025-12-16","w":"周二","g":[8,9,0,9,9,8,6],"s":49,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2025146","d":"2025-12-19","w":"周五","g":[6,4,0,8,5,6,13],"s":42,"p":13,"oe":"2:5","bs":"5:2"},{"i":"2025147","d":"2025-12-21","w":"周日","g":[1,5,6,0,1,3,5],"s":21,"p":6,"oe":"5:2","bs":"2:5"},{"i":"2025148","d":"2025-12-23","w":"周二","g":[2,7,0,9,4,8,10],"s":40,"p":10,"oe":"2:5","bs":"4:3"},{"i":"2025149","d":"2025-12-26","w":"周五","g":[2,8,8,6,5,2,7],"s":38,"p":6,"oe":"2:5","bs":"5:2"},{"i":"2025150","d":"2025-12-28","w":"周日","g":[8,5,3,1,8,7,1],"s":33,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2025151","d":"2025-12-30","w":"周二","g":[8,8,7,5,7,6,9],"s":50,"p":4,"oe":"4:3","bs":"7:0"},{"i":"2026001","d":"2026-01-02","w":"周五","g":[1,1,1,2,4,1,1],"s":11,"p":3,"oe":"5:2","bs":"0:7"},{"i":"2026002","d":"2026-01-04","w":"周日","g":[3,4,5,5,9,8,9],"s":43,"p":6,"oe":"5:2","bs":"5:2"},{"i":"2026003","d":"2026-01-06","w":"周二","g":[5,5,1,9,3,1,0],"s":24,"p":9,"oe":"6:1","bs":"3:4"},{"i":"2026004","d":"2026-01-09","w":"周五","g":[4,4,1,5,3,6,1],"s":24,"p":5,"oe":"4:3","bs":"2:5"},{"i":"2026005","d":"2026-01-11","w":"周日","g":[4,4,8,6,6,4,14],"s":46,"p":10,"oe":"0:7","bs":"4:3"},{"i":"2026006","d":"2026-01-13","w":"周二","g":[8,1,8,5,6,4,0],"s":32,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2026007","d":"2026-01-16","w":"周五","g":[5,0,3,9,5,9,0],"s":31,"p":9,"oe":"5:2","bs":"4:3"},{"i":"2026008","d":"2026-01-18","w":"周日","g":[4,5,4,1,9,9,14],"s":46,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2026009","d":"2026-01-20","w":"周二","g":[8,0,1,9,5,6,2],"s":31,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2026010","d":"2026-01-23","w":"周五","g":[8,3,9,2,6,3,2],"s":33,"p":7,"oe":"3:4","bs":"3:4"},{"i":"2026011","d":"2026-01-25","w":"周日","g":[6,3,5,2,7,3,13],"s":39,"p":11,"oe":"5:2","bs":"4:3"},{"i":"2026012","d":"2026-01-27","w":"周二","g":[6,4,0,6,6,8,6],"s":36,"p":8,"oe":"0:7","bs":"4:3"},{"i":"2026013","d":"2026-01-30","w":"周五","g":[9,5,5,2,3,6,6],"s":36,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2026014","d":"2026-02-01","w":"周日","g":[9,8,8,2,5,1,1],"s":34,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2026015","d":"2026-02-03","w":"周二","g":[0,1,9,9,1,1,5],"s":26,"p":9,"oe":"6:1","bs":"2:5"},{"i":"2026016","d":"2026-02-06","w":"周五","g":[6,4,3,7,3,4,13],"s":40,"p":10,"oe":"4:3","bs":"3:4"},{"i":"2026017","d":"2026-02-08","w":"周日","g":[8,0,2,6,8,0,0],"s":24,"p":8,"oe":"0:7","bs":"3:4"},{"i":"2026018","d":"2026-02-10","w":"周二","g":[2,9,3,6,5,7,2],"s":34,"p":7,"oe":"4:3","bs":"4:3"},{"i":"2026019","d":"2026-02-13","w":"周五","g":[6,0,8,8,2,7,1],"s":32,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2026020","d":"2026-02-24","w":"周二","g":[5,5,0,9,5,6,4],"s":34,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2026021","d":"2026-02-27","w":"周五","g":[6,4,3,5,6,3,2],"s":29,"p":4,"oe":"3:4","bs":"3:4"},{"i":"2026022","d":"2026-03-01","w":"周日","g":[7,9,9,1,0,2,3],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2026023","d":"2026-03-03","w":"周二","g":[2,8,3,8,4,8,13],"s":46,"p":11,"oe":"2:5","bs":"4:3"},{"i":"2026024","d":"2026-03-06","w":"周五","g":[5,4,4,9,0,3,12],"s":37,"p":12,"oe":"3:4","bs":"3:4"},{"i":"2026025","d":"2026-03-08","w":"周日","g":[8,4,0,5,5,3,13],"s":38,"p":13,"oe":"4:3","bs":"4:3"},{"i":"2026026","d":"2026-03-10","w":"周二","g":[2,6,9,8,3,8,14],"s":50,"p":12,"oe":"2:5","bs":"5:2"},{"i":"2026027","d":"2026-03-13","w":"周五","g":[8,7,7,3,6,0,9],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2026028","d":"2026-03-15","w":"周日","g":[7,9,8,0,1,1,6],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2026029","d":"2026-03-17","w":"周二","g":[1,4,0,4,3,2,11],"s":25,"p":11,"oe":"3:4","bs":"1:6"},{"i":"2026030","d":"2026-03-20","w":"周五","g":[1,9,8,1,5,9,13],"s":46,"p":12,"oe":"6:1","bs":"5:2"},{"i":"2026031","d":"2026-03-22","w":"周日","g":[6,8,9,5,2,2,13],"s":45,"p":11,"oe":"3:4","bs":"5:2"},{"i":"2026032","d":"2026-03-24","w":"周二","g":[3,1,6,4,4,5,14],"s":37,"p":13,"oe":"3:4","bs":"3:4"},{"i":"2026033","d":"2026-03-27","w":"周五","g":[1,8,9,1,9,3,14],"s":45,"p":13,"oe":"5:2","bs":"4:3"},{"i":"2026034","d":"2026-03-29","w":"周日","g":[3,9,9,1,5,3,5],"s":35,"p":8,"oe":"7:0","bs":"3:4"},{"i":"2026035","d":"2026-03-31","w":"周二","g":[7,4,2,7,2,7,2],"s":31,"p":5,"oe":"3:4","bs":"3:4"},{"i":"2026036","d":"2026-04-03","w":"周五","g":[2,8,8,9,7,9,8],"s":51,"p":7,"oe":"3:4","bs":"6:1"},{"i":"2026037","d":"2026-04-05","w":"周日","g":[9,9,6,9,4,0,1],"s":38,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2026038","d":"2026-04-07","w":"周二","g":[0,7,1,3,0,2,13],"s":26,"p":13,"oe":"4:3","bs":"2:5"},{"i":"2026039","d":"2026-04-10","w":"周五","g":[0,6,6,2,5,2,12],"s":33,"p":12,"oe":"1:6","bs":"4:3"},{"i":"2026040","d":"2026-04-12","w":"周日","g":[0,7,7,1,8,7,4],"s":34,"p":8,"oe":"4:3","bs":"4:3"},{"i":"2026041","d":"2026-04-14","w":"周二","g":[7,9,1,1,4,9,13],"s":44,"p":12,"oe":"6:1","bs":"4:3"},{"i":"2026042","d":"2026-04-17","w":"周五","g":[6,5,1,8,1,3,6],"s":30,"p":7,"oe":"4:3","bs":"3:4"},{"i":"2026043","d":"2026-04-19","w":"周日","g":[6,5,9,5,8,9,11],"s":53,"p":6,"oe":"5:2","bs":"7:0"},{"i":"2026044","d":"2026-04-21","w":"周二","g":[7,6,2,0,9,1,1],"s":26,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2026045","d":"2026-04-24","w":"周五","g":[1,3,2,8,9,6,14],"s":43,"p":13,"oe":"3:4","bs":"4:3"},{"i":"2026046","d":"2026-04-26","w":"周日","g":[8,8,5,6,2,3,13],"s":45,"p":11,"oe":"3:4","bs":"5:2"},{"i":"2026047","d":"2026-04-28","w":"周二","g":[3,9,8,2,5,0,8],"s":35,"p":9,"oe":"3:4","bs":"4:3"},{"i":"2026048","d":"2026-05-01","w":"周五","g":[4,5,2,9,6,1,5],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2026049","d":"2026-05-03","w":"周日","g":[2,7,8,9,5,0,7],"s":38,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2026050","d":"2026-05-05","w":"周二","g":[2,2,6,2,5,3,0],"s":20,"p":6,"oe":"2:5","bs":"2:5"},{"i":"2026051","d":"2026-05-08","w":"周五","g":[6,8,7,3,3,8,12],"s":47,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2026052","d":"2026-05-10","w":"周日","g":[2,3,5,2,5,6,12],"s":35,"p":10,"oe":"3:4","bs":"4:3"},{"i":"2026053","d":"2026-05-12","w":"周二","g":[4,3,3,2,1,8,12],"s":33,"p":11,"oe":"3:4","bs":"2:5"},{"i":"2026054","d":"2026-05-15","w":"周五","g":[9,6,4,5,3,2,8],"s":37,"p":7,"oe":"3:4","bs":"4:3"},{"i":"2026055","d":"2026-05-17","w":"周日","g":[5,5,6,3,8,5,3],"s":35,"p":5,"oe":"5:2","bs":"5:2"},{"i":"2026056","d":"2026-05-19","w":"周二","g":[2,0,7,2,5,0,12],"s":28,"p":12,"oe":"2:5","bs":"3:4"},{"i":"2026057","d":"2026-05-22","w":"周五","g":[3,3,5,0,5,6,1],"s":23,"p":6,"oe":"5:2","bs":"3:4"},{"i":"2026058","d":"2026-05-24","w":"周日","g":[3,7,4,1,2,3,1],"s":21,"p":6,"oe":"5:2","bs":"1:6"},{"i":"2026059","d":"2026-05-26","w":"周二","g":[0,6,9,2,3,4,4],"s":28,"p":9,"oe":"2:5","bs":"2:5"},{"i":"2026060","d":"2026-05-29","w":"周五","g":[3,1,3,0,3,2,14],"s":26,"p":14,"oe":"4:3","bs":"1:6"},{"i":"2026061","d":"2026-05-31","w":"周日","g":[0,2,0,8,4,8,12],"s":34,"p":12,"oe":"0:7","bs":"3:4"},{"i":"2026062","d":"2026-06-02","w":"周二","g":[5,6,7,0,3,1,3],"s":25,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2026063","d":"2026-06-05","w":"周五","g":[5,0,7,6,6,6,5],"s":35,"p":7,"oe":"3:4","bs":"5:2"},{"i":"2026064","d":"2026-06-07","w":"周日","g":[2,3,3,7,2,5,9],"s":31,"p":7,"oe":"5:2","bs":"3:4"},{"i":"2026065","d":"2026-06-09","w":"周二","g":[7,4,9,0,7,3,1],"s":31,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2026066","d":"2026-06-12","w":"周五","g":[3,5,6,9,7,0,12],"s":42,"p":12,"oe":"4:3","bs":"5:2"},{"i":"2026067","d":"2026-06-14","w":"周日","g":[3,6,5,7,1,4,3],"s":29,"p":6,"oe":"5:2","bs":"3:4"},{"i":"2026068","d":"2026-06-16","w":"周二","g":[7,5,1,1,6,2,5],"s":27,"p":6,"oe":"5:2","bs":"3:4"},{"i":"2026069","d":"2026-06-19","w":"周五","g":[7,9,5,4,3,2,7],"s":37,"p":7,"oe":"5:2","bs":"4:3"},{"i":"2026070","d":"2026-06-21","w":"周日","g":[3,1,5,1,4,6,6],"s":26,"p":5,"oe":"4:3","bs":"2:5"},{"i":"2026071","d":"2026-06-23","w":"周二","g":[4,7,9,6,3,5,7],"s":41,"p":6,"oe":"5:2","bs":"5:2"},{"i":"2026072","d":"2026-06-26","w":"周五","g":[0,8,3,4,5,6,6],"s":32,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2026073","d":"2026-06-28","w":"周日","g":[6,6,8,4,8,9,0],"s":41,"p":9,"oe":"1:6","bs":"5:2"},{"i":"2026074","d":"2026-06-30","w":"周二","g":[9,4,8,8,1,2,6],"s":38,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2026075","d":"2026-07-03","w":"周五","g":[4,7,4,5,8,2,3],"s":33,"p":6,"oe":"3:4","bs":"3:4"},{"i":"2026076","d":"2026-07-05","w":"周日","g":[8,0,5,1,5,0,2],"s":21,"p":8,"oe":"3:4","bs":"3:4"},{"i":"2026077","d":"2026-07-07","w":"周二","g":[5,4,0,5,5,2,9],"s":30,"p":9,"oe":"4:3","bs":"4:3"},{"i":"2026078","d":"2026-07-10","w":"周五","g":[4,4,8,7,5,1,12],"s":41,"p":11,"oe":"3:4","bs":"4:3"},{"i":"2026079","d":"2026-07-12","w":"周日","g":[5,6,8,3,8,7,14],"s":51,"p":11,"oe":"3:4","bs":"6:1"},{"i":"2026080","d":"2026-07-14","w":"周二","g":[3,1,2,4,9,4,6],"s":29,"p":8,"oe":"3:4","bs":"1:6"},{"i":"2026081","d":"2026-07-17","w":"周五","g":[4,2,3,3,5,5,8],"s":30,"p":6,"oe":"4:3","bs":"3:4"},{"i":"2026082","d":"2026-07-19","w":"周日","g":[9,4,7,1,0,4,7],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2026083","d":"2026-07-21","w":"周二","g":[5,2,1,9,6,3,12],"s":38,"p":11,"oe":"4:3","bs":"4:3"},{"i":"2026084","d":"2026-07-24","w":"周五","g":[6,3,8,4,4,0,7],"s":32,"p":8,"oe":"2:5","bs":"3:4"},{"i":"2026085","d":"2026-07-26","w":"周日","g":[8,3,7,0,5,1,4],"s":28,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2026086","d":"2026-07-28","w":"周二","g":[9,7,1,0,3,4,0],"s":24,"p":9,"oe":"4:3","bs":"2:5"},{"i":"2026087","d":"2026-07-31","w":"周五","g":[3,9,9,2,8,6,10],"s":47,"p":8,"oe":"3:4","bs":"5:2"},{"i":"2026088","d":"2026-08-02","w":"周日","g":[9,5,1,9,5,9,2],"s":40,"p":8,"oe":"6:1","bs":"5:2"},{"i":"2026089","d":"2026-08-04","w":"周二","g":[7,1,8,9,3,4,0],"s":32,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2026090","d":"2026-08-07","w":"周五","g":[7,0,1,6,1,2,6],"s":23,"p":7,"oe":"3:4","bs":"2:5"},{"i":"2026091","d":"2026-08-09","w":"周日","g":[7,9,5,8,5,0,6],"s":40,"p":9,"oe":"4:3","bs":"5:2"},{"i":"2026092","d":"2026-08-11","w":"周二","g":[7,8,3,8,5,6,12],"s":49,"p":9,"oe":"3:4","bs":"6:1"},{"i":"2026093","d":"2026-08-14","w":"周五","g":[4,9,6,5,0,8,7],"s":39,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2026094","d":"2026-08-16","w":"周日","g":[0,6,0,2,4,0,0],"s":12,"p":6,"oe":"0:7","bs":"1:6"},{"i":"2026095","d":"2026-08-18","w":"周二","g":[6,6,4,9,0,8,7],"s":40,"p":9,"oe":"2:5","bs":"5:2"},{"i":"2026096","d":"2026-08-21","w":"周五","g":[1,4,2,6,9,5,5],"s":32,"p":8,"oe":"4:3","bs":"3:4"},{"i":"2026097","d":"2026-08-23","w":"周日","g":[8,2,7,4,4,8,12],"s":45,"p":10,"oe":"1:6","bs":"4:3"},{"i":"2026098","d":"2026-08-25","w":"周二","g":[5,6,8,6,3,3,3],"s":34,"p":5,"oe":"4:3","bs":"4:3"},{"i":"2026099","d":"2026-08-28","w":"周五","g":[9,4,6,3,3,4,5],"s":34,"p":6,"oe":"4:3","bs":"2:5"},{"i":"2026100","d":"2026-08-30","w":"周日","g":[8,3,1,1,7,3,0],"s":23,"p":8,"oe":"5:2","bs":"2:5"},{"i":"2026101","d":"2026-09-01","w":"周二","g":[6,8,6,1,0,5,13],"s":39,"p":13,"oe":"3:4","bs":"5:2"},{"i":"2026102","d":"2026-09-04","w":"周五","g":[1,7,5,5,8,8,6],"s":40,"p":7,"oe":"4:3","bs":"5:2"},{"i":"2026103","d":"2026-09-06","w":"周日","g":[0,0,0,6,0,2,8],"s":16,"p":8,"oe":"0:7","bs":"2:5"},{"i":"2026104","d":"2026-09-08","w":"周二","g":[7,4,0,7,2,8,14],"s":42,"p":14,"oe":"2:5","bs":"4:3"},{"i":"2026105","d":"2026-09-11","w":"周五","g":[5,9,9,5,3,3,0],"s":34,"p":9,"oe":"6:1","bs":"4:3"},{"i":"2026106","d":"2026-09-13","w":"周日","g":[5,1,9,5,8,5,11],"s":44,"p":10,"oe":"6:1","bs":"6:1"},{"i":"2026107","d":"2026-09-15","w":"周二","g":[2,8,3,4,5,6,4],"s":32,"p":6,"oe":"2:5","bs":"3:4"},{"i":"2026108","d":"2026-09-18","w":"周五","g":[9,5,2,0,8,6,9],"s":39,"p":9,"oe":"3:4","bs":"5:2"},{"i":"2026109","d":"2026-09-20","w":"周日","g":[2,9,0,5,0,3,9],"s":28,"p":9,"oe":"4:3","bs":"3:4"},{"i":"2026110","d":"2026-09-22","w":"周二","g":[6,2,5,9,6,9,13],"s":50,"p":11,"oe":"4:3","bs":"6:1"},{"i":"2026111","d":"2026-09-25","w":"周五","g":[7,8,9,1,0,1,1],"s":27,"p":9,"oe":"5:2","bs":"3:4"},{"i":"2026112","d":"2026-09-27","w":"周日","g":[4,2,6,4,1,4,8],"s":29,"p":7,"oe":"1:6","bs":"2:5"},{"i":"2026113","d":"2026-09-29","w":"周二","g":[7,0,6,8,7,4,0],"s":32,"p":8,"oe":"2:5","bs":"4:3"},{"i":"2026114","d":"2026-10-06","w":"周二","g":[1,3,8,4,1,5,9],"s":31,"p":8,"oe":"5:2","bs":"3:4"},{"i":"2026115","d":"2026-10-09","w":"周五","g":[6,3,9,3,7,3,3],"s":34,"p":6,"oe":"6:1","bs":"3:4"}];
+const POSCFG = {"key": "qxc", "gameName": "七星彩", "npos": 7, "posMax": [10, 10, 10, 10, 10, 10, 15], "dataFile": "qxc_history_1000.json"};
+</script>
+<script>
+// ===== 定位彩逐位引擎（七星彩 / 排列五共用）=====
+// 依赖页面注入：const POSCFG = {key, gameName, npos, posMax:[...], dataFile, cliCmd}
+//               const RAW_POS = [{i,d,w,g:[digits],s,p,oe,bs}, ...]（升序）
+const GAME_KEY = POSCFG.key;
+const NPOS = POSCFG.npos;
+let RAW = RAW_POS.slice();
+let currentTab = 'overview';
+let rankingCategory = 'all';
+let analysisWindow = 100;
+let historyPage = 1;
+let historyPageSize = 50;
+let filteredHistory = [];
+let rankPos = 0, omPos = 0, wavePos = 0, waveDigit = 0;
+let posStats = [];        // per pos: {digit: {freq, cat, catLabel, freqPct, bias, biasPct, expected}}
+let omissionsSeries = []; // per record: [ per pos: {digit: omissionAfter} ]
+let currentOmissions = []; // per pos: {digit: om}
+let maxOmissions = [];
+let avgOmissions = [];
+
+function $(id) { return document.getElementById(id); }
+function switchLottery(t) {
+  const map = { ssq: 'index.html', dlt: 'dlt.html', kl8: 'kl8.html', qxc: 'qxc.html', pl5: 'pl5.html' };
+  if (map[t] && t !== GAME_KEY) location.href = map[t];
+}
+function toggleTheme() {
+  const b = document.body;
+  const next = b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  b.setAttribute('data-theme', next);
+  try { localStorage.setItem('ssqlotto-theme', next); } catch (e) {}
+  if (currentTab === 'overview') renderOverviewCharts();
+  if (currentTab === 'hotcold') renderRankingCharts();
+  if (currentTab === 'waveform') renderWaveformChart();
+}
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const m = (btn.getAttribute('onclick') || '').match(/switchTab\('(\w+)'\)/);
+    btn.classList.toggle('active', !!m && m[1] === tab);
+  });
+  ['overview', 'hotcold', 'omission', 'waveform', 'history'].forEach(name => {
+    const p = $('panel-' + name);
+    if (p) p.style.display = name === tab ? '' : 'none';
+  });
+  if (tab === 'hotcold') renderRankings();
+  if (tab === 'omission') renderOmissionMatrix();
+  if (tab === 'waveform') renderWaveformChart();
+  if (tab === 'history') filterHistoryTable(false);
+}
+function posName(p) { return '第' + (p + 1) + '位'; }
+function fmtDigit(p, d) { return p === NPOS - 1 && POSCFG.posMax[p] > 10 ? (d < 10 ? '0' + d : '' + d) : '' + d; }
+
+// ---------- 统计 ----------
+function catByRank(rank, total) {
+  const hot = Math.max(1, Math.round(total * 0.3)), warm = Math.max(hot + 1, Math.round(total * 0.7));
+  return rank <= hot ? ['hot', '热号'] : (rank <= warm ? ['warm', '温号'] : ['cold', '冷号']);
+}
+function computeAll() {
+  omissionsSeries = [];
+  const curs = POSCFG.posMax.map(mx => { const o = {}; for (let d = 0; d < mx; d++) o[d] = 0; return o; });
+  const maxs = POSCFG.posMax.map(mx => { const o = {}; for (let d = 0; d < mx; d++) o[d] = 0; return o; });
+  RAW.forEach(rec => {
+    const row = [];
+    for (let p = 0; p < NPOS; p++) {
+      const om = {};
+      for (let d = 0; d < POSCFG.posMax[p]; d++) {
+        curs[p][d] = rec.g[p] === d ? 0 : curs[p][d] + 1;
+        if (curs[p][d] > maxs[p][d]) maxs[p][d] = curs[p][d];
+        om[d] = curs[p][d];
+      }
+      row.push(om);
+    }
+    omissionsSeries.push(row);
+  });
+  currentOmissions = curs; maxOmissions = maxs;
+  avgOmissions = POSCFG.posMax.map((mx, p) => {
+    const o = {};
+    for (let d = 0; d < mx; d++) o[d] = omissionsSeries.reduce((a, r) => a + r[p][d], 0) / Math.max(1, omissionsSeries.length);
+    return o;
+  });
+  computeDynamic();
+}
+function computeDynamic() {
+  const win = RAW.slice(-analysisWindow);
+  posStats = POSCFG.posMax.map((mx, p) => {
+    const freq = {}; for (let d = 0; d < mx; d++) freq[d] = 0;
+    win.forEach(r => freq[r.g[p]]++);
+    const order = Object.keys(freq).map(Number).sort((a, b) => freq[b] - freq[a] || a - b);
+    const st = {};
+    order.forEach((d, idx) => {
+      const [code, label] = catByRank(idx + 1, mx);
+      const exp = win.length / mx;
+      st[d] = { rank: idx + 1, freq: freq[d], cat: code, catLabel: label,
+                freqPct: freq[d] / Math.max(1, win.length) * 100,
+                curOm: currentOmissions[p][d], maxOm: maxOmissions[p][d], expected: exp,
+                bias: freq[d] - exp, biasPct: exp ? (freq[d] - exp) / exp * 100 : 0 };
+    });
+    return st;
+  });
+}
+function catOf(p, d) { return posStats[p] && posStats[p][d] ? posStats[p][d].cat : 'warm'; }
+function ballCls(p, d, size) { return 'ball ' + (size || '') + ' ball-' + catOf(p, d); }
+
+// ---------- 概览 ----------
+function renderOverview() {
+  const latest = RAW[RAW.length - 1];
+  if (!latest) return;
+  $('latestIssueDate').textContent = latest.d + '（' + latest.w + '）';
+  $('latestIssueNo').textContent = '第 ' + latest.i + ' 期';
+  $('latestBallsRow').innerHTML = latest.g.map((d, p) =>
+    '<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;"><span class="' + ballCls(p, d, 'ball-lg') + '">' + fmtDigit(p, d) + '</span><span style="font-size:10px;opacity:0.6;">' + posName(p) + '</span></span>').join('');
+  $('latestMetricsText').textContent = '和值 ' + latest.s + ' · 跨度 ' + latest.p + ' · 奇偶比 ' + latest.oe + ' · 大小比 ' + latest.bs;
+  // 热号速览卡
+  $('cardTopPrimaryTitle').textContent = '近' + analysisWindow + '期 · 各位热号';
+  $('topPrimaryVal').innerHTML = POSCFG.posMax.map((mx, p) => {
+    const hotD = Object.keys(posStats[p]).map(Number).sort((a, b) => posStats[p][b].freq - posStats[p][a].freq || a - b)[0];
+    return '<span class="' + ballCls(p, hotD, 'ball-sm') + '" title="' + posName(p) + '">' + fmtDigit(p, hotD) + '</span>';
+  }).join(' ');
+  $('topPrimarySub').textContent = POSCFG.posMax.map((mx, p) => {
+    const hotD = Object.keys(posStats[p]).map(Number).sort((a, b) => posStats[p][b].freq - posStats[p][a].freq || a - b)[0];
+    return posName(p) + ' ' + fmtDigit(p, hotD) + '（' + posStats[p][hotD].freq + '次）';
+  }).join(' · ');
+  $('theoryPrimarySpan').textContent = '理论概率 每位每数字 ' + (100 / POSCFG.posMax[0]).toFixed(1) + '%（末位 ' + (100 / POSCFG.posMax[NPOS - 1]).toFixed(1) + '%）';
+  $('topPrimaryDiff').textContent = '按近' + analysisWindow + '期频次分档';
+  // 遗漏王卡
+  let omP = 0, omD = 0;
+  for (let p = 0; p < NPOS; p++) for (let d = 0; d < POSCFG.posMax[p]; d++)
+    if (currentOmissions[p][d] > currentOmissions[omP][omD]) { omP = p; omD = d; }
+  $('cardTopSecondaryTitle').textContent = '当前遗漏王（逐位）';
+  $('topSecondaryVal').innerHTML = '<span class="' + ballCls(omP, omD, 'ball-lg') + '">' + fmtDigit(omP, omD) + '</span>';
+  $('topSecondarySub').textContent = posName(omP) + ' · 已遗漏 ' + currentOmissions[omP][omD] + ' 期';
+  $('theorySecondarySpan').textContent = '该位历史最大遗漏 ' + maxOmissions[omP][omD] + ' 期';
+  $('topSecondaryDiff').textContent = '逐位遗漏独立计算';
+  if ($('maxOmText')) $('maxOmText').textContent = posName(omP) + ' ' + fmtDigit(omP, omD);
+  if ($('maxOmSub')) $('maxOmSub').textContent = '当前遗漏 ' + currentOmissions[omP][omD] + ' 期 · 历史最大 ' + maxOmissions[omP][omD] + ' 期';
+  $('totalIssuesDisplay').textContent = RAW.length + ' 期';
+  $('totalBallsCountDisplay').textContent = (RAW.length * NPOS) + ' 个数字';
+  $('primaryGridTitle').textContent = '逐位全景分布（近' + analysisWindow + '期冷温热 · 球下为当前遗漏）';
+  let html = '';
+  for (let p = 0; p < NPOS; p++) {
+    html += '<div style="margin-bottom:10px;"><div style="font-weight:600;margin:4px 0;">' + posName(p) + '</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    for (let d = 0; d < POSCFG.posMax[p]; d++) {
+      html += '<div class="ov-cell"><span class="' + ballCls(p, d) + '">' + fmtDigit(p, d) + '</span><span class="ov-om">遗漏 ' + currentOmissions[p][d] + '</span></div>';
+    }
+    html += '</div></div>';
+  }
+  $('primaryOverviewGrid').innerHTML = html;
+  const sg = $('secondaryGridTitle');
+  if (sg) { const card = sg.closest('.card'); if (card) card.style.display = 'none'; }
+  renderOverviewCharts();
+}
+function drawBars(canvas, labels, values, color) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.clientWidth || canvas.parentElement.clientWidth || 600;
+  const h = 220, dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+  const max = Math.max.apply(null, values.concat([1]));
+  const bw = w / values.length;
+  const dark = document.body.getAttribute('data-theme') !== 'light';
+  ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  values.forEach((v, i) => {
+    const bh = (h - 34) * v / max;
+    ctx.fillStyle = color;
+    ctx.fillRect(i * bw + 2, h - 18 - bh, Math.max(1, bw - 4), bh);
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)';
+    if (labels[i] !== '') ctx.fillText(labels[i], i * bw + bw / 2, h - 4);
+    if (v > 0) ctx.fillText(v, i * bw + bw / 2, h - 24 - bh);
+  });
+}
+function renderOverviewCharts() {
+  const win = RAW.slice(-analysisWindow);
+  const sums = win.map(r => r.s);
+  const lo = Math.min.apply(null, sums), hi = Math.max.apply(null, sums);
+  const bins = new Array(12).fill(0), bw = Math.max(1, Math.ceil((hi - lo + 1) / 12));
+  sums.forEach(s => bins[Math.min(11, Math.floor((s - lo) / bw))]++);
+  $('actualSumMean').textContent = '近' + analysisWindow + '期平均和值 ' + (sums.reduce((a, b) => a + b, 0) / Math.max(1, sums.length)).toFixed(1);
+  drawBars($('sumDistChart'), bins.map((_, i) => i % 2 === 0 ? (lo + i * bw) + '' : ''), bins, '#d9b45b');
+  const oddBins = new Array(NPOS + 1).fill(0);
+  win.forEach(r => oddBins[r.g.filter(d => d % 2 === 1).length]++);
+  drawBars($('ratioChart'), oddBins.map((_, i) => i + ''), oddBins, '#6fa8c9');
+  const rt = $('sumChartTitle'); if (rt) rt.textContent = '和值分布（横轴=和值区间）';
+}
+
+// ---------- 冷热排名（逐位） ----------
+function setRankingZone(z) {}
+function setCategoryFilter(cat) { rankingCategory = cat; renderRankings(); }
+function onRankPosChange() { rankPos = parseInt($('rankingPosSelect').value, 10) || 0; renderRankings(); }
+function updateAnalysisWindow() {
+  analysisWindow = parseInt($('windowSelect').value, 10) || 100;
+  computeDynamic();
+  renderOverview();
+  if (currentTab === 'hotcold') renderRankings();
+  if (currentTab === 'omission') renderOmissionMatrix();
+}
+function renderRankings() {
+  const p = rankPos, sortBy = $('sortSelect').value;
+  let digits = Object.keys(posStats[p]).map(Number);
+  if (rankingCategory !== 'all') digits = digits.filter(d => posStats[p][d].cat === rankingCategory);
+  const key = sortBy === 'omission' ? 'curOm' : (sortBy === 'bias' ? 'bias' : 'freq');
+  digits.sort((a, b) => posStats[p][b][key] - posStats[p][a][key] || a - b);
+  const maxFreq = Math.max.apply(null, Object.keys(posStats[p]).map(d => posStats[p][d].freq).concat([1]));
+  $('rankingsTableBody').innerHTML = digits.map((d, i) => {
+    const s = posStats[p][d], pct = Math.round(s.freq / maxFreq * 100);
+    return '<tr><td>' + (i + 1) + '</td><td><span class="' + ballCls(p, d, 'ball-sm') + '">' + fmtDigit(p, d) + '</span></td>' +
+      '<td><div style="display:flex;align-items:center;gap:8px;"><span>' + s.freq + ' 次</span>' +
+      '<span style="flex:1;height:6px;border-radius:3px;background:rgba(128,128,128,0.25);overflow:hidden;"><i style="display:block;height:100%;width:' + pct + '%;background:#d96c57;border-radius:3px;"></i></span></div></td>' +
+      '<td>' + s.freqPct.toFixed(2) + '%</td>' +
+      '<td>' + (s.bias >= 0 ? '+' : '') + s.bias.toFixed(1) + '</td>' +
+      '<td>' + s.curOm + '</td><td>' + s.maxOm + '</td><td>' + avgOmissions[p][d].toFixed(1) + '</td>' +
+      '<td>' + s.catLabel + '</td>' +
+      '<td><button class="btn btn-sm" onclick="gotoWave(' + p + ',' + d + ')">波浪图</button></td></tr>';
+  }).join('');
+  renderRankingCharts();
+}
+function gotoWave(p, d) {
+  wavePos = p; waveDigit = d;
+  $('wavePosSelect').value = '' + p;
+  syncWaveDigitOptions();
+  $('waveBallSelect').value = '' + d;
+  switchTab('waveform');
+}
+function renderRankingCharts() {
+  const p = rankPos;
+  const top = Object.keys(posStats[p]).map(Number).sort((a, b) => posStats[p][b].freq - posStats[p][a].freq || a - b).reverse();
+  drawBars($('rankingBarChart'), top.map(d => fmtDigit(p, d)), top.map(d => posStats[p][d].freq), '#d96c57');
+  const canvas = $('hotColdDonutChart');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.clientWidth || 260, h = 220, dpr = window.devicePixelRatio || 1;
+  canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+  const totals = { hot: 0, warm: 0, cold: 0 };
+  Object.keys(posStats[p]).forEach(d => totals[posStats[p][d].cat] += posStats[p][d].freq);
+  const sum = Math.max(1, totals.hot + totals.warm + totals.cold);
+  const colors = { hot: '#d96c57', warm: '#d9b45b', cold: '#6fa8c9' };
+  const cx = w / 2, cy = h / 2;
+  const radius = Math.max(Math.min(cx, cy) - 15, 0);
+  let ang = -Math.PI / 2;
+  ['hot', 'warm', 'cold'].forEach(k => {
+    const frac = totals[k] / sum;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, ang, ang + frac * Math.PI * 2); ctx.closePath();
+    ctx.fillStyle = colors[k]; ctx.fill();
+    ang += frac * Math.PI * 2;
+  });
+  ctx.beginPath(); ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
+  ctx.fillStyle = document.body.getAttribute('data-theme') === 'light' ? '#ffffff' : '#1c1c1e'; ctx.fill();
+  ctx.fillStyle = document.body.getAttribute('data-theme') === 'light' ? '#333' : '#eee';
+  ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(posName(p) + ' · 近' + analysisWindow + '期', cx, cy + 4);
+  $('hotColdSummaryText').textContent = posName(p) + '：热号数字出号 ' + totals.hot + '（' + (totals.hot / sum * 100).toFixed(1) +
+    '%）· 温号 ' + totals.warm + '（' + (totals.warm / sum * 100).toFixed(1) + '%）· 冷号 ' + totals.cold + '（' + (totals.cold / sum * 100).toFixed(1) + '%）';
+}
+
+// ---------- 遗漏矩阵（逐位） ----------
+function setOmZone(z) {}
+function onOmPosChange() { omPos = parseInt($('omPosSelect').value, 10) || 0; renderOmissionMatrix(); }
+function renderOmissionMatrix() {
+  const p = omPos;
+  const count = parseInt($('omIssueCount').value, 10) || 50;
+  const showNum = $('chkShowOmNumber').checked;
+  const heat = $('chkHeatmap').checked;
+  const desc = $('chkOrderDesc').checked;
+  let idxs = RAW.map((_, i) => i).slice(-count);
+  if (desc) idxs = idxs.reverse();
+  $('omMatrixCardTitle').textContent = '每期遗漏走势图阵 · ' + posName(p) + '（最近 ' + count + ' 期）';
+  let head = '<tr><th class="sticky-col">期号</th><th>日期</th>';
+  for (let d = 0; d < POSCFG.posMax[p]; d++) head += '<th><span class="' + ballCls(p, d, 'ball-sm') + '">' + fmtDigit(p, d) + '</span></th>';
+  head += '</tr>';
+  $('omissionMatrixHead').innerHTML = head;
+  let body = '';
+  idxs.forEach(i => {
+    const rec = RAW[i], row = omissionsSeries[i][p], hitD = rec.g[p];
+    body += '<tr><td class="sticky-col">' + rec.i.slice(2) + '</td><td>' + rec.d.slice(5) + '</td>';
+    for ( let d = 0; d < POSCFG.posMax[p]; d++) {
+      if (d === hitD) body += '<td class="om-cell om-hit-cat-' + catOf(p, d) + '">' + fmtDigit(p, d) + '</td>';
+      else {
+        const om = row[d];
+        let cls = 'om-cell';
+        if (heat && om >= 15) cls += ' om-heat-high'; else if (heat && om >= 8) cls += ' om-heat-mid';
+        body += '<td class="' + cls + '">' + (showNum ? om : '') + '</td>';
+      }
+    }
+    body += '</tr>';
+  });
+  $('omissionMatrixBody').innerHTML = body;
+  const rowsIdx = RAW.map((_, i) => i).slice(-count);
+  const mkRow = (label, fn) => {
+    let r = '<tr><td class="sticky-col">' + label + '</td><td></td>';
+    for (let d = 0; d < POSCFG.posMax[p]; d++) r += '<td class="om-cell">' + fn(d) + '</td>';
+    return r + '</tr>';
+  };
+  $('omissionMatrixFoot').innerHTML =
+    mkRow('出现次数', d => rowsIdx.reduce((a, i) => a + (RAW[i].g[p] === d ? 1 : 0), 0)) +
+    mkRow('当前遗漏', d => currentOmissions[p][d]) +
+    mkRow('最大遗漏', d => Math.max.apply(null, rowsIdx.map(i => omissionsSeries[i][p][d]))) +
+    mkRow('平均遗漏', d => (rowsIdx.reduce((a, i) => a + omissionsSeries[i][p][d], 0) / rowsIdx.length).toFixed(1));
+}
+
+// ---------- 波浪图（逐位单数字） ----------
+function setWaveZone(z) {}
+function onWavePosChange() { wavePos = parseInt($('wavePosSelect').value, 10) || 0; syncWaveDigitOptions(); renderWaveformChart(); }
+function syncWaveDigitOptions() {
+  const sel = $('waveBallSelect');
+  const cur = parseInt(sel.value, 10) || 0;
+  sel.innerHTML = Array.from({ length: POSCFG.posMax[wavePos] }, (_, d) =>
+    '<option value="' + d + '">' + fmtDigit(wavePos, d) + ' 号</option>').join('');
+  sel.value = '' + Math.min(cur, POSCFG.posMax[wavePos] - 1);
+  waveDigit = parseInt(sel.value, 10) || 0;
+}
+function renderWaveformChart() {
+  waveDigit = parseInt($('waveBallSelect').value, 10) || 0;
+  const range = parseInt($('waveRangeSelect').value, 10) || 500;
+  const p = wavePos, d = waveDigit;
+  const idxs = RAW.map((_, i) => i).slice(-range);
+  const vals = idxs.map(i => omissionsSeries[i][p][d]);
+  const hits = idxs.map(i => RAW[i].g[p] === d);
+  const canvas = $('waveformCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.clientWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : 800) || 800;
+  const h = 260, dpr = window.devicePixelRatio || 1;
+  if (w > 0) {
+    canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+    const maxV = Math.max.apply(null, vals.concat([5]));
+    const px = j => 30 + (w - 40) * j / Math.max(1, vals.length - 1);
+    const py = v => (h - 26) - (h - 44) * v / maxV;
+    const dark = document.body.getAttribute('data-theme') !== 'light';
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+    ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    for (let g = 0; g <= 4; g++) {
+      const v = Math.round(maxV * g / 4), y = py(v);
+      ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(w - 10, y); ctx.stroke();
+      ctx.fillText(v + '', 26, y + 3);
+    }
+    ctx.beginPath();
+    vals.forEach((v, j) => { const x = px(j), y = py(v); j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+    ctx.strokeStyle = '#d9b45b'; ctx.lineWidth = 1.6; ctx.stroke();
+    vals.forEach((v, j) => {
+      if (!hits[j]) return;
+      ctx.beginPath(); ctx.arc(px(j), py(v), 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = '#d96c57'; ctx.fill();
+    });
+  }
+  const hitCount = hits.filter(Boolean).length;
+  const badges = [
+    ['位置', posName(p) + ' · ' + fmtDigit(p, d) + ' 号'],
+    ['当前遗漏', currentOmissions[p][d] + ' 期'],
+    ['历史最大遗漏', maxOmissions[p][d] + ' 期'],
+    ['平均遗漏', (vals.reduce((a, b) => a + b, 0) / Math.max(1, vals.length)).toFixed(1) + ' 期'],
+    ['区间出现', hitCount + ' 次 / ' + vals.length + ' 期'],
+  ];
+  $('waveStatsBadgeRow').innerHTML = badges.map(b =>
+    '<span class="wave-badge"><strong>' + b[0] + '</strong> ' + b[1] + '</span>').join('');
+}
+
+// ---------- 历史明细 ----------
+function filterHistoryTable(resetPage) {
+  if (resetPage !== false) historyPage = 1;
+  const q = ($('historySearchInput').value || '').trim();
+  const ball = $('historyFilterBall').value;
+  filteredHistory = RAW.slice().reverse().filter(r =>
+    (q === '' || r.i.includes(q)) && (ball === '' || r.g.includes(parseInt(ball, 10))));
+  renderHistoryPage();
+}
+function renderHistoryPage() {
+  const total = filteredHistory.length;
+  const pages = Math.max(1, Math.ceil(total / historyPageSize));
+  if (historyPage > pages) historyPage = pages;
+  const start = (historyPage - 1) * historyPageSize;
+  const rows = filteredHistory.slice(start, start + historyPageSize);
+  $('historyTableHead').innerHTML = '<tr><th>期号</th><th>开奖日期</th><th>星期</th><th>开奖号码（逐位）</th><th>和值</th><th>跨度</th><th>奇偶比</th><th>大小比</th></tr>';
+  $('historyTableBody').innerHTML = rows.map(r =>
+    '<tr><td>' + r.i + '</td><td>' + r.d + '</td><td>' + r.w + '</td><td><div class="balls-row">' +
+    r.g.map((d, p) => '<span class="' + ballCls(p, d, 'ball-sm') + '">' + fmtDigit(p, d) + '</span>').join('') +
+    '</div></td><td>' + r.s + '</td><td>' + r.p + '</td><td>' + r.oe + '</td><td>' + r.bs + '</td></tr>').join('');
+  $('historyPageInfo').textContent = '共 ' + total + ' 期 · 第 ' + historyPage + ' / ' + pages + ' 页';
+  $('currentPageNum').textContent = historyPage + ' / ' + pages;
+  $('btnPrevPage').disabled = historyPage <= 1;
+  $('btnNextPage').disabled = historyPage >= pages;
+}
+function prevHistoryPage() { if (historyPage > 1) { historyPage--; renderHistoryPage(); } }
+function nextHistoryPage() { historyPage++; renderHistoryPage(); }
+function changeHistoryPageSize() { historyPageSize = parseInt($('historyPageSize').value, 10) || 50; historyPage = 1; renderHistoryPage(); }
+
+// ---------- 导出 ----------
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: type }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function exportData(fmt) {
+  const base = GAME_KEY + '_history_1000';
+  if (fmt === 'json') {
+    download(base + '.json', JSON.stringify(RAW, null, 1), 'application/json');
+  } else {
+    let csv = '期号,开奖日期,星期,' + Array.from({ length: NPOS }, (_, i) => '第' + (i + 1) + '位').join(',') + ',和值,跨度,奇偶比,大小比\n';
+    RAW.forEach(r => { csv += [r.i, r.d, r.w].concat(r.g, [r.s, r.p, r.oe, r.bs]).join(',') + '\n'; });
+    download(base + '.csv', '\ufeff' + csv, 'text/csv');
+  }
+}
+
+// ---------- 同步 ----------
+function openSyncModal() {
+  $('modalCurIssueText').textContent = '当前数据最新期：' + (RAW.length ? RAW[RAW.length - 1].i : '—');
+  $('syncModal').style.display = 'flex';
+}
+function closeSyncModal() { $('syncModal').style.display = 'none'; }
+function switchModalTab(name) {
+  ['Online', 'File', 'Cli'].forEach(k => {
+    $('modalSubTab' + k).style.display = k.toLowerCase() === name ? '' : 'none';
+    $('modalTabBtn' + k).classList.toggle('active', k.toLowerCase() === name);
+  });
+}
+function setSyncStatus(text, pct) {
+  $('syncStatusText').textContent = text;
+  $('syncProgressBar').style.width = (pct || 0) + '%';
+  $('syncStatusBox').style.display = '';
+}
+function applyNewData(records) {
+  if (!records || !records.length) throw new Error('数据为空');
+  RAW = records.slice().sort((a, b) => a.i < b.i ? -1 : 1);
+  computeAll();
+  renderOverview();
+  if (currentTab === 'hotcold') renderRankings();
+  if (currentTab === 'omission') renderOmissionMatrix();
+  if (currentTab === 'waveform') renderWaveformChart();
+  if (currentTab === 'history') filterHistoryTable(false);
+}
+function executeOnlineSync() {
+  setSyncStatus('正在拉取同源数据文件 data/' + POSCFG.dataFile + ' …', 30);
+  fetch('data/' + POSCFG.dataFile, { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(doc => {
+      const recs = (doc.history || []).map(h => ({
+        i: h.issue, d: h.date, w: h.weekday, g: h.digits,
+        s: h.sum, p: h.span, oe: h.odd_even, bs: h.big_small
+      }));
+      applyNewData(recs);
+      setSyncStatus('同步完成：共 ' + RAW.length + ' 期，最新 ' + RAW[RAW.length - 1].i + ' 期。', 100);
+      $('modalCurIssueText').textContent = '当前数据最新期：' + RAW[RAW.length - 1].i;
+    })
+    .catch(e => setSyncStatus('同步失败：' + e.message + '（本地直接打开文件时同源拉取不可用，请用文件导入或部署后重试）', 0));
+}
+function handleFileImport(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const doc = JSON.parse(reader.result);
+      const arr = doc.history || doc;
+      const recs = arr.map(h => h.g ? h : { i: h.issue, d: h.date, w: h.weekday, g: h.digits, s: h.sum, p: h.span, oe: h.odd_even, bs: h.big_small });
+      applyNewData(recs);
+      setSyncStatus('导入完成：共 ' + RAW.length + ' 期，最新 ' + RAW[RAW.length - 1].i + ' 期。', 100);
+    } catch (e) { setSyncStatus('导入失败：文件格式不正确（' + e.message + '）', 0); }
+  };
+  reader.readAsText(f);
+}
+function copyCliCommand() {
+  const t = $('cliCommandText').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(t);
+}
+
+// ---------- 初始化 ----------
+(function init() {
+  try {
+    const saved = localStorage.getItem('ssqlotto-theme');
+    if (saved) document.body.setAttribute('data-theme', saved);
+  } catch (e) {}
+  const posOpts = POSCFG.posMax.map((mx, p) => '<option value="' + p + '">' + posName(p) + '</option>').join('');
+  $('rankingPosSelect').innerHTML = posOpts;
+  $('omPosSelect').innerHTML = posOpts;
+  $('wavePosSelect').innerHTML = posOpts;
+  syncWaveDigitOptions();
+  const fb = $('historyFilterBall');
+  const maxDigit = Math.max.apply(null, POSCFG.posMax) - 1;
+  fb.innerHTML = '<option value="">全部数字</option>' + Array.from({ length: maxDigit + 1 }, (_, d) =>
+    '<option value="' + d + '">任一位含 ' + d + '</option>').join('');
+  const ws = $('windowSelect');
+  if (ws) analysisWindow = parseInt(ws.value, 10) || 100;
+  computeAll();
+  renderOverview();
+})();
+
+</script>
+</body>
+</html>
