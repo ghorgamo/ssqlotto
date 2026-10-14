@@ -847,6 +847,7 @@ html { -webkit-text-size-adjust: 100%; }
       <div class="header-actions">
         <button class="btn btn-sync" onclick="openSyncModal()" title="手动从官方接口同步最新开奖数据">🔄 实时更新官方数据</button>
         <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ 切换浅色</button>
+        <select id="exportRangeSelect" title="选择导出最近多少期"><option value="100">最近100期</option><option value="200">最近200期</option><option value="500">最近500期</option><option value="1000" selected>最近1000期</option></select>
         <button class="btn" onclick="exportData('json')">📥 导出JSON</button>
         <button class="btn" onclick="exportData('csv')">📥 导出CSV</button>
       </div>
@@ -1638,12 +1639,15 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 function exportData(fmt) {
+  const rangeEl = document.getElementById('exportRangeSelect');
+  const rangeN = rangeEl ? parseInt(rangeEl.value, 10) || 1000 : 1000;
+  const rows = RAW.slice(-rangeN);
   if (fmt === 'json') {
-    download('kl8_history_1000.json', JSON.stringify(RAW, null, 1), 'application/json');
+    download('kl8_history_' + rows.length + '.json', JSON.stringify(rows, null, 1), 'application/json');
   } else {
     let csv = '期号,开奖日期,星期,' + Array.from({ length: 20 }, (_, i) => '号码' + (i + 1)).join(',') + ',和值,跨度,奇偶比,大小比\n';
-    RAW.forEach(r => { csv += [r.i, r.d, r.w].concat(r.n.map(padZero), [r.s, r.p, r.oe, r.bs]).join(',') + '\n'; });
-    download('kl8_history_1000.csv', '\ufeff' + csv, 'text/csv');
+    rows.forEach(r => { csv += [r.i, r.d, r.w].concat(r.n.map(padZero), [r.s, r.p, r.oe, r.bs]).join(',') + '\n'; });
+    download('kl8_history_' + rows.length + '.csv', '\ufeff' + csv, 'text/csv');
   }
 }
 

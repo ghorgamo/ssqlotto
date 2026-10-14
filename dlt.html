@@ -836,6 +836,7 @@ html { -webkit-text-size-adjust: 100%; }
       <div class="header-actions">
         <button class="btn btn-sync" onclick="openSyncModal()" title="手动从官方接口同步最新开奖数据">🔄 实时更新官方数据</button>
         <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ 切换浅色</button>
+        <select id="exportRangeSelect" title="选择导出最近多少期"><option value="100">最近100期</option><option value="200">最近200期</option><option value="500">最近500期</option><option value="1000" selected>最近1000期</option></select>
         <button class="btn" onclick="exportData('json')">📥 导出JSON</button>
         <button class="btn" onclick="exportData('csv')">📥 导出CSV</button>
       </div>
@@ -2441,9 +2442,12 @@ html { -webkit-text-size-adjust: 100%; }
 
     function exportData(format) {
       const isSSQ = currentLottery === 'ssq';
-      const filename = `${currentLottery}_history_${activeHistory.length}_${Date.now()}`;
+      const rangeEl = document.getElementById('exportRangeSelect');
+      const rangeN = rangeEl ? parseInt(rangeEl.value, 10) || 1000 : 1000;
+      const exportRows = activeHistory.slice(-rangeN);
+      const filename = `${currentLottery}_history_${exportRows.length}_${Date.now()}`;
       if (format === 'json') {
-        const blob = new Blob([JSON.stringify(activeHistory, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(exportRows, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -2453,7 +2457,7 @@ html { -webkit-text-size-adjust: 100%; }
         let csvContent = isSSQ ? 
           '期号,开奖日期,星期,红球1,红球2,红球3,红球4,红球5,红球6,蓝球,和值,跨度,AC值,奇偶比,大小比\n' :
           '期号,开奖日期,星期,前区1,前区2,前区3,前区4,前区5,后区1,后区2,前区和值,前区跨度,AC值,奇偶比,大小比,后区和值,后区跨度\n';
-        activeHistory.forEach(item => {
+        exportRows.forEach(item => {
           if (isSSQ) {
             csvContent += `${item.i},${item.d},${item.w},${padZero(item.primary[0])},${padZero(item.primary[1])},${padZero(item.primary[2])},${padZero(item.primary[3])},${padZero(item.primary[4])},${padZero(item.primary[5])},${padZero(item.secondary[0])},${item.s},${item.p},${item.ac},${item.oe},${item.bs}\n`;
           } else {
