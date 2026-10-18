@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """体彩排列五 数据抓取与维护脚本（逐位口径）
 数据源：500彩票网开奖静态XML（kaijiang.500.com/static/info/kaijiang/xml/plw/list.xml，全量历史）
-产出：data/pl5_history_1000.json/.csv（最近1000期，含逐位遗漏与冷热统计），并同步刷新 pl5.html 内嵌 RAW_PL5。
+产出：data/pl5_history_1000.json/.csv（最近1000期，含逐位遗漏与冷热统计），并同步刷新 pl5.html 内嵌 RAW_POS（逐位页通用变量名）。
 号码为定位型：5位、每位 0-9，顺序即开奖顺序，不排序。
 新期并入前须按项目口径多源核对（网易+500），本脚本负责给定数据的重算与写回。
 """
@@ -96,9 +96,9 @@ def raw_record(rec):
 
 def update_html(records, html_path):
     text = open(html_path, encoding="utf-8").read()
-    raw = "const RAW_PL5 = " + json.dumps([raw_record(r) for r in records], ensure_ascii=False, separators=(",", ":")) + ";"
-    new, cnt = re.subn(r"const RAW_PL5 = \[.*?\];", lambda m: raw, text, count=1, flags=re.S)
-    assert cnt == 1, f"RAW_PL5 锚点未找到: {html_path}"
+    raw = "const RAW_POS = " + json.dumps([raw_record(r) for r in records], ensure_ascii=False, separators=(",", ":")) + ";"
+    new, cnt = re.subn(r"const RAW_POS = \[.*?\];", lambda m: raw, text, count=1, flags=re.S)
+    assert cnt == 1, f"RAW_POS 锚点未找到: {html_path}"
     open(html_path, "w", encoding="utf-8").write(new)
 
 def main():
