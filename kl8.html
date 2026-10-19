@@ -794,6 +794,8 @@
 <style>
 /* ===== 移动端可读性适配（≤640px；桌面端保持原样） ===== */
 html { -webkit-text-size-adjust: 100%; }
+.om-container { max-height: none; }
+#omissionMatrixTable thead tr:nth-child(2) th { width: auto; }
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .header-inner { padding: 10px 12px; gap: 10px; }
@@ -813,7 +815,7 @@ html { -webkit-text-size-adjust: 100%; }
   .table-container table { min-width: 640px; }
   .progress-bar-bg { width: 60px; }
   #omissionMatrixTable { width: auto; min-width: 100%; }
-  #omissionMatrixTable th { width: 26px; }
+  #omissionMatrixTable th { width: 22px; }
 }
 </style>
 </head>
@@ -1059,10 +1061,7 @@ html { -webkit-text-size-adjust: 100%; }
             <span id="omMatrixCardTitle">📉 每期全量数字遗漏走势图阵 (Omission Matrix)</span>
           </div>
           <div class="controls-bar">
-            <div class="filter-btn-group">
-              <button class="filter-btn active" id="omZonePrimary" onclick="setOmZone('primary')">号码走势</button>
-              <button class="filter-btn" id="omZoneSecondary" style="display:none" onclick="setOmZone('secondary')">次区走势</button>
-            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">号码 1-80 全量同行显示，可左右拖动</span>
 
             <select id="omIssueCount" onchange="renderOmissionMatrix()">
               <option value="30">显示最近 30 期</option>
@@ -1097,7 +1096,7 @@ html { -webkit-text-size-adjust: 100%; }
             </div>
           </div>
 
-          <div class="table-container" style="max-height: 720px;">
+          <div class="table-container om-container">
             <table id="omissionMatrixTable">
               <thead id="omissionMatrixHead"></thead>
               <tbody id="omissionMatrixBody"></tbody>

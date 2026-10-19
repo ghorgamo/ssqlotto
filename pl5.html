@@ -793,6 +793,8 @@
 <style>
 /* ===== 移动端可读性适配（≤640px；桌面端保持原样） ===== */
 html { -webkit-text-size-adjust: 100%; }
+.om-container { max-height: none; }
+#omissionMatrixTable thead tr:nth-child(2) th { width: auto; }
 @media (max-width: 640px) {
   body { font-size: 14px; }
   .header-inner { padding: 10px 12px; gap: 10px; }
@@ -812,7 +814,7 @@ html { -webkit-text-size-adjust: 100%; }
   .table-container table { min-width: 640px; }
   .progress-bar-bg { width: 60px; }
   #omissionMatrixTable { width: auto; min-width: 100%; }
-  #omissionMatrixTable th { width: 26px; }
+  #omissionMatrixTable th { width: 22px; }
 }
 </style>
 </head>
@@ -1059,7 +1061,7 @@ html { -webkit-text-size-adjust: 100%; }
           </div>
           <div class="controls-bar">
             <div class="filter-btn-group">
-              <select id="omPosSelect" class="pos-select" onchange="onOmPosChange()"></select>
+              <span style="font-size: 12px; color: var(--text-muted);">全部位置同行显示，可左右拖动</span>
               <button class="filter-btn" id="omZoneSecondary" style="display:none" onclick="setOmZone('secondary')">次区走势</button>
             </div>
 
@@ -1096,7 +1098,7 @@ html { -webkit-text-size-adjust: 100%; }
             </div>
           </div>
 
-          <div class="table-container" style="max-height: 720px;">
+          <div class="table-container om-container">
             <table id="omissionMatrixTable">
               <thead id="omissionMatrixHead"></thead>
               <tbody id="omissionMatrixBody"></tbody>
@@ -1526,29 +1528,38 @@ function renderRankingCharts() {
 function setOmZone(z) {}
 function onOmPosChange() { omPos = parseInt($('omPosSelect').value, 10) || 0; renderOmissionMatrix(); }
 function renderOmissionMatrix() {
-  const p = omPos;
   const count = parseInt($('omIssueCount').value, 10) || 50;
   const showNum = $('chkShowOmNumber').checked;
   const heat = $('chkHeatmap').checked;
   const desc = $('chkOrderDesc').checked;
   let idxs = RAW.map((_, i) => i).slice(-count);
   if (desc) idxs = idxs.reverse();
-  $('omMatrixCardTitle').textContent = '每期遗漏走势图阵 · ' + posName(p) + '（最近 ' + count + ' 期）';
-  let head = '<tr><th class="sticky-col">期号</th><th>日期</th>';
-  for (let d = 0; d < POSCFG.posMax[p]; d++) head += '<th><span class="' + ballCls(p, d, 'ball-sm') + '">' + fmtDigit(p, d) + '</span></th>';
+  $('omMatrixCardTitle').textContent = '每期遗漏走势图阵 · 全部位置同行（最近 ' + count + ' 期）';
+  const NP = POSCFG.posMax.length;
+  const SEP = 'border-left: 2px solid var(--card-border);';
+  let head = '<tr><th class="sticky-col" rowspan="2" style="width: 62px;">期号</th><th rowspan="2" style="width: 44px;">日期</th>';
+  for (let p = 0; p < NP; p++) head += '<th colspan="' + POSCFG.posMax[p] + '" style="padding: 4px 0; font-size: 12px;' + (p > 0 ? ' ' + SEP : '') + '">' + posName(p) + '</th>';
+  head += '</tr><tr>';
+  for (let p = 0; p < NP; p++) {
+    for (let d = 0; d < POSCFG.posMax[p]; d++) head += '<th' + ((p > 0 && d === 0) ? ' style="' + SEP + '"' : '') + '><span class="' + ballCls(p, d, 'ball-sm') + '">' + fmtDigit(p, d) + '</span></th>';
+  }
   head += '</tr>';
   $('omissionMatrixHead').innerHTML = head;
   let body = '';
   idxs.forEach(i => {
-    const rec = RAW[i], row = omissionsSeries[i][p], hitD = rec.g[p];
+    const rec = RAW[i];
     body += '<tr><td class="sticky-col">' + rec.i.slice(2) + '</td><td>' + rec.d.slice(5) + '</td>';
-    for ( let d = 0; d < POSCFG.posMax[p]; d++) {
-      if (d === hitD) body += '<td class="om-cell om-hit-cat-' + catOf(p, d) + '">' + fmtDigit(p, d) + '</td>';
-      else {
-        const om = row[d];
-        let cls = 'om-cell';
-        if (heat && om >= 15) cls += ' om-heat-high'; else if (heat && om >= 8) cls += ' om-heat-mid';
-        body += '<td class="' + cls + '">' + (showNum ? om : '') + '</td>';
+    for (let p = 0; p < NP; p++) {
+      const row = omissionsSeries[i][p], hitD = rec.g[p];
+      for (let d = 0; d < POSCFG.posMax[p]; d++) {
+        const sep = (p > 0 && d === 0) ? ' style="' + SEP + '"' : '';
+        if (d === hitD) body += '<td class="om-cell om-hit-cat-' + catOf(p, d) + '"' + sep + '>' + fmtDigit(p, d) + '</td>';
+        else {
+          const om = row[d];
+          let cls = 'om-cell';
+          if (heat && om >= 15) cls += ' om-heat-high'; else if (heat && om >= 8) cls += ' om-heat-mid';
+          body += '<td class="' + cls + '"' + sep + '>' + (showNum ? om : '') + '</td>';
+        }
       }
     }
     body += '</tr>';
@@ -1557,14 +1568,16 @@ function renderOmissionMatrix() {
   const rowsIdx = RAW.map((_, i) => i).slice(-count);
   const mkRow = (label, fn) => {
     let r = '<tr><td class="sticky-col">' + label + '</td><td></td>';
-    for (let d = 0; d < POSCFG.posMax[p]; d++) r += '<td class="om-cell">' + fn(d) + '</td>';
+    for (let p = 0; p < NP; p++) {
+      for (let d = 0; d < POSCFG.posMax[p]; d++) r += '<td class="om-cell"' + ((p > 0 && d === 0) ? ' style="' + SEP + '"' : '') + '>' + fn(p, d) + '</td>';
+    }
     return r + '</tr>';
   };
   $('omissionMatrixFoot').innerHTML =
-    mkRow('出现次数', d => rowsIdx.reduce((a, i) => a + (RAW[i].g[p] === d ? 1 : 0), 0)) +
-    mkRow('当前遗漏', d => currentOmissions[p][d]) +
-    mkRow('最大遗漏', d => Math.max.apply(null, rowsIdx.map(i => omissionsSeries[i][p][d]))) +
-    mkRow('平均遗漏', d => (rowsIdx.reduce((a, i) => a + omissionsSeries[i][p][d], 0) / rowsIdx.length).toFixed(1));
+    mkRow('出现次数', (p, d) => rowsIdx.reduce((a, i) => a + (RAW[i].g[p] === d ? 1 : 0), 0)) +
+    mkRow('当前遗漏', (p, d) => currentOmissions[p][d]) +
+    mkRow('最大遗漏', (p, d) => Math.max.apply(null, rowsIdx.map(i => omissionsSeries[i][p][d]))) +
+    mkRow('平均遗漏', (p, d) => (rowsIdx.reduce((a, i) => a + omissionsSeries[i][p][d], 0) / rowsIdx.length).toFixed(1));
 }
 
 // ---------- 波浪图（逐位单数字） ----------
@@ -1745,7 +1758,6 @@ function copyCliCommand() {
   } catch (e) {}
   const posOpts = POSCFG.posMax.map((mx, p) => '<option value="' + p + '">' + posName(p) + '</option>').join('');
   $('rankingPosSelect').innerHTML = posOpts;
-  $('omPosSelect').innerHTML = posOpts;
   $('wavePosSelect').innerHTML = posOpts;
   syncWaveDigitOptions();
   const fb = $('historyFilterBall');
